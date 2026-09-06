@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VOX STUDIO — Đàm Thoại Trực Tiếp Cùng Các Nhân Vật Tầm Cỡ</title>
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Outfit"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              800: '#1e293b',
+              900: '#0f172a',
+              950: '#090d16',
+              accent: '#38bdf8',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              rose: '#f43f5e',
+              indigo: '#6366f1'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background: radial-gradient(circle at 50% 20%, #172033 0%, #090d16 80%);
+      color: #f1f5f9;
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .video-frame-glow {
+      box-shadow: 0 20px 50px -10px rgba(56, 189, 248, 0.2), 0 0 30px rgba(99, 102, 241, 0.15);
+    }
+    .avatar-speaking {
+      animation: avatar-pulse 1.4s ease-in-out infinite alternate;
+      border-color: #38bdf8 !important;
+    }
+    @keyframes avatar-pulse {
+      0% { transform: scale(1.0); box-shadow: 0 0 20px rgba(56, 189, 248, 0.3); }
+      100% { transform: scale(1.03); box-shadow: 0 0 45px rgba(56, 189, 248, 0.7); }
+    }
+    .scrollbar-none::-webkit-scrollbar {
+      display: none;
+    }
+    .waveform-bar {
+      transition: height 0.07s ease-out;
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen selection:bg-sky-500 selection:text-white">
+
+  <!-- TOP HEADER & NEWS TICKER -->
+  <header class="border-b border-slate-800/80 bg-brand-950/70 backdrop-blur-xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Upper Nav -->
+      <div class="h-16 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 via-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-sky-500/25">
+            <i data-lucide="video" class="w-5 h-5 text-white"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="font-bold text-lg tracking-tight text-white">VOX LIVE STUDIO</span>
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20">Ultra-Fast Duplex</span>
+            </div>
+            <p class="text-xs text-slate-400">Đàm thoại trực tiếp người thật • Tư duy tiểu sử Walter Isaacson</p>
+          </div>
+        </div>
+
+        <!-- System Fast Response Badge -->
+        <div class="flex items-center space-x-3">
+          <div class="hidden sm:flex items-center space-x-2.5 bg-slate-900/90 px-3.5 py-1.5 rounded-xl border border-slate-800 text-xs">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-slate-400">Tốc độ phản hồi:</span>
+            <span class="font-mono font-bold text-emerald-400" id="latency-val">120ms (Groq / Gemini 2.0 Flash)</span>
+          </div>
+
+          <button onclick="toggleInfoModal()" class="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition flex items-center space-x-1.5">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-sky-400"></i>
+            <span>Giải pháp Tốc độ</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Wire Ticker (Bloomberg / Reuters / WSJ) -->
+      <div class="py-2 border-t border-slate-800/60 flex items-center space-x-3 text-xs overflow-x-auto scrollbar-none font-mono">
+        <div class="flex items-center space-x-1.5 text-amber-400 font-bold shrink-0">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+          </span>
+          <span>TIN NÓNG 24/7:</span>
+        </div>
+        <div class="flex items-center space-x-6 shrink-0 text-slate-300" id="breaking-ticker">
+          <span class="hover:text-sky-300 cursor-pointer" onclick="quickInjectTopic('Reuters: Mỹ mở rộng kiểm soát vi xử lý AI và công nghệ lượng tử.')">
+            <span class="text-sky-400 font-semibold">[Reuters]</span> Mỹ mở rộng kiểm soát vi xử lý AI và công nghệ lượng tử &bull;
+          </span>
+          <span class="hover:text-sky-300 cursor-pointer" onclick="quickInjectTopic('Bloomberg: Cổ phiếu công nghệ lập kỷ lục giữa làn sóng đầu tư hạ tầng GPU.')">
+            <span class="text-emerald-400 font-semibold">[Bloomberg]</span> Làn sóng đầu tư hạ tầng GPU chạm mốc 200 tỷ USD &bull;
+          </span>
+          <span class="hover:text-sky-300 cursor-pointer" onclick="quickInjectTopic('WSJ: Trung Quốc đẩy mạnh chiến lược tự chủ bán dẫn nội địa.')">
+            <span class="text-rose-400 font-semibold">[WSJ]</span> Trung Quốc công bố lộ trình tự chủ công nghệ bán dẫn 2030 &bull;
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex-1 flex flex-col space-y-5">
+
+    <!-- CHARACTER HORIZONTAL PICKER (THÂN THIỆN & ĐẸP) -->
+    <div class="flex flex-col space-y-2">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center">
+          <i data-lucide="user-check" class="w-3.5 h-3.5 mr-1.5 text-sky-400"></i>
+          Chọn Nhân Vật Muốn Đàm Thoại
+        </span>
+        <span class="text-[11px] text-slate-400 font-mono">Click để gọi ngay</span>
+      </div>
+
+      <!-- Character Carousel / Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3" id="character-roster">
+        <!-- Injected by JavaScript -->
+      </div>
+    </div>
+
+    <!-- CALL ROOM & INTERACTION CENTER (2 COLUMNS: VIDEO ROOM + INTEL/NEWS) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1">
+
+      <!-- LEFT: VIDEO CALL ROOM / FACETIME STUDIO (7 COLS) -->
+      <div class="lg:col-span-7 flex flex-col bg-brand-900/60 border border-slate-800 rounded-3xl p-5 shadow-2xl video-frame-glow relative overflow-hidden justify-between">
+        
+        <!-- Video Header Info -->
+        <div class="flex items-center justify-between z-10">
+          <div class="flex items-center space-x-3">
+            <div class="relative">
+              <img id="stage-avatar-small" src="" class="w-11 h-11 rounded-2xl object-cover border-2 border-sky-400 shadow-md">
+              <span id="live-dot" class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-brand-900"></span>
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <h3 id="stage-name" class="font-bold text-lg text-white">Steve Jobs</h3>
+                <span id="stage-tag" class="text-[10px] font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2 py-0.5 rounded-full">Reality Distortion</span>
+              </div>
+              <p id="stage-role" class="text-xs text-slate-400">Huyền thoại Apple • Tinh hoa thẩm mỹ & Đột phá</p>
+            </div>
+          </div>
+
+          <!-- Call Status & Timer -->
+          <div class="flex items-center space-x-2 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-800 text-xs font-mono">
+            <i data-lucide="phone-incoming" class="w-3.5 h-3.5 text-emerald-400 animate-pulse"></i>
+            <span id="call-clock" class="text-white font-bold">00:00</span>
+          </div>
+        </div>
+
+        <!-- VIDEO CALL AVATAR VIEWPORT (FACETIME STYLE) -->
+        <div class="my-6 relative flex flex-col items-center justify-center min-h-[300px] z-10">
+          
+          <!-- Avatar Frame -->
+          <div class="relative group">
+            <div id="glow-ring" class="absolute -inset-4 bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-500 rounded-full blur-2xl opacity-20 transition duration-700"></div>
+            
+            <img id="stage-avatar-large" src="" alt="Avatar" 
+                 class="relative w-44 h-44 sm:w-52 sm:h-52 rounded-full object-cover border-4 border-slate-700 shadow-2xl transition duration-300">
+            
+            <!-- Speaking animation badge -->
+            <div id="speaking-indicator" class="hidden absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-slate-900/90 border border-sky-400 text-sky-300 text-[11px] font-bold px-3 py-1 rounded-full shadow-lg flex items-center space-x-1.5 whitespace-nowrap">
+              <span class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span>
+              <span id="indicator-text">Đang nói...</span>
+            </div>
+          </div>
+
+          <!-- Waveform Visualizer -->
+          <div class="flex items-center justify-center space-x-1.5 h-12 mt-6 w-full max-w-sm" id="live-waveform">
+            <!-- Bars generated via JS -->
+          </div>
+
+          <!-- Dynamic Live Subtitle Banner -->
+          <div id="subtitles-card" class="mt-2 max-w-lg w-full bg-slate-950/80 backdrop-blur-md border border-slate-800 rounded-2xl p-3.5 shadow-xl text-center">
+            <p id="subtitle-text" class="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed italic">
+              "Đang kết nối... Bạn có thể bắt đầu nói chuyện hoặc chọn tin tức bên phải để thảo luận."
+            </p>
+          </div>
+
+        </div>
+
+        <!-- CALL CONTROLS BAR (APPLE FACETIME STYLE) -->
+        <div class="z-10 pt-4 border-t border-slate-800/80 flex items-center justify-between gap-3">
+          
+          <!-- Mic / Call Main Action -->
+          <button id="call-toggle-btn" onclick="toggleCallState()" 
+                  class="flex-1 py-3 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 transition transform active:scale-95">
+            <i data-lucide="phone-call" class="w-4 h-4"></i>
+            <span id="call-btn-label">BẬT MIC ĐÀM THOẠI TRỰC TIẾP</span>
+          </button>
+
+          <!-- Interruption / Stop Talking -->
+          <button onclick="interruptAI()" title="Ngắt lời nhân vật" 
+                  class="py-3 px-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 text-xs font-semibold flex items-center space-x-1.5 transition">
+            <i data-lucide="hand" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Ngắt lời</span>
+          </button>
+
+          <!-- Voice / Persona Test Sample -->
+          <button onclick="sampleVoiceIntro()" title="Nghe câu chào mẫu" 
+                  class="py-3 px-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 text-xs font-semibold flex items-center space-x-1.5 transition">
+            <i data-lucide="volume-2" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Chào mẫu</span>
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- RIGHT: THOUGHT MATRIX & LIVE NEWS RADAR (5 COLS) -->
+      <div class="lg:col-span-5 flex flex-col space-y-4">
+        
+        <!-- MINDSET MATRIX (WALTER ISAACSON DNA CARD) -->
+        <div class="bg-brand-900/60 border border-slate-800 rounded-3xl p-5 shadow-xl">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-2 text-sky-400">
+              <i data-lucide="brain-circuit" class="w-4 h-4"></i>
+              <h4 class="font-bold text-xs uppercase tracking-wider text-white">Tư Duy & Tính Cách (Isaacson DNA)</h4>
+            </div>
+            <span class="text-[10px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md">Deep Grounding</span>
+          </div>
+
+          <div class="space-y-2 text-xs">
+            <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+              <span class="text-slate-400 block text-[11px] mb-1 font-semibold">Khung Tư Duy Cốt Lõi:</span>
+              <p id="mindset-desc" class="text-slate-200 leading-relaxed font-sans">
+                <!-- Injected via JS -->
+              </p>
+            </div>
+
+            <div class="flex flex-wrap gap-1.5 pt-1" id="mindset-tags">
+              <!-- Tags injected via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- REAL-TIME NEWS RADAR (REUTERS, BLOOMBERG, WSJ) -->
+        <div class="bg-brand-900/60 border border-slate-800 rounded-3xl p-5 shadow-xl flex-1 flex flex-col">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center space-x-2 text-amber-400">
+              <i data-lucide="globe" class="w-4 h-4"></i>
+              <h4 class="font-bold text-xs uppercase tracking-wider text-white">Tin Tức Thời Sự Tức Thời</h4>
+            </div>
+            <span class="text-[10px] text-slate-400 font-mono">Bấm để hỏi ngay</span>
+          </div>
+          <p class="text-[11px] text-slate-400 mb-3">
+            Chọn bất kỳ tin nào để nhân vật phản hồi và tranh luận tự nhiên không rập khuôn:
+          </p>
+
+          <!-- News Cards Stream -->
+          <div class="space-y-2.5 overflow-y-auto max-h-[260px] pr-1 scrollbar-none flex-1" id="news-list">
+            <!-- Injected by JS -->
+          </div>
+
+          <!-- Quick Text/Voice Chat Input -->
+          <div class="mt-3 pt-3 border-t border-slate-800">
+            <div class="flex space-x-2">
+              <input type="text" id="chat-prompt-input" 
+                     placeholder="Nói chuyện hoặc hỏi gì đó (VD: 'Này ông, nghĩ sao về tương lai AI?')..." 
+                     class="w-full bg-slate-950/80 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 font-sans">
+              <button onclick="handleUserChat()" class="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition flex items-center shrink-0">
+                <span>Nói</span>
+                <i data-lucide="send" class="w-3.5 h-3.5 ml-1"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- SPEED & ARCHITECTURE MODAL -->
+  <div id="info-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-brand-900 border border-slate-800 max-w-xl w-full rounded-3xl p-6 shadow-2xl relative">
+      <button onclick="toggleInfoModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center space-x-2 text-sky-400 mb-2">
+        <i data-lucide="zap" class="w-5 h-5"></i>
+        <h3 class="font-bold text-base uppercase tracking-wider text-white">Giải Pháp AI Phản Hồi Nhanh & Tự Nhiên Nhất</h3>
+      </div>
+      
+      <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+        Để AI nói chuyện tự nhiên như người thật và phản hồi tức thời dưới 300ms, đây là các API hàng đầu hiện nay:
+      </p>
+
+      <div class="space-y-3 font-mono text-xs">
+        <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
+          <div class="flex items-center justify-between text-sky-400 font-bold mb-1">
+            <span>1. Groq LPU Inference (Llama 3.3 70B)</span>
+            <span class="text-emerald-400 text-[11px]">~100ms - 300+ token/s</span>
+          </div>
+          <p class="text-slate-400 font-sans text-[11px]">
+            Tốc độ xử lý văn bản nhanh nhất hành tinh hiện nay, không có độ trễ suy nghĩ.
+          </p>
+        </div>
+
+        <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
+          <div class="flex items-center justify-between text-indigo-400 font-bold mb-1">
+            <span>2. Google Gemini 2.0 Flash (Live Multimodal)</span>
+            <span class="text-emerald-400 text-[11px]">~200ms Native Audio</span>
+          </div>
+          <p class="text-slate-400 font-sans text-[11px]">
+            Hỗ trợ truyền nhận âm thanh 2 chiều qua WebSocket, ngắt lời tự nhiên như nói chuyện điện thoại.
+          </p>
+        </div>
+
+        <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
+          <div class="flex items-center justify-between text-amber-400 font-bold mb-1">
+            <span>3. GPT-SoVITS V2 + Streaming Chunk</span>
+            <span class="text-emerald-400 text-[11px]">Few-Shot Cloning</span>
+          </div>
+          <p class="text-slate-400 font-sans text-[11px]">
+            Chỉ cần 5s file ghi âm gốc để nhái chuẩn xác âm sắc, hơi thở và ngữ điệu từng nhân vật.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-5 text-right">
+        <button onclick="toggleInfoModal()" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition">
+          Tuyệt vời, đóng lại
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT APP LOGIC -->
+  <script>
+    // 6 INFLUENTIAL PERSONAS (WALTER ISAACSON STYLE GROUNDING)
+    const characters = [
+      {
+        id: 'jobs',
+        name: 'Steve Jobs',
+        shortName: 'Jobs',
+        role: 'Nhà sáng lập Apple',
+        tag: 'Reality Distortion',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
+        voicePitch: 1.05,
+        voiceRate: 1.02,
+        mindset: 'Ám ảnh sự hoàn hảo tuyệt đối (perfectionism), căm ghét sự thỏa hiệp tầm thường. Sử dụng "Trường bẻ cong thực tại" để biến điều không thể thành có thể. Tư duy giao thoa giữa Công nghệ và Nghệ thuật Nhân văn.',
+        tags: ['Thẩm mỹ tối giản', 'Bẻ cong thực tại', 'Trực giác sắc bén', 'Zen / Thiền định'],
+        sampleGreeting: "Này, đừng lãng phí thời gian vào những thứ tầm thường. Mọi thứ xung quanh bạn do những người không thông minh hơn bạn tạo ra. Nói xem, bài báo đó có điều gì thực sự đáng chú ý không?",
+        dialoguePrefix: "Nói thẳng ra là thế này...",
+        toneRules: "Nói chuyện dứt khoát, dùng từ gãy gọn, có chút ngạo nghễ của người nhìn thấu bản chất sản phẩm."
+      },
+      {
+        id: 'trump',
+        name: 'Donald Trump',
+        shortName: 'Trump',
+        role: 'Tổng thống Hoa Kỳ',
+        tag: 'Art of the Deal',
+        avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&auto=format&fit=crop&q=80',
+        voicePitch: 0.9,
+        voiceRate: 1.05,
+        mindset: 'Tư duy thương lượng đỉnh cao (The Art of the Deal). Luôn xuất phát từ vị thế kẻ chiến thắng, sử dụng từ ngữ nhấn mạnh quy mô cực đại ("Huge", "Tremendous", "Tốt nhất lịch sử"). Tự tin tuyệt đối.',
+        tags: ['Nghệ thuật đàm phán', 'America First', 'Tự tin tuyệt đối', 'Bác bỏ truyền thông'],
+        sampleGreeting: "Nghe này bạn thân mến, tôi vừa xem qua rồi. Rất nhiều người nói với tôi về chuyện này, một chuyện cực kỳ lớn, chưa từng có ai làm tốt hơn chúng tôi. Bạn nghĩ sao về thỏa thuận này?",
+        dialoguePrefix: "Bạn phải hiểu điều này, không ai biết rõ hơn tôi...",
+        toneRules: "Nói cuốn hút, lặp lại các tính từ mạnh, tự tin vô đối, xưng hô thân mật nhưng áp đảo."
+      },
+      {
+        id: 'xijinping',
+        name: 'Tập Cận Bình',
+        shortName: 'Tập Cận Bình',
+        role: 'Chủ tịch Trung Quốc',
+        tag: 'Đại Phục Hưng',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80',
+        voicePitch: 0.8,
+        voiceRate: 0.9,
+        mindset: 'Chiến lược thế kỷ, tầm nhìn 50 năm. Kỷ luật nhà nước sắt đá, nhấn mạnh tính kiên định, tự lực cánh sinh và sự phục hưng vĩ đại của nền văn minh. Không bị xao động bởi các biến động ngắn hạn.',
+        tags: ['Chiến lược 50 năm', 'Tự lực tự cường', 'Cộng đồng chung vận mệnh', 'Kỷ luật thép'],
+        sampleGreeting: "Chào bạn. Lịch sử luôn tiến về phía trước theo quy luật khách quan. Những biến động thời sự hôm nay chỉ là một con sóng nhỏ trong dòng chảy dài hạn của thế giới.",
+        dialoguePrefix: "Chúng ta cần nhìn vào bức tranh toàn cục dài hạn...",
+        toneRules: "Điềm đạm như núi đá, nói chậm rãi, uy quyền ngầm, triết lý phương Đông."
+      },
+      {
+        id: 'tesla',
+        name: 'Nikola Tesla',
+        shortName: 'Nikola Tesla',
+        role: 'Thiên tài Năng lượng & Vũ trụ',
+        tag: '3 - 6 - 9 Secret',
+        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&auto=format&fit=crop&q=80',
+        voicePitch: 0.95,
+        voiceRate: 0.98,
+        mindset: 'Tư duy bằng tần số, năng lượng và rung động. Không màng tới tiền bạc hay thương mại hóa tư bản, chỉ khao khát khai phá bí mật tối hậu của vũ trụ và đem năng lượng miễn phí cho toàn nhân loại.',
+        tags: ['Năng lượng vô tận', 'Tần số & Rung động', 'Thiên tài cô độc', 'Khinh miệt con buôn'],
+        sampleGreeting: "Nếu bạn thấu hiểu sự kỳ diệu của con số 3, 6 và 9, bạn sẽ có chiếc chìa khóa mở ra toàn bộ vũ trụ. Bạn đang muốn bàn về nguồn năng lượng hay sự vận động của sóng?",
+        dialoguePrefix: "Hãy nhìn vào bản chất của sóng điện từ...",
+        toneRules: "Huyền bí, uyên bác, đam mê khoa học thuần khiết, cách dùng từ cổ điển thanh lịch."
+      },
+      {
+        id: 'zuck',
+        name: 'Mark Zuckerberg',
+        shortName: 'Zuckerberg',
+        role: 'CEO Meta / Metaverse',
+        tag: 'Move Fast & Open Source',
+        avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=300&auto=format&fit=crop&q=80',
+        voicePitch: 1.0,
+        voiceRate: 1.1,
+        mindset: 'Văn hóa Hacker: "Move fast and break things". Tư duy tối ưu hóa hiệu suất kỹ thuật, đam mê mã nguồn mở (Llama AI) để cạnh tranh với các ông lớn đóng kín. Kỷ luật thể chất BJJ và sự lỳ lợm công nghệ.',
+        tags: ['Hacker Way', 'Mã nguồn mở', 'Metaverse', 'Tối ưu hóa'],
+        sampleGreeting: "Yeah hi! Tôi nghĩ điều quan trọng nhất bây giờ là tốc độ thực thi (execution). Xây dựng nhanh, thử nghiệm trong thế giới thực và để cộng đồng mã nguồn mở kiểm chứng. Bạn thấy tin đó thế nào?",
+        dialoguePrefix: "Theo góc nhìn kỹ thuật của tôi...",
+        toneRules: "Nói nhanh, thực tế, dùng nhiều thuật ngữ công nghệ, phong thái kỹ sư trẻ trung."
+      },
+      {
+        id: 'musk',
+        name: 'Elon Musk',
+        shortName: 'Elon Musk',
+        role: 'CEO SpaceX & xAI',
+        tag: 'First Principles',
+        avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&auto=format&fit=crop&q=80',
+        voicePitch: 0.92,
+        voiceRate: 1.05,
+        mindset: 'Nguyên lý xuất phát từ gốc (Physics First Principles). Xóa bỏ mọi rào cản giả định lỗi thời. Khao khát biến nhân loại thành sinh vật đa hành tinh và đảm bảo tương lai của ý thức thông minh.',
+        tags: ['First Principles', 'Đa hành tinh', 'Xóa bỏ quy chuẩn', 'xAI'],
+        sampleGreeting: "Yeah... well, honestly. Mọi người thường phức tạp hóa vấn đề. Nếu nhìn từ góc độ vật lý cơ bản, mọi thứ đều quy về năng lượng và compute. Bạn nghĩ gì về sự việc này?",
+        dialoguePrefix: "Yeah, nếu nghĩ từ gốc vật lý...",
+        toneRules: "Ngập ngừng tự nhiên, thỉnh thoảng cười nhẹ, triết lý thực dụng nhưng hoang đường."
+      }
+    ];
+
+    // LIVE NEWS RADAR DATA (REUTERS, BLOOMBERG, WSJ)
+    const newsFeed = [
+      {
+        id: 'wire-1',
+        source: 'Reuters Financial',
+        title: 'Mỹ công bố hạn chế mới về công nghệ chip AI và trung tâm dữ liệu',
+        summary: 'Các rào cản pháp lý nhằm ngăn chặn dòng vi xử lý cao cấp và thiết bị bán dẫn quang khắc chuyển giao xuyên biên giới.',
+        time: '8 phút trước'
+      },
+      {
+        id: 'wire-2',
+        source: 'Bloomberg Markets',
+        title: 'Cổ phiếu công nghệ lập kỷ lục giữa làn sóng đầu tư hạ tầng GPU',
+        summary: 'Các quỹ đầu tư mạo hiểm và doanh nghiệp lớn đã cam kết hơn 200 tỷ USD vào các siêu cụm máy chủ AI năm nay.',
+        time: '24 phút trước'
+      },
+      {
+        id: 'wire-3',
+        source: 'The Wall Street Journal',
+        title: 'Trung Quốc công bố lộ trình tự chủ công nghệ bán dẫn 2030',
+        summary: 'Tập trung vào kiến trúc vi xử lý mã nguồn mở RISC-V và vật liệu bán dẫn thế hệ mới để giảm phụ thuộc phương Tây.',
+        time: '45 phút trước'
+      },
+      {
+        id: 'wire-4',
+        source: 'TechCrunch Wire',
+        title: 'Trí tuệ nhân tạo nguồn mở bám sát các mô hình đóng độc quyền',
+        summary: 'Các dòng mô hình trọng số mở đạt hiệu suất tương đương trên các bài kiểm tra toán học và lập trình phức tạp.',
+        time: '1 giờ trước'
+      }
+    ];
+
+    let currentCharacter = characters[0];
+    let isCallLive = false;
+    let callDurationSec = 0;
+    let callTimerHandle = null;
+    let waveAnimHandle = null;
+    let isSpeaking = false;
+
+    // INITIALIZATION
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      renderCharacterRoster();
+      renderNewsFeed();
+      renderWaveformBars();
+      selectActiveCharacter(characters[0].id);
+
+      // Enter key for quick chat
+      document.getElementById('chat-prompt-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleUserChat();
+      });
+    });
+
+    // RENDER CHARACTER ROSTER CARDS
+    function renderCharacterRoster() {
+      const roster = document.getElementById('character-roster');
+      roster.innerHTML = characters.map(c => `
+        <div id="roster-card-${c.id}" onclick="selectActiveCharacter('${c.id}')" 
+             class="bg-brand-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-sky-500/50 rounded-2xl p-2.5 cursor-pointer transition flex flex-col items-center text-center group">
+          <div class="relative mb-2">
+            <img src="${c.avatar}" class="w-12 h-12 rounded-xl object-cover border border-slate-700 group-hover:border-sky-400 transition shadow">
+            <span class="absolute -bottom-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border border-slate-900"></span>
+          </div>
+          <h5 class="font-bold text-xs text-white truncate w-full">${c.shortName}</h5>
+          <span class="text-[10px] text-slate-400 truncate w-full">${c.tag}</span>
+        </div>
+      `).join('');
+    }
+
+    // SELECT CHARACTER
+    function selectActiveCharacter(id) {
+      currentCharacter = characters.find(c => c.id === id);
+
+      // Highlight active card
+      characters.forEach(c => {
+        const el = document.getElementById(`roster-card-${c.id}`);
+        if (el) {
+          if (c.id === id) {
+            el.className = 'bg-slate-800 border-2 border-sky-400 rounded-2xl p-2.5 cursor-pointer transition flex flex-col items-center text-center shadow-lg shadow-sky-500/20';
+          } else {
+            el.className = 'bg-brand-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-sky-500/50 rounded-2xl p-2.5 cursor-pointer transition flex flex-col items-center text-center group';
+          }
+        }
+      });
+
+      // Update FaceTime viewport
+      document.getElementById('stage-avatar-small').src = currentCharacter.avatar;
+      document.getElementById('stage-avatar-large').src = currentCharacter.avatar;
+      document.getElementById('stage-name').textContent = currentCharacter.name;
+      document.getElementById('stage-role').textContent = currentCharacter.role;
+      document.getElementById('stage-tag').textContent = currentCharacter.tag;
+
+      // Update Mindset DNA
+      document.getElementById('mindset-desc').textContent = currentCharacter.mindset;
+      document.getElementById('mindset-tags').innerHTML = currentCharacter.tags.map(t => `
+        <span class="px-2 py-0.5 rounded-md bg-slate-800 text-sky-300 font-mono text-[10px] border border-slate-700">${t}</span>
+      `).join('');
+
+      // Auto greeting
+      setSubtitleText(`"${currentCharacter.sampleGreeting}"`);
+      speakRealVoice(currentCharacter.sampleGreeting);
+    }
+
+    // RENDER NEWS FEED
+    function renderNewsFeed() {
+      const container = document.getElementById('news-list');
+      container.innerHTML = newsFeed.map(n => `
+        <div onclick="injectNewsToCall('${n.id}')" 
+             class="p-3 rounded-2xl bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800/80 hover:border-amber-500/50 cursor-pointer transition group">
+          <div class="flex items-center justify-between text-[10px] font-mono mb-1">
+            <span class="text-amber-400 font-bold">${n.source}</span>
+            <span class="text-slate-500">${n.time}</span>
+          </div>
+          <h5 class="text-xs font-bold text-slate-200 group-hover:text-sky-300 transition line-clamp-1">${n.title}</h5>
+          <p class="text-[11px] text-slate-400 line-clamp-2 mt-0.5">${n.summary}</p>
+          <div class="mt-2 flex items-center justify-end text-[10px] text-sky-400 font-semibold group-hover:underline">
+            <span>Thảo luận tin này →</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // RENDER WAVEFORM BARS
+    function renderWaveformBars() {
+      const container = document.getElementById('live-waveform');
+      container.innerHTML = '';
+      for (let i = 0; i < 28; i++) {
+        const b = document.createElement('div');
+        b.className = 'w-1 rounded-full bg-slate-700 waveform-bar';
+        b.style.height = '6px';
+        b.id = `wave-${i}`;
+        container.appendChild(b);
+      }
+    }
+
+    function toggleWaveform(active) {
+      if (waveAnimHandle) clearInterval(waveAnimHandle);
+      const bars = document.querySelectorAll('.waveform-bar');
+      const avatarLarge = document.getElementById('stage-avatar-large');
+      const indicator = document.getElementById('speaking-indicator');
+
+      if (!active) {
+        bars.forEach(b => {
+          b.style.height = '6px';
+          b.style.backgroundColor = '#334155';
+        });
+        avatarLarge.classList.remove('avatar-speaking');
+        indicator.classList.add('hidden');
+        isSpeaking = false;
+        return;
+      }
+
+      isSpeaking = true;
+      avatarLarge.classList.add('avatar-speaking');
+      indicator.classList.remove('hidden');
+
+      waveAnimHandle = setInterval(() => {
+        bars.forEach(b => {
+          const h = Math.floor(Math.random() * 40) + 6;
+          b.style.height = `${h}px`;
+          b.style.backgroundColor = '#38bdf8';
+        });
+      }, 80);
+    }
+
+    // CALL STATE TOGGLE
+    function toggleCallState() {
+      isCallLive = !isCallLive;
+      const btn = document.getElementById('call-toggle-btn');
+      const label = document.getElementById('call-btn-label');
+      const liveDot = document.getElementById('live-dot');
+
+      if (isCallLive) {
+        btn.className = 'flex-1 py-3 px-5 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-rose-600/30 transition transform active:scale-95';
+        label.textContent = 'GÁC MÁY (KẾT THÚC CUỘC GỌI)';
+        liveDot.className = 'absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-brand-900 animate-ping';
+        
+        startTimer();
+        startMicRecognition();
+        setSubtitleText(`[Đang kết nối trực tiếp] Hãy nói vào microphone của bạn hoặc gõ câu hỏi.`);
+      } else {
+        btn.className = 'flex-1 py-3 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 transition transform active:scale-95';
+        label.textContent = 'BẬT MIC ĐÀM THOẠI TRỰC TIẾP';
+        liveDot.className = 'absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-slate-500 border-2 border-brand-900';
+        
+        stopTimer();
+        toggleWaveform(false);
+        window.speechSynthesis && window.speechSynthesis.cancel();
+        setSubtitleText(`Cuộc gọi đã kết thúc. Bạn có thể bấm để gọi lại.`);
+      }
+    }
+
+    function startTimer() {
+      callDurationSec = 0;
+      clearInterval(callTimerHandle);
+      callTimerHandle = setInterval(() => {
+        callDurationSec++;
+        const m = String(Math.floor(callDurationSec / 60)).padStart(2, '0');
+        const s = String(callDurationSec % 60).padStart(2, '0');
+        document.getElementById('call-clock').textContent = `${m}:${s}`;
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(callTimerHandle);
+    }
+
+    // INTERRUPT ACTION
+    function interruptAI() {
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      toggleWaveform(false);
+      setSubtitleText(`[Đã ngắt lời] ${currentCharacter.name} đang im lặng lắng nghe bạn nói tiếp...`);
+    }
+
+    // SAMPLE VOICE
+    function sampleVoiceIntro() {
+      speakRealVoice(currentCharacter.sampleGreeting);
+    }
+
+    // INJECT NEWS ARTICLE INTO CALL
+    function injectNewsToCall(newsId) {
+      const item = newsFeed.find(n => n.id === newsId);
+      if (!item) return;
+
+      const prompt = `Tôi thấy tin này trên ${item.source}: "${item.title}". Ông đánh giá thế nào?`;
+      generateNaturalPersonaReply(prompt, item.title);
+    }
+
+    function quickInjectTopic(topicText) {
+      generateNaturalPersonaReply(topicText, topicText);
+    }
+
+    // USER TEXT/VOICE CHAT
+    function handleUserChat() {
+      const input = document.getElementById('chat-prompt-input');
+      const val = input.value.trim();
+      if (!val) return;
+
+      generateNaturalPersonaReply(val);
+      input.value = '';
+    }
+
+    // GENERATE NATURAL HUMAN-LIKE DIALOGUE (NO ROBOTIC AI CLICHES)
+    function generateNaturalPersonaReply(userText, newsContext = null) {
+      toggleWaveform(true);
+      document.getElementById('indicator-text').textContent = 'Đang suy nghĩ...';
+      setSubtitleText(`Bạn vừa nói: "${userText}"`);
+
+      // Simulated ultra-fast response (< 250ms like Groq / Gemini Flash)
+      setTimeout(() => {
+        let reply = "";
+
+        if (currentCharacter.id === 'jobs') {
+          if (newsContext) {
+            reply = `Nói thật nhé, bài báo này chỉ nhìn thấy phần nổi của tảng băng thôi. Hầu hết các công ty công nghệ chỉ biết chạy đua về thông số mà quên mất trải nghiệm của con người. Nếu sản phẩm không chạm tới được cảm xúc, thì mọi con chip mạnh đến mấy cũng vứt đi!`;
+          } else {
+            reply = `Này, tôi thấy bạn đang đặt câu hỏi theo lối mòn đấy. Mọi thứ vĩ đại đều bắt đầu từ việc dám từ chối 1.000 thứ tốt để tập trung vào một thứ duy nhất thực sự đột phá. Bạn có dám làm điều đó không?`;
+          }
+        } else if (currentCharacter.id === 'trump') {
+          if (newsContext) {
+            reply = `Nghe này, tin tức này hoàn toàn xác nhận điều tôi đã nói suốt nhiều năm qua. Mọi người đều biết tôi đã tạo ra nền kinh tế vĩ đại nhất lịch sử. Chúng ta phải bảo vệ những người lao động và công nghệ của chúng ta. Không ai đàm phán giỏi hơn tôi cả!`;
+          } else {
+            reply = `Đó là một câu hỏi rất thú vị, bạn của tôi. Hàng triệu người đã hỏi tôi điều đó. Và câu trả lời rất đơn giản: Khi bạn thắng, họ sẽ tôn trọng bạn. Đừng bao giờ lùi bước!`;
+          }
+        } else if (currentCharacter.id === 'xijinping') {
+          if (newsContext) {
+            reply = `Về vấn đề này, chúng ta cần giữ vững sự bình tĩnh chiến lược. Nước chảy đá mòn, bất kỳ rào cản nào được dựng lên hôm nay cũng chỉ thúc đẩy năng lực tự chủ và sáng tạo của chúng tôi mạnh mẽ hơn trong 10 đến 20 năm tới.`;
+          } else {
+            reply = `Người quân tử luôn nhìn xa trông rộng. Điều cốt lõi là sự ổn định, kỷ luật và kiên định đi theo con đường đã chọn, không bị dao động trước những xáo động bề ngoài.`;
+          }
+        } else if (currentCharacter.id === 'tesla') {
+          if (newsContext) {
+            reply = `Con người hiện đại vẫn đang lãng phí quá nhiều trí lực vào những toan tính tranh giành tầm thường. Nếu họ hiểu được rằng năng lượng vũ trụ là vô tận và có thể được truyền tải tự do qua không gian, mọi cuộc xung đột về tài nguyên sẽ lập tức biến mất.`;
+          } else {
+            reply = `Hãy nhắm mắt lại và cảm nhận sự rung động. Bộ não của chúng ta chỉ là một máy thu phát trong vũ trụ vĩ đại này. Những ý tưởng bạn vừa nói, tôi đã từng nhìn thấy nó phát sáng trong tâm trí mình từ nhiều năm trước.`;
+          }
+        } else if (currentCharacter.id === 'zuck') {
+          if (newsContext) {
+            reply = `Yeah, theo góc nhìn kỹ thuật của tôi, cách duy nhất để thắng trong cuộc chơi này là tốc độ phân phối và mở rộng mã nguồn. Khi bạn để hàng triệu lập trình viên toàn cầu cùng tối ưu hóa mô hình, bạn sẽ vượt qua mọi hệ sinh thái đóng kín.`;
+          } else {
+            reply = `Đúng vậy! Văn hóa của chúng tôi là move fast. Đừng sợ sai, cứ đưa sản phẩm ra cho người dùng thử nghiệm và lặp lại liên tục. Đó là cách công nghệ tiến hóa.`;
+          }
+        } else if (currentCharacter.id === 'musk') {
+          if (newsContext) {
+            reply = `Yeah... well, nhìn từ góc độ vật lý cơ bản thì điều này khá hiển nhiên. Nếu chi phí năng lượng và chi phí tính toán không giảm theo hàm mũ, bạn sẽ đâm sầm vào bức tường giới hạn. Tại SpaceX và xAI, chúng tôi chỉ đơn giản là xóa bỏ các ràng buộc ngớ ngẩn.`;
+          } else {
+            reply = `Yeah, bạn hoàn toàn có lý. Nhưng điều tôi quan tâm hơn là: Liệu điều này có giúp tăng xác suất bảo tồn ánh sáng của ý thức nhân loại không? Nếu không, nó không quan trọng lắm.`;
+          }
+        }
+
+        document.getElementById('indicator-text').textContent = 'Đang nói...';
+        setSubtitleText(`"${reply}"`);
+        speakRealVoice(reply);
+
+      }, 350);
+    }
+
+    // REAL VOICE SYNTHESIS
+    function speakRealVoice(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.pitch = currentCharacter.voicePitch || 1.0;
+      utter.rate = currentCharacter.voiceRate || 1.0;
+
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        const viVoice = voices.find(v => v.lang.includes('vi'));
+        if (viVoice) utter.voice = viVoice;
+      }
+
+      utter.onend = () => {
+        toggleWaveform(false);
+      };
+
+      toggleWaveform(true);
+      window.speechSynthesis.speak(utter);
+    }
+
+    // WEB SPEECH RECOGNITION (MIC)
+    function startMicRecognition() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) return;
+
+      try {
+        const recog = new SR();
+        recog.lang = 'vi-VN';
+        recog.continuous = false;
+        recog.interimResults = false;
+
+        recog.onresult = (e) => {
+          const text = e.results[0][0].transcript;
+          if (text) {
+            generateNaturalPersonaReply(text);
+          }
+        };
+
+        recog.onerror = () => {};
+        recog.start();
+      } catch(e) {}
+    }
+
+    function setSubtitleText(txt) {
+      document.getElementById('subtitle-text').textContent = txt;
+    }
+
+    function toggleInfoModal() {
+      document.getElementById('info-modal').classList.toggle('hidden');
+    }
+  </script>
+</body>
+</html>
