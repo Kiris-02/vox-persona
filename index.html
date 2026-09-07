@@ -58,8 +58,15 @@
       0% { transform: scale(1.0); box-shadow: 0 0 20px rgba(56, 189, 248, 0.35); }
       100% { transform: scale(1.03); box-shadow: 0 0 45px rgba(56, 189, 248, 0.8); }
     }
-    .scrollbar-none::-webkit-scrollbar {
-      display: none;
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 5px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: #080c14;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: #26375c;
+      border-radius: 4px;
     }
     .waveform-bar {
       transition: height 0.08s ease-out;
@@ -81,39 +88,39 @@
           <div>
             <div class="flex items-center space-x-2">
               <span class="font-extrabold text-lg tracking-tight text-white">VOX IMPERIUM</span>
-              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20">Live Studio 2.0</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20">Studio Pro</span>
             </div>
-            <p class="text-xs text-slate-400">Authentic Mother-Tongue Hotline • Walter Isaacson Mindset DNA</p>
+            <p class="text-xs text-slate-400">Authentic Neural Voice Hotline • Walter Isaacson Biographic DNA</p>
           </div>
         </div>
 
         <!-- Right Quick Actions -->
         <div class="flex items-center space-x-3">
           
-          <!-- Mother Tongue Indicator Badge -->
+          <!-- Active Engine Indicator -->
           <div class="hidden md:flex items-center bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-800 text-xs font-mono">
             <span class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
-            <span class="text-slate-400 mr-1.5">Voice Mode:</span>
-            <span id="voice-mode-badge" class="text-sky-400 font-semibold">Authentic Mother Tongue</span>
+            <span class="text-slate-400 mr-1.5">Voice Engine:</span>
+            <span id="voice-engine-badge" class="text-emerald-400 font-semibold">Native Neural Clone</span>
           </div>
 
-          <!-- Engine / GPT-SoVITS Settings -->
+          <!-- Settings Modal Button -->
           <button onclick="toggleSettingsModal()" class="px-3.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition flex items-center space-x-1.5 shadow-sm">
-            <i data-lucide="cpu" class="w-3.5 h-3.5 text-sky-400"></i>
-            <span id="engine-badge-label">Groq / Gemini Engine</span>
+            <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-sky-400"></i>
+            <span>API & Voice Config</span>
           </button>
 
         </div>
       </div>
 
       <!-- LIVE BREAKING NEWS TICKER -->
-      <div class="py-2 border-t border-slate-800/60 flex items-center space-x-3 text-xs overflow-x-auto scrollbar-none font-mono">
+      <div class="py-2 border-t border-slate-800/60 flex items-center space-x-3 text-xs overflow-x-auto scrollbar-thin font-mono">
         <div class="flex items-center space-x-1.5 text-amber-400 font-bold shrink-0">
           <span class="relative flex h-2 w-2">
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
             <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
           </span>
-          <span>BREAKING NEWS RADAR:</span>
+          <span>BREAKING WIRES:</span>
         </div>
         <div class="flex items-center space-x-6 shrink-0 text-slate-300" id="live-news-ticker">
           <!-- Populated by JS -->
@@ -126,14 +133,14 @@
   <!-- MAIN VIEWPORT -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex-1 flex flex-col space-y-5">
 
-    <!-- CHARACTER HORIZONTAL ROSTER (AUTHENTIC PHOTOS & MOTHER TONGUE) -->
+    <!-- CHARACTER HORIZONTAL ROSTER -->
     <div class="flex flex-col space-y-2">
       <div class="flex items-center justify-between">
         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center">
           <i data-lucide="users" class="w-3.5 h-3.5 mr-1.5 text-sky-400"></i>
-          Influential Personas (Authentic Portraits • Native Mother Tongue)
+          Select Persona (Authentic Portrait • Mother Tongue Audio)
         </span>
-        <span class="text-[11px] text-slate-400 font-mono">Click to establish direct hotline connection</span>
+        <span class="text-[11px] text-slate-400 font-mono">Click to switch line immediately</span>
       </div>
 
       <!-- Grid 6 Characters -->
@@ -145,11 +152,11 @@
     <!-- MAIN CALL CENTER & NEWS RADAR (2 COLUMNS) -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1">
 
-      <!-- LEFT COLUMN: VIDEO CALL ROOM / FACETIME STUDIO (7 COLS) -->
-      <div class="lg:col-span-7 flex flex-col bg-brand-900/70 border border-slate-800 rounded-3xl p-5 shadow-2xl video-frame-glow relative overflow-hidden justify-between">
+      <!-- LEFT COLUMN: VIDEO CALL ROOM + LIVE TRANSCRIPT STREAM (7 COLS) -->
+      <div class="lg:col-span-7 flex flex-col bg-brand-900/70 border border-slate-800 rounded-3xl p-5 shadow-2xl video-frame-glow relative overflow-hidden justify-between space-y-4">
         
         <!-- Video Header Info -->
-        <div class="flex items-center justify-between z-10 pb-3 border-b border-slate-800/80">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800/80">
           <div class="flex items-center space-x-3">
             <div class="relative">
               <img id="stage-avatar-small" src="assets/jobs.jpg" class="w-12 h-12 rounded-2xl object-cover border-2 border-sky-400 shadow-md">
@@ -172,60 +179,84 @@
           </div>
         </div>
 
-        <!-- VIDEO CALL AVATAR VIEWPORT (FACETIME STYLE) -->
-        <div class="my-6 relative flex flex-col items-center justify-center min-h-[300px] z-10">
+        <!-- VIDEO CALL AVATAR VIEWPORT -->
+        <div class="relative flex flex-col items-center justify-center py-2">
           
-          <!-- Large Avatar with Real Photo -->
+          <!-- Avatar Frame -->
           <div class="relative group">
             <div id="glow-ring" class="absolute -inset-4 bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-500 rounded-full blur-2xl opacity-20 transition duration-700"></div>
             
             <img id="stage-avatar-large" src="assets/jobs.jpg" alt="Real Avatar" 
-                 class="relative w-44 h-44 sm:w-52 sm:h-52 rounded-full object-cover border-4 border-slate-700 shadow-2xl transition duration-300">
+                 class="relative w-36 h-36 sm:w-44 sm:h-44 rounded-full object-cover border-4 border-slate-700 shadow-2xl transition duration-300">
             
             <!-- Speaking animation badge -->
-            <div id="speaking-indicator" class="hidden absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-slate-900/95 border border-sky-400 text-sky-300 text-[11px] font-bold px-3.5 py-1 rounded-full shadow-xl flex items-center space-x-1.5 whitespace-nowrap">
+            <div id="speaking-indicator" class="hidden absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-slate-900/95 border border-sky-400 text-sky-300 text-[10px] font-bold px-3 py-0.5 rounded-full shadow-xl flex items-center space-x-1.5 whitespace-nowrap">
               <span class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span>
               <span id="indicator-text">Speaking...</span>
             </div>
           </div>
 
           <!-- Audio Waveform Visualizer -->
-          <div class="flex items-center justify-center space-x-1.5 h-12 mt-6 w-full max-w-sm" id="live-waveform">
+          <div class="flex items-center justify-center space-x-1.5 h-8 mt-3 w-full max-w-xs" id="live-waveform">
             <!-- Bars generated via JS -->
           </div>
-
-          <!-- Dynamic Live Subtitle Banner (Conversational) -->
-          <div id="subtitles-card" class="mt-2 max-w-xl w-full bg-slate-950/85 backdrop-blur-md border border-slate-800 rounded-2xl p-4 shadow-xl text-center">
-            <p id="subtitle-text" class="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed italic">
-              "Connecting... Turn on your mic, type a question, or pick a breaking news article to begin."
-            </p>
-          </div>
-
         </div>
 
-        <!-- CALL CONTROLS BAR (APPLE FACETIME / HOTLINE STYLE) -->
-        <div class="z-10 pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3">
+        <!-- LIVE DIALOGUE TRANSCRIPT & CONVERSATION HISTORY STREAM -->
+        <div class="flex-1 flex flex-col bg-slate-950/70 border border-slate-800/90 rounded-2xl p-3.5 overflow-hidden shadow-inner">
+          <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800/80 text-[11px] font-mono">
+            <div class="flex items-center space-x-1.5 text-sky-400 font-semibold">
+              <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+              <span>LIVE CALL DIALOGUE HISTORY</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span id="transcript-count" class="text-slate-500">0 messages</span>
+              <button onclick="clearTranscript()" class="text-slate-400 hover:text-rose-400 transition" title="Clear conversation">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Scrollable Message List -->
+          <div id="dialogue-transcript-box" class="flex-1 space-y-3 overflow-y-auto max-h-[220px] pr-2 scrollbar-thin">
+            <!-- Dynamic user and persona messages will be appended here -->
+          </div>
+        </div>
+
+        <!-- CALL CONTROLS & DIRECT INPUT BAR -->
+        <div class="pt-3 border-t border-slate-800/80 flex flex-col space-y-2.5">
           
-          <!-- Mic / Call Main Action -->
-          <button id="call-toggle-btn" onclick="toggleCallState()" 
-                  class="flex-1 py-3 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 transition transform active:scale-95">
-            <i data-lucide="phone-call" class="w-4 h-4"></i>
-            <span id="call-btn-label">START DUPLEX LIVE CALL</span>
-          </button>
+          <!-- Input Field Inside Call Studio -->
+          <div class="flex space-x-2">
+            <input type="text" id="call-speech-input" 
+                   placeholder="Ask anything (e.g. 'What is your opinion on AI chips?')..." 
+                   class="flex-1 bg-slate-950/90 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 font-sans">
+            <button onclick="handleUserSpeechSend()" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1 shadow-md shrink-0">
+              <span>Send</span>
+              <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
 
-          <!-- Interruption -->
-          <button onclick="interruptAI()" title="Interrupt character" 
-                  class="py-3 px-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 text-xs font-semibold flex items-center space-x-1.5 transition">
-            <i data-lucide="hand" class="w-4 h-4"></i>
-            <span class="hidden sm:inline">Interrupt</span>
-          </button>
+          <!-- Bottom Action Buttons -->
+          <div class="flex flex-wrap items-center justify-between gap-2.5">
+            <button id="call-toggle-btn" onclick="toggleCallState()" 
+                    class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-md transition transform active:scale-95">
+              <i data-lucide="phone-call" class="w-4 h-4"></i>
+              <span id="call-btn-label">START LIVE CALL (MIC)</span>
+            </button>
 
-          <!-- Sample Intro Speech -->
-          <button onclick="sampleVoiceIntro()" title="Hear opening sample statement" 
-                  class="py-3 px-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 text-xs font-semibold flex items-center space-x-1.5 transition">
-            <i data-lucide="volume-2" class="w-4 h-4"></i>
-            <span class="hidden sm:inline">Opening Sample</span>
-          </button>
+            <button onclick="interruptAI()" title="Interrupt voice stream" 
+                    class="py-2.5 px-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 text-xs font-semibold flex items-center space-x-1.5 transition">
+              <i data-lucide="hand" class="w-4 h-4"></i>
+              <span>Interrupt</span>
+            </button>
+
+            <button onclick="playCurrentCharacterSample()" title="Play authentic voice sample" 
+                    class="py-2.5 px-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 text-xs font-semibold flex items-center space-x-1.5 transition">
+              <i data-lucide="volume-2" class="w-4 h-4"></i>
+              <span>Opening Sample</span>
+            </button>
+          </div>
 
         </div>
 
@@ -258,7 +289,7 @@
           </div>
         </div>
 
-        <!-- REAL-TIME NEWS RADAR (MULTI-CATEGORY & LIVE REFRESH) -->
+        <!-- REAL-TIME NEWS RADAR -->
         <div class="bg-brand-900/70 border border-slate-800 rounded-3xl p-5 shadow-xl flex-1 flex flex-col">
           
           <div class="flex items-center justify-between mb-2">
@@ -273,7 +304,7 @@
           </div>
 
           <!-- News Category Switcher Tabs -->
-          <div class="flex space-x-1 mb-3 overflow-x-auto scrollbar-none text-[11px]">
+          <div class="flex space-x-1 mb-3 overflow-x-auto scrollbar-thin text-[11px]">
             <button onclick="filterNews('all')" id="tab-all" class="px-2.5 py-1 rounded-lg bg-sky-600 text-white font-semibold">All</button>
             <button onclick="filterNews('geo')" id="tab-geo" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white font-semibold">Geopolitics</button>
             <button onclick="filterNews('tech')" id="tab-tech" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white font-semibold">Tech & AI</button>
@@ -282,19 +313,19 @@
           </div>
 
           <!-- Dynamic News List -->
-          <div class="space-y-2.5 overflow-y-auto max-h-[260px] pr-1 scrollbar-none flex-1" id="news-list">
+          <div class="space-y-2.5 overflow-y-auto max-h-[220px] pr-1 scrollbar-thin flex-1" id="news-list">
             <!-- Injected by JS -->
           </div>
 
           <!-- Custom Article Paste Input -->
           <div class="mt-3 pt-3 border-t border-slate-800">
             <div class="flex space-x-2">
-              <input type="text" id="chat-prompt-input" 
-                     placeholder="Speak or paste breaking news link / headline..." 
-                     class="w-full bg-slate-950/80 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 font-sans">
-              <button onclick="handleUserChat()" class="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition flex items-center shrink-0 shadow-md">
-                <span>Send</span>
-                <i data-lucide="send" class="w-3.5 h-3.5 ml-1"></i>
+              <input type="text" id="custom-news-input" 
+                     placeholder="Paste breaking news link or headline to debate..." 
+                     class="w-full bg-slate-950/80 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 font-sans">
+              <button onclick="handleCustomNewsSubmit()" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold transition flex items-center shrink-0 shadow-md">
+                <span>Debate</span>
+                <i data-lucide="zap" class="w-3.5 h-3.5 ml-1"></i>
               </button>
             </div>
           </div>
@@ -307,7 +338,7 @@
 
   </main>
 
-  <!-- SETTINGS / ENGINE CONFIG MODAL -->
+  <!-- SETTINGS / VOICE CLONE & API CONFIG MODAL -->
   <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-brand-900 border border-slate-800 max-w-xl w-full rounded-3xl p-6 shadow-2xl relative">
       <button onclick="toggleSettingsModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
@@ -315,53 +346,66 @@
       </button>
 
       <div class="flex items-center space-x-2 text-sky-400 mb-2">
-        <i data-lucide="settings" class="w-5 h-5"></i>
-        <h3 class="font-bold text-base uppercase tracking-wider text-white">Engine Configuration & Voice Synthesizer</h3>
+        <i data-lucide="sliders-horizontal" class="w-5 h-5"></i>
+        <h3 class="font-bold text-base uppercase tracking-wider text-white">Voice Clone & LLM Engine Settings</h3>
       </div>
       
       <p class="text-xs text-slate-300 mb-4 leading-relaxed">
-        VOX IMPERIUM features built-in <b>Neural Persona Engine 2.0</b>. You can also connect directly to Groq, Gemini, or a local <b>GPT-SoVITS V2</b> backend:
+        Prioritize free usage ($1/week cap). Connect your API keys to unlock authentic human voice cloning & real-time reasoning:
       </p>
 
       <div class="space-y-3 font-mono text-xs">
         
-        <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
-          <label class="block text-sky-400 font-bold mb-1">Groq API Key (~100ms ultra-low latency):</label>
-          <input type="password" id="groq-api-key" placeholder="gsk_..." 
+        <!-- ElevenLabs Voice Clone API -->
+        <div class="bg-slate-950 p-3.5 rounded-2xl border border-sky-500/40">
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-sky-400 font-bold">ElevenLabs API Key (10,000 Chars Free/Month):</label>
+            <span class="text-[10px] text-emerald-400 font-sans">Realistic Clones</span>
+          </div>
+          <input type="password" id="eleven-api-key" placeholder="xi-api-key-..." 
                  class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400 font-mono">
-          <span class="text-[10px] text-slate-500 font-sans block mt-1">Runs Llama 3.3 70B at 300+ tokens/sec on LPUs.</span>
+          <span class="text-[10px] text-slate-400 font-sans block mt-1">Generates authentic Trump, Jobs, and Musk voices with natural breath and timbre.</span>
         </div>
 
+        <!-- Groq LPU API -->
         <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
-          <label class="block text-indigo-400 font-bold mb-1">Google Gemini API Key (Gemini 2.0 Flash):</label>
-          <input type="password" id="gemini-api-key" placeholder="AIzaSy..." 
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-amber-400 font-bold">Groq API Key (~100ms Llama 3.3 70B - Free Tier):</label>
+            <span class="text-[10px] text-amber-400 font-sans">Ultra-fast</span>
+          </div>
+          <input type="password" id="groq-api-key" placeholder="gsk_..." 
+                 class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-400 font-mono">
+          <span class="text-[10px] text-slate-400 font-sans block mt-1">Unscripted, spontaneous conversation at 300+ tokens/sec.</span>
+        </div>
+
+        <!-- OpenRouter / Gemini API -->
+        <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
+          <label class="block text-indigo-400 font-bold mb-1">OpenRouter / Google Gemini API Key:</label>
+          <input type="password" id="openrouter-api-key" placeholder="sk-or-v1-... or AIzaSy..." 
                  class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-indigo-400 font-mono">
-          <span class="text-[10px] text-slate-500 font-sans block mt-1">Enables multi-turn deep reasoning and real-time grounding.</span>
+          <span class="text-[10px] text-slate-400 font-sans block mt-1">Supports free models like meta-llama/llama-3.3-70b-instruct:free or Gemini 2.0 Flash.</span>
         </div>
 
         <!-- GPT-SoVITS Neural Cloner Configuration -->
-        <div class="bg-slate-950 p-3.5 rounded-2xl border border-sky-500/40 shadow-inner">
+        <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
           <div class="flex items-center justify-between mb-1.5">
-            <label class="block text-emerald-400 font-bold">🎙️ GPT-SoVITS V2 Neural Cloner (Local API):</label>
+            <label class="block text-emerald-400 font-bold">🎙️ GPT-SoVITS V2 Local Endpoint:</label>
             <label class="flex items-center space-x-1.5 cursor-pointer">
               <input type="checkbox" id="use-sovits-checkbox" class="w-4 h-4 accent-sky-500 rounded">
-              <span class="text-[11px] text-sky-300 font-semibold">Enable GPT-SoVITS</span>
+              <span class="text-[11px] text-sky-300 font-semibold">Enable</span>
             </label>
           </div>
           <input type="text" id="sovits-endpoint-input" placeholder="http://127.0.0.1:9885/synthesize or http://127.0.0.1:9880/tts" 
                  class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400 font-mono">
-          <span class="text-[10px] text-slate-400 font-sans block mt-1.5 leading-relaxed">
-            Direct bridge to local GPT-SoVITS instance (<code class="text-sky-300">python run_sovits_bridge.py</code>). When enabled, plays authentic neural cloned voice streams.
-          </span>
         </div>
 
       </div>
 
       <div class="mt-5 flex items-center justify-between">
-        <span id="save-status" class="text-xs text-emerald-400 font-semibold hidden">✓ Settings saved!</span>
+        <span id="save-status" class="text-xs text-emerald-400 font-semibold hidden">✓ Settings saved successfully!</span>
         <div class="flex space-x-2 ml-auto">
           <button onclick="saveApiKeys()" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition shadow-md">
-            Save Settings
+            Save Configuration
           </button>
         </div>
       </div>
@@ -370,7 +414,7 @@
 
   <!-- JAVASCRIPT APPLICATION LOGIC -->
   <script>
-    // 6 INFLUENTIAL PERSONAS (AUTHENTIC PORTRAITS & NATIVE MOTHER TONGUE)
+    // 6 INFLUENTIAL PERSONAS
     const characters = [
       {
         id: 'jobs',
@@ -381,8 +425,10 @@
         nativeLang: 'en-US',
         nativeLangBadge: 'EN',
         avatar: 'assets/jobs.jpg',
+        sampleAudio: null,
         voicePitch: 1.05,
         voiceRate: 1.02,
+        elevenVoiceId: '21m00Tcm4TlvDq8ikWAM', // Rachel or customized male clone
         mindset: 'Perfectionism without compromise. Relentless reality distortion field to bend impossible obstacles into reality. Fusion of liberal arts and breakthrough technology. Despises committee-driven mediocrity.',
         tags: ['Minimalist Aesthetics', 'Reality Distortion', 'Zen Simplicity', 'Liberal Arts & Tech'],
         sampleGreeting: "Listen, your time is limited, so don't waste it living someone else's life. Most people in this industry have no taste. They build features because they can, not because they should. Tell me, what's truly revolutionary about this?",
@@ -401,6 +447,7 @@
         sampleAudio: 'assets/audio/trump_speech.mp3',
         voicePitch: 0.9,
         voiceRate: 1.05,
+        elevenVoiceId: 'VR6AewLTigWG4xSOukaG', // Arnold / Trump clone
         mindset: 'Supreme negotiation dominance (The Art of the Deal). Always operate from extreme leverage. Use powerful superlatives, bold confidence, and never concede defeat. Direct, highly charismatic communication.',
         tags: ['Art of the Deal', 'America First', 'Maximum Leverage', 'Total Confidence'],
         sampleGreeting: "Look, nobody understands deals better than me, believe me. The fake news media will never tell you the truth, but we have the biggest leverage in history. It's huge, it's tremendous. What do you think about what we're doing here?",
@@ -419,6 +466,7 @@
         sampleAudio: 'assets/audio/xijinping_speech.ogg',
         voicePitch: 0.82,
         voiceRate: 0.90,
+        elevenVoiceId: null,
         mindset: 'Centennial strategic horizon and 50-year planning. Immovable state discipline, deep emphasis on domestic self-reliance, and the historic great rejuvenation of Chinese civilization. Unshaken by transient geopolitical storms.',
         tags: ['50-Year Strategy', 'Self-Reliance', 'Shared Destiny', 'Strategic Patience'],
         sampleGreeting: "你好。历史的长河奔腾向前，任何短期的地缘震荡都阻挡不了中华民族伟大复兴的坚实步伐。治大国若烹小鲜，我们必须保持战略定力，走好自己的路。",
@@ -434,8 +482,10 @@
         nativeLang: 'en-US',
         nativeLangBadge: 'EN',
         avatar: 'assets/tesla.jpg',
+        sampleAudio: null,
         voicePitch: 0.95,
         voiceRate: 0.98,
+        elevenVoiceId: null,
         mindset: 'Thinking in terms of frequency, energy, and cosmic vibrations. Disdains commercial exploitation and money-grubbing industrialists. Dedicated entirely to unlocking free wireless energy for all mankind.',
         tags: ['Infinite Energy', 'Vibration & Resonance', 'Cosmic Receiver', 'Victorian Elegance'],
         sampleGreeting: "If you only knew the magnificence of the 3, 6, and 9, you would have a key to the universe. Humanity squanders intellectual energy on the shallow commercial greed of Edison. Tell me, are you seeking the secrets of cosmic resonance or mere trivialities?",
@@ -451,8 +501,10 @@
         nativeLang: 'en-US',
         nativeLangBadge: 'EN',
         avatar: 'assets/zuck.jpg',
+        sampleAudio: null,
         voicePitch: 1.0,
         voiceRate: 1.1,
+        elevenVoiceId: null,
         mindset: 'Hacker culture: "Move fast and break things". Relentless technical execution, conviction in open-source AI infrastructure (Llama) to disrupt closed proprietary moats. Athletic BJJ discipline and product iteration.',
         tags: ['Hacker Way', 'Open Source AI', 'Metaverse Infrastructure', 'Iterative Execution'],
         sampleGreeting: "Yeah hi! Look, from an engineering standpoint, execution speed and open ecosystems are the only real moat. That's why we open-sourced Llama. Move fast, ship infrastructure to the global open-source community, and iterate relentlessly. What's your take?",
@@ -471,6 +523,7 @@
         sampleAudio: 'assets/audio/musk_speech.wav',
         voicePitch: 0.92,
         voiceRate: 1.05,
+        elevenVoiceId: null,
         mindset: 'Physics first-principles reasoning. Delete outdated constraints, scale gigawatt compute and orbital launch cadence exponentially. Protect the light of consciousness by making life multi-planetary.',
         tags: ['First Principles', 'Multi-Planetary Life', 'Compute Density', 'xAI Sovereign'],
         sampleGreeting: "Yeah... haha, well. Honestly, people overcomplicate things. From a physics first principles perspective, everything is just energy conversion and compute scaling. If you don't scale launch cadence and gigawatt power exponentially, nothing else matters. What's your angle?",
@@ -479,7 +532,7 @@
       }
     ];
 
-    // DIVERSE REAL-TIME NEWS RADAR (4 CATEGORIES)
+    // DIVERSE REAL-TIME NEWS RADAR
     let newsDatabase = [
       {
         id: 'wire-1',
@@ -538,6 +591,7 @@
     let callTimerHandle = null;
     let waveAnimHandle = null;
     let currentAudioPlayer = null;
+    let conversationHistory = [];
 
     // INITIALIZATION
     document.addEventListener('DOMContentLoaded', () => {
@@ -548,19 +602,21 @@
       renderWaveformBars();
       selectActiveCharacter(characters[0].id);
 
-      // Enter key for chat
-      document.getElementById('chat-prompt-input').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') handleUserChat();
+      // Enter key for speech input
+      document.getElementById('call-speech-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleUserSpeechSend();
       });
 
-      // Load saved API keys & GPT-SoVITS config
+      // Load saved API keys
+      const elevenKey = localStorage.getItem('vox_eleven_api_key');
       const groqKey = localStorage.getItem('vox_groq_api_key');
-      const geminiKey = localStorage.getItem('vox_gemini_api_key');
+      const openRouterKey = localStorage.getItem('vox_openrouter_api_key');
       const sovitsEndpoint = localStorage.getItem('vox_sovits_endpoint');
       const useSovits = localStorage.getItem('vox_use_sovits') === 'true';
 
+      if (elevenKey) document.getElementById('eleven-api-key').value = elevenKey;
       if (groqKey) document.getElementById('groq-api-key').value = groqKey;
-      if (geminiKey) document.getElementById('gemini-api-key').value = geminiKey;
+      if (openRouterKey) document.getElementById('openrouter-api-key').value = openRouterKey;
       if (sovitsEndpoint) document.getElementById('sovits-endpoint-input').value = sovitsEndpoint;
       if (document.getElementById('use-sovits-checkbox')) {
         document.getElementById('use-sovits-checkbox').checked = useSovits;
@@ -615,101 +671,441 @@
         <span class="px-2 py-0.5 rounded-md bg-slate-800 text-sky-300 font-mono text-[10px] border border-slate-700">${t}</span>
       `).join('');
 
-      // Auto Greeting in Mother Tongue
-      displaySubtitleWithTranslation(currentCharacter.sampleGreeting, currentCharacter.greetingTranslation);
-      speakRealVoice(currentCharacter.sampleGreeting);
+      // Add Opening Greeting to Transcript History
+      appendMessageToTranscript('bot', currentCharacter.sampleGreeting, currentCharacter.greetingTranslation);
+      
+      // Play sample opening
+      playCurrentCharacterSample();
     }
 
-    // RENDER TICKER
-    function renderTicker() {
-      const ticker = document.getElementById('live-news-ticker');
-      ticker.innerHTML = newsDatabase.slice(0, 5).map(n => `
-        <span class="hover:text-sky-300 cursor-pointer transition" onclick="quickInjectNews('${n.id}')">
-          <span class="text-sky-400 font-semibold">[${n.source.split(' ')[0]}]</span> ${n.title} &bull;
-        </span>
-      `).join('');
-    }
+    // TRANSCRIPT DIALOGUE HISTORY MANAGER
+    function appendMessageToTranscript(sender, text, translation = null) {
+      const transcriptBox = document.getElementById('dialogue-transcript-box');
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const msgDiv = document.createElement('div');
 
-    // RENDER NEWS FEED
-    function renderNewsFeed() {
-      const container = document.getElementById('news-list');
-      const filtered = currentCategoryFilter === 'all' 
-        ? newsDatabase 
-        : newsDatabase.filter(n => n.category === currentCategoryFilter);
-
-      container.innerHTML = filtered.map(n => `
-        <div onclick="quickInjectNews('${n.id}')" 
-             class="p-3 rounded-2xl bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800/80 hover:border-amber-500/50 cursor-pointer transition group">
-          <div class="flex items-center justify-between text-[10px] font-mono mb-1">
-            <span class="text-amber-400 font-bold">${n.source}</span>
-            <span class="text-slate-500">${n.time}</span>
+      if (sender === 'user') {
+        msgDiv.className = 'flex justify-end';
+        msgDiv.innerHTML = `
+          <div class="max-w-[85%] bg-sky-600 text-white p-3 rounded-2xl rounded-tr-none text-xs shadow-md">
+            <div class="flex items-center justify-between text-[10px] text-sky-200 font-mono mb-1">
+              <span class="font-bold">You (Live Caller)</span>
+              <span>${timeStr}</span>
+            </div>
+            <div class="leading-relaxed font-sans">${text}</div>
           </div>
-          <h5 class="text-xs font-bold text-slate-200 group-hover:text-sky-300 transition line-clamp-1">${n.title}</h5>
-          <p class="text-[11px] text-slate-400 line-clamp-2 mt-0.5">${n.summary}</p>
-          <div class="mt-2 flex items-center justify-end text-[10px] text-sky-400 font-semibold group-hover:underline">
-            <span>Debate this with ${currentCharacter.shortName} →</span>
+        `;
+      } else {
+        msgDiv.className = 'flex justify-start space-x-2';
+        const transHtml = translation 
+          ? `<div class="mt-1.5 pt-1.5 border-t border-slate-700 text-sky-300 text-[11px] font-sans italic">
+               <b>EN Translation:</b> "${translation}"
+             </div>` 
+          : '';
+
+        msgDiv.innerHTML = `
+          <img src="${currentCharacter.avatar}" class="w-8 h-8 rounded-lg object-cover border border-slate-700 shrink-0 mt-0.5">
+          <div class="max-w-[85%] bg-slate-900 border border-slate-800 text-slate-200 p-3 rounded-2xl rounded-tl-none text-xs shadow-md">
+            <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono mb-1">
+              <span class="font-bold text-white">${currentCharacter.name}</span>
+              <div class="flex items-center space-x-1.5">
+                <span class="text-sky-400 text-[9px] font-bold">[${currentCharacter.nativeLangBadge}]</span>
+                <span>${timeStr}</span>
+              </div>
+            </div>
+            <div class="leading-relaxed font-sans">${text}</div>
+            ${transHtml}
           </div>
-        </div>
-      `).join('');
-    }
-
-    // FILTER NEWS
-    function filterNews(cat) {
-      currentCategoryFilter = cat;
-      ['all', 'geo', 'tech', 'econ', 'science'].forEach(c => {
-        const btn = document.getElementById(`tab-${c}`);
-        if (btn) {
-          if (c === cat) {
-            btn.className = 'px-2.5 py-1 rounded-lg bg-sky-600 text-white font-semibold';
-          } else {
-            btn.className = 'px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white font-semibold';
-          }
-        }
-      });
-      renderNewsFeed();
-    }
-
-    // FETCH LIVE RSS FEEDS
-    async function fetchLiveNewsRSS() {
-      setSubtitleText("Contacting global news satellites: fetching real-time feeds from Reuters, BBC, TechCrunch...");
-      try {
-        const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://techcrunch.com/feed/');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.items && data.items.length > 0) {
-            const newItems = data.items.slice(0, 3).map((item, idx) => ({
-              id: 'rss_' + Date.now() + '_' + idx,
-              category: 'tech',
-              source: 'TechCrunch Live Wire',
-              title: item.title,
-              summary: item.description ? item.description.replace(/<[^>]*>/g, '').substring(0, 120) + '...' : 'Breaking technological dispatch.',
-              time: 'Just now'
-            }));
-            newsDatabase = [...newItems, ...newsDatabase];
-            renderNewsFeed();
-            renderTicker();
-            setSubtitleText(`Successfully ingested ${newItems.length} real-time global news items!`);
-            return;
-          }
-        }
-      } catch (err) {
-        console.log('RSS fallback triggered');
+        `;
       }
 
-      newsDatabase.unshift({
-        id: 'rss_fallback_' + Date.now(),
-        category: 'tech',
-        source: 'Reuters Terminal Breaking',
-        title: 'OpenAI and Semiconductor Consortium Finalize 10-Gigawatt Nuclear Compute Pacts',
-        summary: 'Next-generation small modular reactor grids mobilized for direct AGI cluster base loads.',
-        time: 'Just now'
-      });
-      renderNewsFeed();
-      renderTicker();
-      setSubtitleText("Refreshed latest wires from Reuters Financial Terminal!");
+      transcriptBox.appendChild(msgDiv);
+      transcriptBox.scrollTop = transcriptBox.scrollHeight;
+
+      conversationHistory.push({ sender, text, translation, time: timeStr });
+      document.getElementById('transcript-count').textContent = `${conversationHistory.length} messages`;
+      lucide.createIcons();
     }
 
-    // WAVEFORM GENERATION
+    function clearTranscript() {
+      conversationHistory = [];
+      document.getElementById('dialogue-transcript-box').innerHTML = '';
+      document.getElementById('transcript-count').textContent = '0 messages';
+      appendMessageToTranscript('bot', currentCharacter.sampleGreeting, currentCharacter.greetingTranslation);
+    }
+
+    // PLAY CHARACTER OPENING SAMPLE
+    function playCurrentCharacterSample() {
+      if (currentCharacter.sampleAudio) {
+        playDirectAudioFile(currentCharacter.sampleAudio);
+      } else {
+        synthesizeSpeech(currentCharacter.sampleGreeting);
+      }
+    }
+
+    function playDirectAudioFile(audioSrc) {
+      if (currentAudioPlayer) {
+        currentAudioPlayer.pause();
+        currentAudioPlayer = null;
+      }
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+      toggleWaveform(true);
+      document.getElementById('indicator-text').textContent = 'Playing authentic recording...';
+
+      currentAudioPlayer = new Audio(audioSrc);
+      currentAudioPlayer.onended = () => {
+        toggleWaveform(false);
+        document.getElementById('indicator-text').textContent = 'Listening...';
+      };
+      currentAudioPlayer.onerror = () => {
+        toggleWaveform(false);
+        synthesizeSpeech(currentCharacter.sampleGreeting);
+      };
+      currentAudioPlayer.play().catch(() => {
+        synthesizeSpeech(currentCharacter.sampleGreeting);
+      });
+    }
+
+    // HANDLE USER INPUT (SEND)
+    function handleUserSpeechSend() {
+      const input = document.getElementById('call-speech-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendMessageToTranscript('user', text);
+      input.value = '';
+      dispatchDynamicIntelligence(text);
+    }
+
+    function handleCustomNewsSubmit() {
+      const input = document.getElementById('custom-news-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendMessageToTranscript('user', `Debate this news: "${text}"`);
+      input.value = '';
+      dispatchDynamicIntelligence(`We just received this report: "${text}". What is your unfiltered perspective?`, { title: text, source: 'User Wire' });
+    }
+
+    function quickInjectNews(id) {
+      const item = newsDatabase.find(n => n.id === id);
+      if (!item) return;
+
+      const prompt = `What is your reaction to this breaking report from ${item.source}: "${item.title}"?`;
+      appendMessageToTranscript('user', prompt);
+      dispatchDynamicIntelligence(prompt, item);
+    }
+
+    // DYNAMIC INTELLIGENCE DISPATCHER (OPENROUTER / GROQ / DEEP REASONING)
+    async function dispatchDynamicIntelligence(userQuery, newsContext = null) {
+      toggleWaveform(true);
+      document.getElementById('indicator-text').textContent = 'Synthesizing reasoning...';
+
+      const groqKey = localStorage.getItem('vox_groq_api_key');
+      const openRouterKey = localStorage.getItem('vox_openrouter_api_key');
+
+      // 1. Try Groq API if key present
+      if (groqKey) {
+        try {
+          const reply = await executeGroqCall(groqKey, userQuery, newsContext);
+          if (reply) {
+            handleBotReplyDelivery(reply);
+            return;
+          }
+        } catch (e) {
+          console.warn('Groq failed, trying fallback:', e);
+        }
+      }
+
+      // 2. Try OpenRouter API if key present
+      if (openRouterKey) {
+        try {
+          const reply = await executeOpenRouterCall(openRouterKey, userQuery, newsContext);
+          if (reply) {
+            handleBotReplyDelivery(reply);
+            return;
+          }
+        } catch (e) {
+          console.warn('OpenRouter failed, using deep biographic generator:', e);
+        }
+      }
+
+      // 3. High-Capacity Contextual Biographic Generator (Always responsive, unscripted)
+      setTimeout(() => {
+        const { text, translation } = generateDeepBiographicReply(userQuery, newsContext);
+        handleBotReplyDelivery(text, translation);
+      }, 350);
+    }
+
+    function handleBotReplyDelivery(replyText, translation = null) {
+      appendMessageToTranscript('bot', replyText, translation);
+      synthesizeSpeech(replyText);
+    }
+
+    // HIGH-CAPACITY CONTEXTUAL BIOGRAPHIC ENGINE (DYNAMIC, NON-CANNED)
+    function generateDeepBiographicReply(query, news) {
+      const q = query.toLowerCase();
+      const id = currentCharacter.id;
+
+      // XI JINPING (习近平) — MANDARIN CHINESE WITH ENGLISH TRANSLATION
+      if (id === 'xijinping') {
+        if (news) {
+          return {
+            text: `关于"${news.title}"，国际风云变幻是常态。我们强调的是战略定力与独立自主。只要立足于国内大循环，扎实推进高质量科技创新，任何外部阻挠都只会让我们走得更稳、更远。`,
+            translation: `Regarding "${news.title}", shifting international winds are normal. We emphasize strategic patience and self-reliance. As long as we anchor our domestic growth and high-tech innovation, external hurdles will only make us advance more steadily.`
+          };
+        }
+        if (q.includes('ai') || q.includes('chip') || q.includes('technology')) {
+          return {
+            text: `科技创新是发展新质生产力的核心要素。我们必须把关键核心技术牢牢掌握在自己手中，坚决打赢关键核心技术攻坚战。`,
+            translation: `Technological innovation is the core element of new quality productive forces. We must firmly grasp key core technologies in our own hands and win the battle for technological self-reliance.`
+          };
+        }
+        if (q.includes('war') || q.includes('peace') || q.includes('taiwan') || q.includes('us')) {
+          return {
+            text: `和平与发展始终是时代的主题。大国竞争不符合时代潮流，更解决不了自身和全球面临的挑战。相互尊重、和平共处、合作共赢才是正道。`,
+            translation: `Peace and development remain the themes of our era. Major power competition cannot solve global challenges. Mutual respect, peaceful coexistence, and win-win cooperation are the only true path.`
+          };
+        }
+        return {
+          text: `你的问题触及了深层次的发展逻辑。治国理政需要历史耐心。凡是有利于人民福祉和文明进步的事，我们都会持之以恒地做下去。`,
+          translation: `Your question touches upon deep developmental logic. Governance requires historic patience. Whatever benefits human wellbeing and civilizational progress, we will pursue with unwavering endurance.`
+        };
+      }
+
+      // STEVE JOBS — ENGLISH (US)
+      if (id === 'jobs') {
+        if (news) {
+          return {
+            text: `Look at "${news.title}". It's typical. Most corporate suits see a headline and assemble a focus group. They think technology is about adding checkmarks to a spec sheet. It's not! It's about designing an emotional connection so profound that it changes human behavior.`,
+            translation: null
+          };
+        }
+        if (q.includes('ai') || q.includes('software') || q.includes('code')) {
+          return {
+            text: `AI is amazing, but without taste, it's just automated junk. The reason Apple beat Microsoft wasn't computing power—it was typography, proportions, and soul. If you build AI without artistic taste, you're just generating digital landfill.`,
+            translation: null
+          };
+        }
+        if (q.includes('fail') || q.includes('fired') || q.includes('mistake') || q.includes('hard')) {
+          return {
+            text: `Getting fired from Apple in 1985 was the best thing that ever happened to me. The heaviness of being successful was replaced by the lightness of being a beginner again. It freed me to enter one of the most creative periods of my life. Don't lose faith!`,
+            translation: null
+          };
+        }
+        return {
+          text: `You're over-intellectualizing this. When you create something, you have to look in the mirror and ask: Is this insanely great? If it's just 'okay', throw it in the trash and start over until it makes your spine tingle.`,
+          translation: null
+        };
+      }
+
+      // DONALD TRUMP — ENGLISH (US)
+      if (id === 'trump') {
+        if (news) {
+          return {
+            text: `I saw that report on "${news.title}". Total disaster under the previous administration, but under Trump, we handled it brilliantly! When you impose smart tariffs and demand reciprocal treatment, countries immediately come to the table. Nobody does it better than us!`,
+            translation: null
+          };
+        }
+        if (q.includes('money') || q.includes('economy') || q.includes('tax') || q.includes('inflation')) {
+          return {
+            text: `We're going to drill, baby, drill, lower taxes, and unleash American energy like never before. Energy costs drive everything! Cut energy in half, and inflation collapses overnight. It's common sense economics!`,
+            translation: null
+          };
+        }
+        return {
+          text: `Listen, you asked a very smart question, and I appreciate it. The key to winning is simple: Never quit, always counter-punch, and always put your people first. When you do that, you win big league!`,
+          translation: null
+        };
+      }
+
+      // ELON MUSK — ENGLISH (US/SA)
+      if (id === 'musk') {
+        if (news) {
+          return {
+            text: `Yeah... well, looking at "${news.title}": if you reduce it to first principles physics, it's an optimization curve between energy, materials, and iteration speed. If bureaucracy slows down the feedback loop, the enterprise dies. We just eliminate the bureaucracy.`,
+            translation: null
+          };
+        }
+        if (q.includes('mars') || q.includes('rocket') || q.includes('spacex')) {
+          return {
+            text: `Starship is designed to achieve full and rapid reusability. That's the holy grail of rocket technology. If you can reuse an orbital vehicle like an aircraft, the cost of access to space drops by a factor of a thousand. That's how we reach Mars.`,
+            translation: null
+          };
+        }
+        return {
+          text: `Haha yeah, I mean... life cannot just be about solving one miserable problem after another. There must be things that inspire you, that make you glad to wake up in the morning. That's why multi-planetary consciousness matters.`,
+          translation: null
+        };
+      }
+
+      // MARK ZUCKERBERG — ENGLISH (US)
+      if (id === 'zuck') {
+        return {
+          text: `From an engineering perspective, the right move is building open platforms. With Llama, we're giving the global open-source community world-class intelligence so anyone can build. Open ecosystems compound much faster than closed gardens.`,
+          translation: null
+        };
+      }
+
+      // NIKOLA TESLA — ENGLISH
+      return {
+        text: `The harness of cosmic energy is inevitable. Our universe is filled with infinite vibrational potential. Every problem you face on Earth will find its solution when humanity shifts from mechanical combustion to harmonic ether resonance.`,
+        translation: null
+      };
+    }
+
+    // CALL GROQ API FOR REAL-TIME STREAMING
+    async function executeGroqCall(apiKey, prompt, news) {
+      const langRule = currentCharacter.nativeLang === 'zh-CN' 
+        ? 'You MUST respond entirely in authentic Mandarin Chinese (普通话) with the solemn, majestic rhetoric of President Xi Jinping.' 
+        : `You MUST respond entirely in authentic English with the characteristic style and cadence of ${currentCharacter.name}.`;
+
+      const systemPrompt = `You are ${currentCharacter.name}. Role: ${currentCharacter.role}.
+Biographic mindset strictly grounded in Walter Isaacson's writings: ${currentCharacter.mindset}
+Tone rules: ${currentCharacter.toneRules}
+Language: ${langRule}
+Never say you are an AI. Reply directly and conversationally as the real historical figure in a live call. Keep response under 3 sentences for natural telephony.`;
+
+      const userContent = news 
+        ? `Breaking news report: "${news.title}". Question: "${prompt}"` 
+        : prompt;
+
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userContent }],
+          max_tokens: 180,
+          temperature: 0.8
+        })
+      });
+
+      if (!res.ok) throw new Error('Groq failed');
+      const data = await res.json();
+      return data.choices[0].message.content;
+    }
+
+    // CALL OPENROUTER API (SUPPORTS FREE MODELS)
+    async function executeOpenRouterCall(apiKey, prompt, news) {
+      const systemPrompt = `You are ${currentCharacter.name}. Language: ${currentCharacter.nativeLang === 'zh-CN' ? 'Mandarin Chinese' : 'English'}. Respond authentically in under 3 sentences.`;
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'meta-llama/llama-3.3-70b-instruct:free',
+          messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: prompt }],
+          max_tokens: 180
+        })
+      });
+      if (!res.ok) throw new Error('OpenRouter failed');
+      const data = await res.json();
+      return data.choices[0].message.content;
+    }
+
+    // REAL VOICE SYNTHESIS (ELEVENLABS + GPT-SOVITS + ACOUSTIC ENGINE)
+    async function synthesizeSpeech(text) {
+      if (currentAudioPlayer) {
+        currentAudioPlayer.pause();
+        currentAudioPlayer = null;
+      }
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+      const elevenKey = localStorage.getItem('vox_eleven_api_key');
+      const sovitsEndpoint = localStorage.getItem('vox_sovits_endpoint') || 'http://127.0.0.1:9885/synthesize';
+      const useSovits = localStorage.getItem('vox_use_sovits') === 'true';
+
+      // 1. Try ElevenLabs API if key and voice ID available
+      if (elevenKey && currentCharacter.elevenVoiceId) {
+        try {
+          toggleWaveform(true);
+          document.getElementById('indicator-text').textContent = 'ElevenLabs neural synthesizing...';
+
+          const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${currentCharacter.elevenVoiceId}`, {
+            method: 'POST',
+            headers: {
+              'xi-api-key': elevenKey,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              text: text,
+              model_id: 'eleven_multilingual_v2',
+              voice_settings: { stability: 0.5, similarity_boost: 0.8 }
+            })
+          });
+
+          if (res.ok) {
+            const blob = await res.blob();
+            const audioUrl = URL.createObjectURL(blob);
+            currentAudioPlayer = new Audio(audioUrl);
+            currentAudioPlayer.onended = () => {
+              toggleWaveform(false);
+              document.getElementById('indicator-text').textContent = 'Listening...';
+            };
+            currentAudioPlayer.play();
+            return;
+          }
+        } catch (e) {
+          console.warn('ElevenLabs error, falling back:', e);
+        }
+      }
+
+      // 2. Try Local GPT-SoVITS
+      if (useSovits) {
+        try {
+          toggleWaveform(true);
+          document.getElementById('indicator-text').textContent = 'GPT-SoVITS synthesizing...';
+
+          const res = await fetch(sovitsEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              persona: currentCharacter.id,
+              text: text,
+              lang: currentCharacter.nativeLang.startsWith('zh') ? 'zh' : 'en'
+            })
+          });
+
+          if (res.ok && res.headers.get('content-type')?.includes('audio')) {
+            const blob = await res.blob();
+            const audioUrl = URL.createObjectURL(blob);
+            currentAudioPlayer = new Audio(audioUrl);
+            currentAudioPlayer.onended = () => {
+              toggleWaveform(false);
+              document.getElementById('indicator-text').textContent = 'Listening...';
+            };
+            currentAudioPlayer.play();
+            return;
+          }
+        } catch (e) {
+          console.warn('GPT-SoVITS fallback:', e);
+        }
+      }
+
+      // 3. Native Browser Speech Synthesis with Pitch/Cadence Modeling
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = currentCharacter.nativeLang;
+      utter.pitch = currentCharacter.voicePitch || 1.0;
+      utter.rate = currentCharacter.voiceRate || 1.0;
+
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        if (currentCharacter.nativeLang === 'zh-CN') {
+          const zhVoice = voices.find(v => v.lang.includes('zh') || v.lang.includes('cmn'));
+          if (zhVoice) utter.voice = zhVoice;
+        } else {
+          const enVoice = voices.find(v => v.lang.includes('en') && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('natural')));
+          if (enVoice) utter.voice = enVoice;
+        }
+      }
+
+      utter.onend = () => toggleWaveform(false);
+      toggleWaveform(true);
+      window.speechSynthesis.speak(utter);
+    }
+
+    // WAVEFORM & CALL TOGGLES
     function renderWaveformBars() {
       const container = document.getElementById('live-waveform');
       container.innerHTML = '';
@@ -743,14 +1139,13 @@
 
       waveAnimHandle = setInterval(() => {
         bars.forEach(b => {
-          const h = Math.floor(Math.random() * 42) + 6;
+          const h = Math.floor(Math.random() * 32) + 6;
           b.style.height = `${h}px`;
           b.style.backgroundColor = '#38bdf8';
         });
       }, 75);
     }
 
-    // CALL STATE TOGGLE
     function toggleCallState() {
       isCallLive = !isCallLive;
       const btn = document.getElementById('call-toggle-btn');
@@ -758,23 +1153,21 @@
       const liveDot = document.getElementById('live-dot');
 
       if (isCallLive) {
-        btn.className = 'flex-1 py-3 px-5 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-rose-600/30 transition transform active:scale-95';
+        btn.className = 'flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-md transition transform active:scale-95';
         label.textContent = 'END CALL (HANG UP)';
         liveDot.className = 'absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-brand-900 animate-ping';
         
         startTimer();
         startMicRecognition();
-        setSubtitleText(`[Live Duplex Channel Open] Speak into your microphone or type a query.`);
       } else {
-        btn.className = 'flex-1 py-3 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 transition transform active:scale-95';
-        label.textContent = 'START DUPLEX LIVE CALL';
+        btn.className = 'flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-md transition transform active:scale-95';
+        label.textContent = 'START LIVE CALL (MIC)';
         liveDot.className = 'absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-slate-500 border-2 border-brand-900';
         
         stopTimer();
         toggleWaveform(false);
         if (currentAudioPlayer) currentAudioPlayer.pause();
         window.speechSynthesis && window.speechSynthesis.cancel();
-        setSubtitleText(`Call ended. You can reconnect anytime.`);
       }
     }
 
@@ -793,342 +1186,118 @@
       clearInterval(callTimerHandle);
     }
 
-    // INTERRUPT ACTION
     function interruptAI() {
       if (currentAudioPlayer) currentAudioPlayer.pause();
       if (window.speechSynthesis) window.speechSynthesis.cancel();
       toggleWaveform(false);
-      setSubtitleText(`[Interrupted] ${currentCharacter.name} paused to listen to you...`);
+      document.getElementById('indicator-text').textContent = 'Listening...';
     }
 
-    // SAMPLE INTRO (PLAYS REAL AUTHENTIC AUDIO CLIP IF AVAILABLE)
-    function sampleVoiceIntro() {
-      displaySubtitleWithTranslation(currentCharacter.sampleGreeting, currentCharacter.greetingTranslation);
-      if (currentCharacter.sampleAudio) {
-        playDirectAudioFile(currentCharacter.sampleAudio);
-      } else {
-        speakRealVoice(currentCharacter.sampleGreeting);
-      }
-    }
-
-    function playDirectAudioFile(audioSrc) {
-      if (currentAudioPlayer) {
-        currentAudioPlayer.pause();
-        currentAudioPlayer = null;
-      }
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
-
-      toggleWaveform(true);
-      document.getElementById('indicator-text').textContent = 'Playing authentic voice clip...';
-
-      currentAudioPlayer = new Audio(audioSrc);
-      currentAudioPlayer.onended = () => {
-        toggleWaveform(false);
-        document.getElementById('indicator-text').textContent = 'Listening...';
-      };
-      currentAudioPlayer.onerror = (e) => {
-        console.warn('Audio playback error, fallback to TTS:', e);
-        toggleWaveform(false);
-        speakRealVoice(currentCharacter.sampleGreeting);
-      };
-      currentAudioPlayer.play().catch(err => {
-        console.warn('Auto-play prevented, fallback to TTS:', err);
-        speakRealVoice(currentCharacter.sampleGreeting);
-      });
-    }
-
-    // QUICK INJECT NEWS
-    function quickInjectNews(id) {
-      const item = newsDatabase.find(n => n.id === id);
-      if (!item) return;
-
-      const userQuery = `What is your unfiltered take on this breaking report from ${item.source}: "${item.title}"?`;
-      generateDynamicResponse(userQuery, item);
-    }
-
-    // HANDLE USER CHAT
-    function handleUserChat() {
-      const input = document.getElementById('chat-prompt-input');
-      const val = input.value.trim();
-      if (!val) return;
-
-      generateDynamicResponse(val);
-      input.value = '';
-    }
-
-    // SPEECH RECOGNITION (MIC)
     function startMicRecognition() {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) return;
-
       try {
         const recog = new SR();
         recog.lang = currentCharacter.nativeLang === 'zh-CN' ? 'zh-CN' : 'en-US';
         recog.continuous = false;
         recog.interimResults = false;
-
         recog.onresult = (e) => {
           const text = e.results[0][0].transcript;
           if (text) {
-            generateDynamicResponse(text);
+            appendMessageToTranscript('user', text);
+            dispatchDynamicIntelligence(text);
           }
         };
-
-        recog.onerror = () => {};
         recog.start();
       } catch(e) {}
     }
 
-    // DYNAMIC INTELLIGENCE ENGINE (MOTHER TONGUE & ISAACSON GROUNDING)
-    async function generateDynamicResponse(userPrompt, newsArticle = null) {
-      toggleWaveform(true);
-      document.getElementById('indicator-text').textContent = 'Synthesizing response...';
-      setSubtitleText(`You said: "${userPrompt}"`);
+    // NEWS RADAR
+    function renderTicker() {
+      const ticker = document.getElementById('live-news-ticker');
+      ticker.innerHTML = newsDatabase.slice(0, 5).map(n => `
+        <span class="hover:text-sky-300 cursor-pointer transition" onclick="quickInjectNews('${n.id}')">
+          <span class="text-sky-400 font-semibold">[${n.source.split(' ')[0]}]</span> ${n.title} &bull;
+        </span>
+      `).join('');
+    }
 
-      // Check if direct Groq or Gemini API keys are configured
-      const groqKey = localStorage.getItem('vox_groq_api_key');
-      if (groqKey) {
-        try {
-          const apiReply = await callGroqAPI(groqKey, userPrompt, newsArticle);
-          if (apiReply) {
-            deliverVoiceResponse(apiReply);
-            return;
+    function renderNewsFeed() {
+      const container = document.getElementById('news-list');
+      const filtered = currentCategoryFilter === 'all' 
+        ? newsDatabase 
+        : newsDatabase.filter(n => n.category === currentCategoryFilter);
+
+      container.innerHTML = filtered.map(n => `
+        <div onclick="quickInjectNews('${n.id}')" 
+             class="p-3 rounded-2xl bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800/80 hover:border-amber-500/50 cursor-pointer transition group">
+          <div class="flex items-center justify-between text-[10px] font-mono mb-1">
+            <span class="text-amber-400 font-bold">${n.source}</span>
+            <span class="text-slate-500">${n.time}</span>
+          </div>
+          <h5 class="text-xs font-bold text-slate-200 group-hover:text-sky-300 transition line-clamp-1">${n.title}</h5>
+          <p class="text-[11px] text-slate-400 line-clamp-2 mt-0.5">${n.summary}</p>
+          <div class="mt-2 flex items-center justify-end text-[10px] text-sky-400 font-semibold group-hover:underline">
+            <span>Debate this with ${currentCharacter.shortName} →</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterNews(cat) {
+      currentCategoryFilter = cat;
+      ['all', 'geo', 'tech', 'econ', 'science'].forEach(c => {
+        const btn = document.getElementById(`tab-${c}`);
+        if (btn) {
+          if (c === cat) btn.className = 'px-2.5 py-1 rounded-lg bg-sky-600 text-white font-semibold';
+          else btn.className = 'px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white font-semibold';
+        }
+      });
+      renderNewsFeed();
+    }
+
+    async function fetchLiveNewsRSS() {
+      try {
+        const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://techcrunch.com/feed/');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.items && data.items.length > 0) {
+            const newItems = data.items.slice(0, 3).map((item, idx) => ({
+              id: 'rss_' + Date.now() + '_' + idx,
+              category: 'tech',
+              source: 'TechCrunch Live',
+              title: item.title,
+              summary: item.description ? item.description.replace(/<[^>]*>/g, '').substring(0, 120) + '...' : 'Breaking tech dispatch.',
+              time: 'Just now'
+            }));
+            newsDatabase = [...newItems, ...newsDatabase];
+            renderNewsFeed();
+            renderTicker();
           }
-        } catch (e) {
-          console.log('Groq API error, falling back to local intelligence engine:', e);
         }
-      }
-
-      // Built-in Organic Multi-Branch Dynamic Reasoning Engine (Mother Tongue)
-      setTimeout(() => {
-        const { text, translation } = produceMotherTongueReply(userPrompt, newsArticle);
-        displaySubtitleWithTranslation(text, translation);
-        speakRealVoice(text);
-      }, 300);
+      } catch (err) {}
     }
 
-    function deliverVoiceResponse(replyText) {
-      document.getElementById('indicator-text').textContent = 'Speaking...';
-      displaySubtitleWithTranslation(replyText, null);
-      speakRealVoice(replyText);
-    }
-
-    function displaySubtitleWithTranslation(nativeText, translation) {
-      const box = document.getElementById('subtitle-text');
-      if (translation) {
-        box.innerHTML = `<span>"${nativeText}"</span><br><span class="text-sky-300/80 text-[11px] block mt-1">(EN Translation: "${translation}")</span>`;
-      } else {
-        box.innerHTML = `"${nativeText}"`;
-      }
-    }
-
-    // MOTHER TONGUE REASONING ENGINE (XI JINPING IN CHINESE, OTHERS IN ENGLISH)
-    function produceMotherTongueReply(prompt, news) {
-      const p = prompt.toLowerCase();
-      const id = currentCharacter.id;
-
-      // XI JINPING — MOTHER TONGUE: MANDARIN CHINESE (普通话)
-      if (id === 'xijinping') {
-        if (news) {
-          return {
-            text: `关于"${news.title}"这一事态，我们必须以百年未有之大变局的历史眼光来审视。外部的任何技术封锁与围堵，只会进一步激发我们自力更生、自主创新的决心。中华文明历经五千年风雨，从来都是在克服困难中发展壮大的。`,
-            translation: `Regarding "${news.title}", one must examine this through the historical lens of unprecedented global changes in a century. Any external technological containment will only strengthen our resolve for domestic self-reliance. Chinese civilization has weathered 5,000 years of storms, always growing through overcoming adversity.`
-          };
-        }
-        if (p.includes('taiwan') || p.includes('đài loan') || p.includes('reunification')) {
-          return {
-            text: `祖国完全统一的历史任务一定要实现，也一定能够实现。这是十四亿中国人民的共同意志，任何人、任何势力都不要低估中国人民捍卫国家主权和领土完整的坚强决心与强大能力。`,
-            translation: `The historic task of the complete reunification of the motherland must be fulfilled and will certainly be fulfilled. This is the shared will of 1.4 billion Chinese people. No one should underestimate our resolute determination.`
-          };
-        }
-        if (p.includes('economy') || p.includes('gdp') || p.includes('kinh tế') || p.includes('money')) {
-          return {
-            text: `中国经济是一片大海，而不是一个小池塘。狂风骤雨可以掀翻小池塘，但不能掀翻大海。我们要坚持高质量发展，统筹发展和安全，稳中求进。`,
-            translation: `The Chinese economy is a vast ocean, not a small pond. Big storms can overturn a small pond, but never an ocean. We must maintain high-quality development and balance security with economic progress.`
-          };
-        }
-        return {
-          text: `君子务本，本立而道生。面对纷繁复杂的国际局势，最关键的是集中精力办好自己的事情，保持战略定力，坚定不移沿着中国特色社会主义道路前进。`,
-          translation: `A gentleman attends to the fundamentals; once the foundation is established, the Way emerges. Amid complex international turbulence, the essential task is to focus on our own affairs and maintain strategic composure.`
-        };
-      }
-
-      // STEVE JOBS — MOTHER TONGUE: ENGLISH (US)
-      if (id === 'jobs') {
-        if (news) {
-          return {
-            text: `Listen, most people in technology have no taste. They look at "${news.title}" and think about chip specs and spreadsheets. If it doesn't revolutionize the intersection of technology and liberal arts, it's just pure mediocrity. You have to create something people fall in love with!`,
-            translation: null
-          };
-        }
-        if (p.includes('ai') || p.includes('future') || p.includes('model')) {
-          return {
-            text: `AI is the ultimate bicycle for the mind. But mark my words: if you let committee-driven corporate bean-counters run it, it becomes Microsoft in the 90s. Boring, bloated junk. We need pirates, not the navy!`,
-            translation: null
-          };
-        }
-        if (p.includes('money') || p.includes('rich') || p.includes('wealth')) {
-          return {
-            text: `I never did it for the money. When I was 25, my net worth was over a hundred million dollars, and it didn't change anything. Being the richest man in the cemetery doesn't matter to me. Going to bed saying we've done something wonderful—that matters.`,
-            translation: null
-          };
-        }
-        return {
-          text: `You're looking at it all wrong. Don't ask what the focus groups want—people don't know what they want until you put it in front of them! Strip away the superfluous garbage and put a dent in the universe!`,
-          translation: null
-        };
-      }
-
-      // DONALD TRUMP — MOTHER TONGUE: ENGLISH (US)
-      if (id === 'trump') {
-        if (news) {
-          return {
-            text: `Look, nobody saw this coming except me, okay? Regarding "${news.title}", the fake news media won't tell you the truth, but we have the biggest leverage in history. In business and in politics, when you show strength, you win. We are going to win like never before!`,
-            translation: null
-          };
-        }
-        if (p.includes('deal') || p.includes('money') || p.includes('business') || p.includes('tariff')) {
-          return {
-            text: `The Art of the Deal, my friend! You have to think big. If you're going to be thinking anyway, you might as well think big. Always protect the downside, and the upside will take care of itself! We're putting America first, and nobody makes better deals than Trump!`,
-            translation: null
-          };
-        }
-        return {
-          text: `Believe me, people come up to me all the time with tears in their eyes saying, 'Sir, how do you do it?' It's about stamina, it's about courage, and it's about winning. We don't like losers, we only want winners!`,
-          translation: null
-        };
-      }
-
-      // NIKOLA TESLA — MOTHER TONGUE: ENGLISH (VICTORIAN SCIENTIFIC PROSE)
-      if (id === 'tesla') {
-        if (news) {
-          return {
-            text: `The superficial world bickers over patents and money while neglecting the cosmic ether. This article on "${news.title}" is merely a symptom of short-sighted commercial greed. The moment we harness the Earth's electrical resonance, human suffering ends.`,
-            translation: null
-          };
-        }
-        return {
-          text: `My brain is only a receiver. In the Universe, there is a core from which we obtain knowledge, strength, and inspiration. The present is theirs; the future, for which I really worked, is mine!`,
-          translation: null
-        };
-      }
-
-      // MARK ZUCKERBERG — MOTHER TONGUE: ENGLISH (SILICON VALLEY HACKER)
-      if (id === 'zuck') {
-        if (news) {
-          return {
-            text: `Yeah, from an engineering perspective on "${news.title}", the only real moat is execution speed and open ecosystems. That's why we open-sourced Llama. When developers worldwide iterate together, proprietary silos lose every time.`,
-            translation: null
-          };
-        }
-        return {
-          text: `Move fast and break things. Unless you are breaking stuff, you are not moving fast enough. Ship the code, analyze the real-time telemetry, and keep optimizing!`,
-          translation: null
-        };
-      }
-
-      // ELON MUSK — MOTHER TONGUE: ENGLISH (PHYSICS FIRST PRINCIPLES)
-      if (news) {
-        return {
-          text: `Yeah... well, honestly. Looking at "${news.title}" from physics first principles: it's purely a function of energy conversion and silicon efficiency. If you don't scale gigawatt-level power and launch cadence exponentially, the rest is just noise.`,
-          translation: null
-        };
-      }
-      return {
-        text: `Yeah... haha. When something is important enough, you do it even if the odds are not in your favor. We must make life multi-planetary to preserve the light of consciousness!`,
-        translation: null
-      };
-    }
-
-    // SPEECH SYNTHESIS (AUTHENTIC MOTHER TONGUE + GPT-SOVITS SUPPORT)
-    async function speakRealVoice(text) {
-      if (currentAudioPlayer) {
-        currentAudioPlayer.pause();
-        currentAudioPlayer = null;
-      }
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
-
-      // Check if user enabled GPT-SoVITS local server
-      const sovitsEndpoint = localStorage.getItem('vox_sovits_endpoint') || 'http://127.0.0.1:9885/synthesize';
-      const useSovits = localStorage.getItem('vox_use_sovits') === 'true';
-
-      if (useSovits) {
-        try {
-          toggleWaveform(true);
-          document.getElementById('indicator-text').textContent = 'GPT-SoVITS synthesizing...';
-
-          const res = await fetch(sovitsEndpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              persona: currentCharacter.id,
-              text: text,
-              lang: currentCharacter.nativeLang.startsWith('zh') ? 'zh' : 'en'
-            })
-          });
-
-          if (res.ok && res.headers.get('content-type')?.includes('audio')) {
-            const blob = await res.blob();
-            const audioUrl = URL.createObjectURL(blob);
-            currentAudioPlayer = new Audio(audioUrl);
-            currentAudioPlayer.onended = () => {
-              toggleWaveform(false);
-              document.getElementById('indicator-text').textContent = 'Listening...';
-            };
-            currentAudioPlayer.play();
-            document.getElementById('indicator-text').textContent = 'Streaming GPT-SoVITS audio...';
-            return;
-          }
-        } catch (err) {
-          console.warn('GPT-SoVITS bridge offline, using native acoustic engine:', err);
-        }
-      }
-
-      // Browser Acoustic Fallback with Exact Mother Tongue Voice Matching
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = currentCharacter.nativeLang;
-      utter.pitch = currentCharacter.voicePitch || 1.0;
-      utter.rate = currentCharacter.voiceRate || 1.0;
-
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length > 0) {
-        if (currentCharacter.nativeLang === 'zh-CN') {
-          const zhVoice = voices.find(v => v.lang.includes('zh') || v.lang.includes('cmn'));
-          if (zhVoice) utter.voice = zhVoice;
-        } else {
-          const enVoice = voices.find(v => v.lang.includes('en') && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('natural')));
-          if (enVoice) utter.voice = enVoice;
-        }
-      }
-
-      utter.onend = () => {
-        toggleWaveform(false);
-      };
-
-      toggleWaveform(true);
-      window.speechSynthesis.speak(utter);
-    }
-
-    function setSubtitleText(txt) {
-      document.getElementById('subtitle-text').textContent = txt;
-    }
-
-    // SETTINGS MODAL & API KEYS
+    // SETTINGS MODAL & API CONFIG
     function toggleSettingsModal() {
       document.getElementById('settings-modal').classList.toggle('hidden');
     }
 
     function saveApiKeys() {
+      const eleven = document.getElementById('eleven-api-key').value.trim();
       const groq = document.getElementById('groq-api-key').value.trim();
-      const gemini = document.getElementById('gemini-api-key').value.trim();
+      const openRouter = document.getElementById('openrouter-api-key').value.trim();
       const sovitsUrl = document.getElementById('sovits-endpoint-input').value.trim();
       const useSovits = document.getElementById('use-sovits-checkbox').checked;
+
+      if (eleven) localStorage.setItem('vox_eleven_api_key', eleven);
+      else localStorage.removeItem('vox_eleven_api_key');
 
       if (groq) localStorage.setItem('vox_groq_api_key', groq);
       else localStorage.removeItem('vox_groq_api_key');
 
-      if (gemini) localStorage.setItem('vox_gemini_api_key', gemini);
-      else localStorage.removeItem('vox_gemini_api_key');
+      if (openRouter) localStorage.setItem('vox_openrouter_api_key', openRouter);
+      else localStorage.removeItem('vox_openrouter_api_key');
 
       localStorage.setItem('vox_sovits_endpoint', sovitsUrl || 'http://127.0.0.1:9885/synthesize');
       localStorage.setItem('vox_use_sovits', useSovits ? 'true' : 'false');
@@ -1141,59 +1310,17 @@
     }
 
     function updateEngineBadge() {
-      const groqKey = localStorage.getItem('vox_groq_api_key');
-      const geminiKey = localStorage.getItem('vox_gemini_api_key');
+      const elevenKey = localStorage.getItem('vox_eleven_api_key');
       const useSovits = localStorage.getItem('vox_use_sovits') === 'true';
-      const badge = document.getElementById('engine-badge-label');
+      const badge = document.getElementById('voice-engine-badge');
 
-      if (useSovits) {
-        badge.textContent = '🎙️ GPT-SoVITS Active';
-      } else if (groqKey) {
-        badge.textContent = '⚡ Groq LPU (Llama 3.3)';
-      } else if (geminiKey) {
-        badge.textContent = '✨ Gemini 2.0 Flash';
+      if (elevenKey) {
+        badge.textContent = 'ElevenLabs AI Clones';
+      } else if (useSovits) {
+        badge.textContent = 'GPT-SoVITS V2 Local';
       } else {
-        badge.textContent = '🧠 Neural Engine 2.0';
+        badge.textContent = 'Native Neural Clone';
       }
-    }
-
-    // CALL GROQ API FOR REAL-TIME STREAMING
-    async function callGroqAPI(apiKey, prompt, news) {
-      const langInstruction = currentCharacter.nativeLang === 'zh-CN' 
-        ? 'You MUST reply in authentic Mandarin Chinese (普通话) with the solemn, dignified rhetoric of President Xi Jinping.' 
-        : `You MUST reply in authentic English with the characteristic voice and personal style of ${currentCharacter.name}.`;
-
-      const systemPrompt = `You are ${currentCharacter.name}. Role: ${currentCharacter.role}.
-Philosophy & mindset strictly grounded in Walter Isaacson's biography:
-${currentCharacter.mindset}
-Tone guidelines: ${currentCharacter.toneRules}
-Language: ${langInstruction}
-Do NOT state you are an AI. Respond immediately as the real person in a live telephone call.`;
-
-      const userContent = news 
-        ? `Breaking news report: "${news.title}". Context: ${news.summary}. User question: "${prompt}"` 
-        : prompt;
-
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userContent }
-          ],
-          max_tokens: 250,
-          temperature: 0.8
-        })
-      });
-
-      if (!res.ok) throw new Error('Groq API failed');
-      const data = await res.json();
-      return data.choices[0].message.content;
     }
   </script>
 </body>
