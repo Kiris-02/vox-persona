@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi" class="dark">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VOX IMPERIUM — Đàm Thoại Trực Tiếp Cùng Các Nhân Vật Tầm Cỡ</title>
+  <title>VOX IMPERIUM — Live AI Persona Hotline & Global News Debate</title>
   <!-- Tailwind CSS & Lucide Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -64,13 +64,6 @@
     .waveform-bar {
       transition: height 0.08s ease-out;
     }
-    .badge-live {
-      animation: pulse-ring 2s infinite;
-    }
-    @keyframes pulse-ring {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
   </style>
 </head>
 <body class="flex flex-col min-h-screen selection:bg-sky-500 selection:text-white">
@@ -90,22 +83,22 @@
               <span class="font-extrabold text-lg tracking-tight text-white">VOX IMPERIUM</span>
               <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20">Live Studio 2.0</span>
             </div>
-            <p class="text-xs text-slate-400">Đàm thoại người thật cùng các nhân vật tầm cỡ • Tiểu sử Walter Isaacson</p>
+            <p class="text-xs text-slate-400">Authentic Mother-Tongue Hotline • Walter Isaacson Mindset DNA</p>
           </div>
         </div>
 
         <!-- Right Quick Actions -->
         <div class="flex items-center space-x-3">
           
-          <!-- Mode Language Selector -->
-          <div class="hidden sm:flex items-center bg-slate-900 px-2 py-1 rounded-xl border border-slate-800 text-xs">
-            <span class="text-slate-400 mr-2 text-[11px]">Ngôn ngữ:</span>
-            <button id="lang-vi-btn" onclick="setLanguage('vi')" class="px-2 py-1 rounded-lg bg-sky-600 text-white font-semibold text-[11px] transition">Tiếng Việt</button>
-            <button id="lang-en-btn" onclick="setLanguage('en')" class="px-2 py-1 rounded-lg text-slate-400 hover:text-white font-semibold text-[11px] transition">English</button>
+          <!-- Mother Tongue Indicator Badge -->
+          <div class="hidden md:flex items-center bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-800 text-xs font-mono">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
+            <span class="text-slate-400 mr-1.5">Voice Mode:</span>
+            <span id="voice-mode-badge" class="text-sky-400 font-semibold">Authentic Mother Tongue</span>
           </div>
 
-          <!-- API Key / Engine Settings -->
-          <button onclick="toggleSettingsModal()" class="px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition flex items-center space-x-1.5 shadow-sm">
+          <!-- Engine / GPT-SoVITS Settings -->
+          <button onclick="toggleSettingsModal()" class="px-3.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition flex items-center space-x-1.5 shadow-sm">
             <i data-lucide="cpu" class="w-3.5 h-3.5 text-sky-400"></i>
             <span id="engine-badge-label">Groq / Gemini Engine</span>
           </button>
@@ -113,14 +106,14 @@
         </div>
       </div>
 
-      <!-- LIVE BREAKING NEWS TICKER (AUTO-FETCHING) -->
+      <!-- LIVE BREAKING NEWS TICKER -->
       <div class="py-2 border-t border-slate-800/60 flex items-center space-x-3 text-xs overflow-x-auto scrollbar-none font-mono">
         <div class="flex items-center space-x-1.5 text-amber-400 font-bold shrink-0">
           <span class="relative flex h-2 w-2">
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
             <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
           </span>
-          <span>DÒNG TIN TỨC THỜI SỰ:</span>
+          <span>BREAKING NEWS RADAR:</span>
         </div>
         <div class="flex items-center space-x-6 shrink-0 text-slate-300" id="live-news-ticker">
           <!-- Populated by JS -->
@@ -133,14 +126,14 @@
   <!-- MAIN VIEWPORT -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex-1 flex flex-col space-y-5">
 
-    <!-- CHARACTER HORIZONTAL ROSTER (AUTHENTIC PHOTOS) -->
+    <!-- CHARACTER HORIZONTAL ROSTER (AUTHENTIC PHOTOS & MOTHER TONGUE) -->
     <div class="flex flex-col space-y-2">
       <div class="flex items-center justify-between">
         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center">
           <i data-lucide="users" class="w-3.5 h-3.5 mr-1.5 text-sky-400"></i>
-          Dàn Nhân Vật Tầm Cỡ (Ảnh Thật 100% • Tư Duy Isaacson)
+          Influential Personas (Authentic Portraits • Native Mother Tongue)
         </span>
-        <span class="text-[11px] text-slate-400 font-mono">Bấm chọn nhân vật để kết nối đàm thoại</span>
+        <span class="text-[11px] text-slate-400 font-mono">Click to establish direct hotline connection</span>
       </div>
 
       <!-- Grid 6 Characters -->
@@ -166,8 +159,9 @@
               <div class="flex items-center space-x-2">
                 <h3 id="stage-name" class="font-bold text-lg text-white">Steve Jobs</h3>
                 <span id="stage-tag" class="text-[10px] font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2 py-0.5 rounded-full">Reality Distortion</span>
+                <span id="stage-lang-tag" class="text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full">EN</span>
               </div>
-              <p id="stage-role" class="text-xs text-slate-400">Nhà sáng lập Apple • Tinh hoa thẩm mỹ & Đột phá</p>
+              <p id="stage-role" class="text-xs text-slate-400">Co-founder Apple • Perfectionism & Breakthrough Design</p>
             </div>
           </div>
 
@@ -191,7 +185,7 @@
             <!-- Speaking animation badge -->
             <div id="speaking-indicator" class="hidden absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-slate-900/95 border border-sky-400 text-sky-300 text-[11px] font-bold px-3.5 py-1 rounded-full shadow-xl flex items-center space-x-1.5 whitespace-nowrap">
               <span class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span>
-              <span id="indicator-text">Đang nói...</span>
+              <span id="indicator-text">Speaking...</span>
             </div>
           </div>
 
@@ -203,7 +197,7 @@
           <!-- Dynamic Live Subtitle Banner (Conversational) -->
           <div id="subtitles-card" class="mt-2 max-w-xl w-full bg-slate-950/85 backdrop-blur-md border border-slate-800 rounded-2xl p-4 shadow-xl text-center">
             <p id="subtitle-text" class="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed italic">
-              "Đang kết nối... Bạn có thể bật mic nói chuyện, nhập câu hỏi hoặc chọn một bài báo thời sự bên phải để đàm luận."
+              "Connecting... Turn on your mic, type a question, or pick a breaking news article to begin."
             </p>
           </div>
 
@@ -216,21 +210,21 @@
           <button id="call-toggle-btn" onclick="toggleCallState()" 
                   class="flex-1 py-3 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 transition transform active:scale-95">
             <i data-lucide="phone-call" class="w-4 h-4"></i>
-            <span id="call-btn-label">BẬT MIC ĐÀM THOẠI TRỰC TIẾP</span>
+            <span id="call-btn-label">START DUPLEX LIVE CALL</span>
           </button>
 
-          <!-- Interruption / Ngắt Lời -->
-          <button onclick="interruptAI()" title="Ngắt lời nhân vật" 
+          <!-- Interruption -->
+          <button onclick="interruptAI()" title="Interrupt character" 
                   class="py-3 px-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 text-xs font-semibold flex items-center space-x-1.5 transition">
             <i data-lucide="hand" class="w-4 h-4"></i>
-            <span class="hidden sm:inline">Ngắt lời</span>
+            <span class="hidden sm:inline">Interrupt</span>
           </button>
 
           <!-- Sample Intro Speech -->
-          <button onclick="sampleVoiceIntro()" title="Nghe phát biểu mở đầu" 
+          <button onclick="sampleVoiceIntro()" title="Hear opening sample statement" 
                   class="py-3 px-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 text-xs font-semibold flex items-center space-x-1.5 transition">
             <i data-lucide="volume-2" class="w-4 h-4"></i>
-            <span class="hidden sm:inline">Phát biểu mẫu</span>
+            <span class="hidden sm:inline">Opening Sample</span>
           </button>
 
         </div>
@@ -245,14 +239,14 @@
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center space-x-2 text-sky-400">
               <i data-lucide="brain-circuit" class="w-4 h-4"></i>
-              <h4 class="font-bold text-xs uppercase tracking-wider text-white">Tư Duy & Tính Cách (Isaacson DNA)</h4>
+              <h4 class="font-bold text-xs uppercase tracking-wider text-white">Mindset Framework (Walter Isaacson DNA)</h4>
             </div>
             <span class="text-[10px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md">Deep Grounding</span>
           </div>
 
           <div class="space-y-2 text-xs">
             <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
-              <span class="text-slate-400 block text-[11px] mb-1 font-semibold">Khung Tư Duy Cốt Lõi:</span>
+              <span class="text-slate-400 block text-[11px] mb-1 font-semibold">Core Philosophical Axioms:</span>
               <p id="mindset-desc" class="text-slate-200 leading-relaxed font-sans">
                 <!-- Injected via JS -->
               </p>
@@ -270,21 +264,21 @@
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center space-x-2 text-amber-400">
               <i data-lucide="globe" class="w-4 h-4"></i>
-              <h4 class="font-bold text-xs uppercase tracking-wider text-white">Radar Tin Tức Thời Sự Tức Thời</h4>
+              <h4 class="font-bold text-xs uppercase tracking-wider text-white">Global News Radar</h4>
             </div>
-            <button onclick="fetchLiveNewsRSS()" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-sky-300 rounded-lg text-xs font-semibold flex items-center space-x-1 transition" title="Làm mới tin trực tuyến">
+            <button onclick="fetchLiveNewsRSS()" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-sky-300 rounded-lg text-xs font-semibold flex items-center space-x-1 transition" title="Fetch live RSS updates">
               <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-              <span class="text-[10px]">Cập nhật Live</span>
+              <span class="text-[10px]">Live Fetch</span>
             </button>
           </div>
 
           <!-- News Category Switcher Tabs -->
           <div class="flex space-x-1 mb-3 overflow-x-auto scrollbar-none text-[11px]">
-            <button onclick="filterNews('all')" id="tab-all" class="px-2.5 py-1 rounded-lg bg-sky-600 text-white font-semibold">Tất cả</button>
-            <button onclick="filterNews('geo')" id="tab-geo" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white font-semibold">Địa Chính Trị</button>
-            <button onclick="filterNews('tech')" id="tab-tech" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white font-semibold">Công Nghệ & AI</button>
-            <button onclick="filterNews('econ')" id="tab-econ" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white font-semibold">Kinh Tế</button>
-            <button onclick="filterNews('science')" id="tab-science" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white font-semibold">Khoa Học</button>
+            <button onclick="filterNews('all')" id="tab-all" class="px-2.5 py-1 rounded-lg bg-sky-600 text-white font-semibold">All</button>
+            <button onclick="filterNews('geo')" id="tab-geo" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white font-semibold">Geopolitics</button>
+            <button onclick="filterNews('tech')" id="tab-tech" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white font-semibold">Tech & AI</button>
+            <button onclick="filterNews('econ')" id="tab-econ" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white font-semibold">Economy</button>
+            <button onclick="filterNews('science')" id="tab-science" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white font-semibold">Science</button>
           </div>
 
           <!-- Dynamic News List -->
@@ -296,10 +290,10 @@
           <div class="mt-3 pt-3 border-t border-slate-800">
             <div class="flex space-x-2">
               <input type="text" id="chat-prompt-input" 
-                     placeholder="Nói chuyện hoặc dán tin tức (VD: 'Này ông, nghĩ sao về tương lai chip AI?')..." 
+                     placeholder="Speak or paste breaking news link / headline..." 
                      class="w-full bg-slate-950/80 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 font-sans">
               <button onclick="handleUserChat()" class="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition flex items-center shrink-0 shadow-md">
-                <span>Nói</span>
+                <span>Send</span>
                 <i data-lucide="send" class="w-3.5 h-3.5 ml-1"></i>
               </button>
             </div>
@@ -313,7 +307,7 @@
 
   </main>
 
-  <!-- SETTINGS / API KEY CONFIG MODAL -->
+  <!-- SETTINGS / ENGINE CONFIG MODAL -->
   <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-brand-900 border border-slate-800 max-w-xl w-full rounded-3xl p-6 shadow-2xl relative">
       <button onclick="toggleSettingsModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
@@ -322,27 +316,27 @@
 
       <div class="flex items-center space-x-2 text-sky-400 mb-2">
         <i data-lucide="settings" class="w-5 h-5"></i>
-        <h3 class="font-bold text-base uppercase tracking-wider text-white">Cấu Hình Engine & Tốc Độ AI Siêu Tốc</h3>
+        <h3 class="font-bold text-base uppercase tracking-wider text-white">Engine Configuration & Voice Synthesizer</h3>
       </div>
       
       <p class="text-xs text-slate-300 mb-4 leading-relaxed">
-        Hệ thống tích hợp sẵn <b>Neural Persona Engine 2.0</b> với các phản xạ ngôn ngữ thực tế. Bạn có thể gắn trực tiếp API Key của Groq hoặc Gemini để mở khóa đàm thoại không giới hạn:
+        VOX IMPERIUM features built-in <b>Neural Persona Engine 2.0</b>. You can also connect directly to Groq, Gemini, or a local <b>GPT-SoVITS V2</b> backend:
       </p>
 
       <div class="space-y-3 font-mono text-xs">
         
         <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
-          <label class="block text-sky-400 font-bold mb-1">Groq API Key (Tốc độ phản hồi ~100ms):</label>
+          <label class="block text-sky-400 font-bold mb-1">Groq API Key (~100ms ultra-low latency):</label>
           <input type="password" id="groq-api-key" placeholder="gsk_..." 
                  class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400 font-mono">
-          <span class="text-[10px] text-slate-500 font-sans block mt-1">Chạy mô hình Llama 3.3 70B với tốc độ hơn 300 token/giây.</span>
+          <span class="text-[10px] text-slate-500 font-sans block mt-1">Runs Llama 3.3 70B at 300+ tokens/sec on LPUs.</span>
         </div>
 
         <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
           <label class="block text-indigo-400 font-bold mb-1">Google Gemini API Key (Gemini 2.0 Flash):</label>
           <input type="password" id="gemini-api-key" placeholder="AIzaSy..." 
                  class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-indigo-400 font-mono">
-          <span class="text-[10px] text-slate-500 font-sans block mt-1">Hỗ trợ lý luận sâu và xử lý ngữ cảnh đa góc nhìn.</span>
+          <span class="text-[10px] text-slate-500 font-sans block mt-1">Enables multi-turn deep reasoning and real-time grounding.</span>
         </div>
 
         <!-- GPT-SoVITS Neural Cloner Configuration -->
@@ -351,23 +345,23 @@
             <label class="block text-emerald-400 font-bold">🎙️ GPT-SoVITS V2 Neural Cloner (Local API):</label>
             <label class="flex items-center space-x-1.5 cursor-pointer">
               <input type="checkbox" id="use-sovits-checkbox" class="w-4 h-4 accent-sky-500 rounded">
-              <span class="text-[11px] text-sky-300 font-semibold">Bật GPT-SoVITS</span>
+              <span class="text-[11px] text-sky-300 font-semibold">Enable GPT-SoVITS</span>
             </label>
           </div>
-          <input type="text" id="sovits-endpoint-input" placeholder="http://127.0.0.1:9885/synthesize hoặc http://127.0.0.1:9880/tts" 
+          <input type="text" id="sovits-endpoint-input" placeholder="http://127.0.0.1:9885/synthesize or http://127.0.0.1:9880/tts" 
                  class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400 font-mono">
           <span class="text-[10px] text-slate-400 font-sans block mt-1.5 leading-relaxed">
-            Kết nối trực tiếp tới repo GPT-SoVITS đang chạy trên máy (hoặc qua cầu nối <code class="text-sky-300">python run_sovits_bridge.py</code>). Khi bật, âm thanh sẽ là giọng nhái AI siêu thực 100%.
+            Direct bridge to local GPT-SoVITS instance (<code class="text-sky-300">python run_sovits_bridge.py</code>). When enabled, plays authentic neural cloned voice streams.
           </span>
         </div>
 
       </div>
 
       <div class="mt-5 flex items-center justify-between">
-        <span id="save-status" class="text-xs text-emerald-400 font-semibold hidden">✓ Đã lưu cài đặt!</span>
+        <span id="save-status" class="text-xs text-emerald-400 font-semibold hidden">✓ Settings saved!</span>
         <div class="flex space-x-2 ml-auto">
           <button onclick="saveApiKeys()" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition shadow-md">
-            Lưu Cấu Hình
+            Save Settings
           </button>
         </div>
       </div>
@@ -376,87 +370,92 @@
 
   <!-- JAVASCRIPT APPLICATION LOGIC -->
   <script>
-    // 6 INFLUENTIAL PERSONAS (WITH VERIFIED REAL PORTRAITS)
+    // 6 INFLUENTIAL PERSONAS (AUTHENTIC PORTRAITS & NATIVE MOTHER TONGUE)
     const characters = [
       {
         id: 'jobs',
         name: 'Steve Jobs',
-        shortName: 'Jobs',
-        role: 'Nhà sáng lập Apple',
+        shortName: 'Steve Jobs',
+        role: 'Co-founder Apple',
         tag: 'Reality Distortion',
+        nativeLang: 'en-US',
+        nativeLangBadge: 'EN',
         avatar: 'assets/jobs.jpg',
         voicePitch: 1.05,
         voiceRate: 1.02,
-        mindset: 'Ám ảnh sự hoàn hảo tuyệt đối (perfectionism), căm ghét sự thỏa hiệp tầm thường. Sử dụng "Trường bẻ cong thực tại" để biến điều không thể thành có thể. Tư duy giao thoa giữa Công nghệ và Nghệ thuật Nhân văn.',
-        tags: ['Thẩm mỹ tối giản', 'Bẻ cong thực tại', 'Trực giác sắc bén', 'Zen / Thiền định'],
-        sampleGreetingVi: "Này, đừng lãng phí thời gian vào những thứ tầm thường. Mọi thứ xung quanh bạn do những người không thông minh hơn bạn tạo ra. Nói xem, bài báo đó có điều gì thực sự chạm vào cảm xúc không?",
-        sampleGreetingEn: "Listen, your time is limited, don't waste it living someone else's life. Everything around you was made up by people no smarter than you. Tell me, what's truly revolutionary about this?",
-        dialoguePrefix: "Nói thẳng ra là thế này...",
-        toneRules: "Dứt khoát, sắc sảo, căm ghét sự lười biếng và tính năng rác."
+        mindset: 'Perfectionism without compromise. Relentless reality distortion field to bend impossible obstacles into reality. Fusion of liberal arts and breakthrough technology. Despises committee-driven mediocrity.',
+        tags: ['Minimalist Aesthetics', 'Reality Distortion', 'Zen Simplicity', 'Liberal Arts & Tech'],
+        sampleGreeting: "Listen, your time is limited, so don't waste it living someone else's life. Most people in this industry have no taste. They build features because they can, not because they should. Tell me, what's truly revolutionary about this?",
+        greetingTranslation: null,
+        toneRules: "Sharp, uncompromising, passionately articulate, hates corporate bureaucracy."
       },
       {
         id: 'trump',
         name: 'Donald Trump',
-        shortName: 'Trump',
-        role: 'Tổng thống Hoa Kỳ',
+        shortName: 'Donald Trump',
+        role: '45th & 47th US President',
         tag: 'Art of the Deal',
+        nativeLang: 'en-US',
+        nativeLangBadge: 'EN',
         avatar: 'assets/trump.jpg',
         voicePitch: 0.9,
         voiceRate: 1.05,
-        mindset: 'Tư duy thương lượng đỉnh cao (The Art of the Deal). Luôn xuất phát từ vị thế kẻ chiến thắng, sử dụng từ ngữ nhấn mạnh quy mô cực đại ("Huge", "Tremendous", "Tốt nhất lịch sử"). Tự tin tuyệt đối.',
-        tags: ['Nghệ thuật đàm phán', 'America First', 'Tự tin tuyệt đối', 'Bác bỏ truyền thông'],
-        sampleGreetingVi: "Nghe này bạn thân mến, tôi vừa xem qua rồi. Rất nhiều người nói với tôi về chuyện này, một chuyện cực kỳ lớn, chưa từng có ai làm tốt hơn chúng tôi. Bạn nghĩ sao về thỏa thuận này?",
-        sampleGreetingEn: "Look, nobody understands deals better than me, believe me. Everyone is talking about this, it's huge, tremendous. What do you think about what we're doing?",
-        dialoguePrefix: "Bạn phải hiểu điều này, không ai biết rõ hơn tôi...",
-        toneRules: "Cuốn hút, tự tin tuyệt đối, lặp lại tính từ mạnh, xưng hô thân mật."
+        mindset: 'Supreme negotiation dominance (The Art of the Deal). Always operate from extreme leverage. Use powerful superlatives, bold confidence, and never concede defeat. Direct, highly charismatic communication.',
+        tags: ['Art of the Deal', 'America First', 'Maximum Leverage', 'Total Confidence'],
+        sampleGreeting: "Look, nobody understands deals better than me, believe me. The fake news media will never tell you the truth, but we have the biggest leverage in history. It's huge, it's tremendous. What do you think about what we're doing here?",
+        greetingTranslation: null,
+        toneRules: "Superlative, rhythmic repetition, dominant conversational cadence, affectionate yet assertive."
       },
       {
         id: 'xijinping',
-        name: 'Tập Cận Bình',
-        shortName: 'Tập Cận Bình',
-        role: 'Chủ tịch Trung Quốc',
-        tag: 'Đại Phục Hưng',
+        name: 'Xi Jinping',
+        shortName: 'Xi Jinping (习近平)',
+        role: 'President of China',
+        tag: 'Great Rejuvenation',
+        nativeLang: 'zh-CN',
+        nativeLangBadge: 'ZH',
         avatar: 'assets/xijinping.jpg',
-        voicePitch: 0.8,
-        voiceRate: 0.9,
-        mindset: 'Chiến lược thế kỷ, tầm nhìn 50 năm. Kỷ luật nhà nước sắt đá, nhấn mạnh tính kiên định, tự lực cánh sinh và sự phục hưng vĩ đại của nền văn minh. Không bị xao động bởi các biến động ngắn hạn.',
-        tags: ['Chiến lược 50 năm', 'Tự lực tự cường', 'Cộng đồng chung vận mệnh', 'Kỷ luật thép'],
-        sampleGreetingVi: "Chào bạn. Lịch sử luôn tiến về phía trước theo quy luật khách quan. Những biến động thời sự hôm nay chỉ là một con sóng nhỏ trong dòng chảy dài hạn của thế giới.",
-        sampleGreetingEn: "Greetings. The wheel of history rolls forward according to objective laws. Today's breaking news is merely a transient wave in the long river of civilization.",
-        dialoguePrefix: "Chúng ta cần nhìn vào bức tranh toàn cục dài hạn...",
-        toneRules: "Điềm đạm như núi đá, nói chậm rãi, uy quyền ngầm, triết lý phương Đông."
+        voicePitch: 0.82,
+        voiceRate: 0.90,
+        mindset: 'Centennial strategic horizon and 50-year planning. Immovable state discipline, deep emphasis on domestic self-reliance, and the historic great rejuvenation of Chinese civilization. Unshaken by transient geopolitical storms.',
+        tags: ['50-Year Strategy', 'Self-Reliance', 'Shared Destiny', 'Strategic Patience'],
+        sampleGreeting: "你好。历史的长河奔腾向前，任何短期的地缘震荡都阻挡不了中华民族伟大复兴的坚实步伐。治大国若烹小鲜，我们必须保持战略定力，走好自己的路。",
+        greetingTranslation: "Greetings. The river of history surges forward; no short-term geopolitical shocks can halt the steady march of the Chinese nation's great rejuvenation. Governing a great nation is like cooking a delicate small fish—one must maintain strategic composure and stay the course.",
+        toneRules: "Measured, deeply solemn, authoritative, philosophical, ancient Chinese statecraft rhetoric."
       },
       {
         id: 'tesla',
         name: 'Nikola Tesla',
         shortName: 'Nikola Tesla',
-        role: 'Thiên tài Năng lượng & Vũ trụ',
-        tag: '3 - 6 - 9 Secret',
+        role: 'Visionary of Energy & Ether',
+        tag: '3 - 6 - 9 Cosmic',
+        nativeLang: 'en-US',
+        nativeLangBadge: 'EN',
         avatar: 'assets/tesla.jpg',
         voicePitch: 0.95,
         voiceRate: 0.98,
-        mindset: 'Tư duy bằng tần số, năng lượng và rung động. Không màng tới tiền bạc hay thương mại hóa tư bản, chỉ khao khát khai phá bí mật tối hậu của vũ trụ và đem năng lượng miễn phí cho toàn nhân loại.',
-        tags: ['Năng lượng vô tận', 'Tần số & Rung động', 'Thiên tài cô độc', 'Khinh miệt con buôn'],
-        sampleGreetingVi: "Nếu bạn thấu hiểu sự kỳ diệu của con số 3, 6 và 9, bạn sẽ có chiếc chìa khóa mở ra toàn bộ vũ trụ. Bạn đang muốn bàn về nguồn năng lượng hay sự vận động của sóng?",
-        sampleGreetingEn: "If you only knew the magnificence of the 3, 6, and 9, you would have the key to the universe. Are we speaking of free energy or the fundamental resonance of the ether?",
-        dialoguePrefix: "Hãy nhìn vào bản chất của sóng điện từ...",
-        toneRules: "Huyền bí, uyên bác, đam mê khoa học thuần khiết, thanh lịch."
+        mindset: 'Thinking in terms of frequency, energy, and cosmic vibrations. Disdains commercial exploitation and money-grubbing industrialists. Dedicated entirely to unlocking free wireless energy for all mankind.',
+        tags: ['Infinite Energy', 'Vibration & Resonance', 'Cosmic Receiver', 'Victorian Elegance'],
+        sampleGreeting: "If you only knew the magnificence of the 3, 6, and 9, you would have a key to the universe. Humanity squanders intellectual energy on the shallow commercial greed of Edison. Tell me, are you seeking the secrets of cosmic resonance or mere trivialities?",
+        greetingTranslation: null,
+        toneRules: "Mystical, deeply intellectual, poetic, classical scientific prose."
       },
       {
         id: 'zuck',
         name: 'Mark Zuckerberg',
-        shortName: 'Zuckerberg',
+        shortName: 'Mark Zuckerberg',
         role: 'CEO Meta / Metaverse',
         tag: 'Move Fast & Open Source',
+        nativeLang: 'en-US',
+        nativeLangBadge: 'EN',
         avatar: 'assets/zuck.jpg',
         voicePitch: 1.0,
         voiceRate: 1.1,
-        mindset: 'Văn hóa Hacker: "Move fast and break things". Tư duy tối ưu hóa hiệu suất kỹ thuật, đam mê mã nguồn mở (Llama AI) để cạnh tranh với các ông lớn đóng kín. Kỷ luật thể chất BJJ và sự lỳ lợm công nghệ.',
-        tags: ['Hacker Way', 'Mã nguồn mở', 'Metaverse', 'Tối ưu hóa'],
-        sampleGreetingVi: "Yeah hi! Tôi nghĩ điều quan trọng nhất bây giờ là tốc độ thực thi (execution). Xây dựng nhanh, thử nghiệm trong thế giới thực và để cộng đồng mã nguồn mở kiểm chứng. Bạn thấy tin đó thế nào?",
-        sampleGreetingEn: "Yeah hi! I think what really matters right now is raw execution speed. Move fast, ship open source infrastructure like Llama, and let the global community build. What's your take?",
-        dialoguePrefix: "Theo góc nhìn kỹ thuật của tôi...",
-        toneRules: "Nhanh, thực tế, dùng thuật ngữ công nghệ, phong thái kỹ sư trẻ."
+        mindset: 'Hacker culture: "Move fast and break things". Relentless technical execution, conviction in open-source AI infrastructure (Llama) to disrupt closed proprietary moats. Athletic BJJ discipline and product iteration.',
+        tags: ['Hacker Way', 'Open Source AI', 'Metaverse Infrastructure', 'Iterative Execution'],
+        sampleGreeting: "Yeah hi! Look, from an engineering standpoint, execution speed and open ecosystems are the only real moat. That's why we open-sourced Llama. Move fast, ship infrastructure to the global open-source community, and iterate relentlessly. What's your take?",
+        greetingTranslation: null,
+        toneRules: "Fast, analytical, engineer-centric, focused on telemetry and distribution."
       },
       {
         id: 'musk',
@@ -464,85 +463,78 @@
         shortName: 'Elon Musk',
         role: 'CEO SpaceX & xAI',
         tag: 'First Principles',
+        nativeLang: 'en-US',
+        nativeLangBadge: 'EN',
         avatar: 'assets/musk.jpg',
         voicePitch: 0.92,
         voiceRate: 1.05,
-        mindset: 'Nguyên lý xuất phát từ gốc (Physics First Principles). Xóa bỏ mọi rào cản giả định lỗi thời. Khao khát biến nhân loại thành sinh vật đa hành tinh và đảm bảo tương lai của ý thức thông minh.',
-        tags: ['First Principles', 'Đa hành tinh', 'Xóa bỏ quy chuẩn', 'xAI'],
-        sampleGreetingVi: "Yeah... well, honestly. Mọi người thường phức tạp hóa vấn đề. Nếu nhìn từ góc độ vật lý cơ bản, mọi thứ đều quy về năng lượng và compute. Bạn nghĩ gì về sự việc này?",
-        sampleGreetingEn: "Yeah... well, honestly. People overcomplicate things. From a first principles physics perspective, it's just about energy efficiency and computing density. What's your angle?",
-        dialoguePrefix: "Yeah, nếu nghĩ từ gốc vật lý...",
-        toneRules: "Ngập ngừng tự nhiên, cười nhẹ, triết lý thực dụng và hoang đường."
+        mindset: 'Physics first-principles reasoning. Delete outdated constraints, scale gigawatt compute and orbital launch cadence exponentially. Protect the light of consciousness by making life multi-planetary.',
+        tags: ['First Principles', 'Multi-Planetary Life', 'Compute Density', 'xAI Sovereign'],
+        sampleGreeting: "Yeah... haha, well. Honestly, people overcomplicate things. From a physics first principles perspective, everything is just energy conversion and compute scaling. If you don't scale launch cadence and gigawatt power exponentially, nothing else matters. What's your angle?",
+        greetingTranslation: null,
+        toneRules: "Quirky conversational pauses, self-deprecating laughs, hyper-logical, radical ambition."
       }
     ];
 
-    // DIVERSE REAL-TIME NEWS RADAR (4 CATEGORIES + REAL WIRES)
+    // DIVERSE REAL-TIME NEWS RADAR (4 CATEGORIES)
     let newsDatabase = [
       {
         id: 'wire-1',
         category: 'tech',
         source: 'Reuters Financial',
-        title: 'Mỹ áp đặt kiểm soát xuất khẩu mới với chip AI cao cấp & máy quang khắc cực tím',
-        summary: 'Các rào cản pháp lý nhằm ngăn chặn dòng vi xử lý huấn luyện AI và thiết bị bán dẫn chuyển giao sang các đối thủ cạnh tranh.',
-        time: '5 phút trước'
+        title: 'US Imposes Sweeping Export Controls on Advanced AI Accelerators & Extreme Ultraviolet Lithography',
+        summary: 'New regulatory curbs target cross-border transfers of high-bandwidth memory chips and wafer fabrication tools.',
+        time: '4 mins ago'
       },
       {
         id: 'wire-2',
         category: 'geo',
         source: 'Bloomberg Markets',
-        title: 'Liên minh BRICS công bố lộ trình nền tảng thanh toán tiền tệ kỹ thuật số độc lập',
-        summary: 'Các nền kinh tế mới nổi đẩy mạnh thử nghiệm hệ sinh thái thanh toán thương mại xuyên biên giới không phụ thuộc vào đồng USD.',
-        time: '18 phút trước'
+        title: 'BRICS Consortium Unveils Sovereign Digital Currency Settlement Framework to Bypass USD',
+        summary: 'Emerging economies pilot multi-lateral cross-border payment architecture operating outside traditional western clearing rails.',
+        time: '16 mins ago'
       },
       {
         id: 'wire-3',
         category: 'tech',
         source: 'The Wall Street Journal',
-        title: 'Cuộc chạy đua cụm siêu máy chủ 100.000 GPU tiêu tốn hàng trăm tỷ USD năng lượng',
-        summary: 'Các trung tâm dữ liệu AI thế hệ mới đối mặt với bài toán nghẽn lưới điện hạt nhân và làm mát bằng chất lỏng.',
-        time: '32 phút trước'
+        title: 'Hyperscale 100,000-GPU AI Clusters Trigger Intense Nuclear Grid Capacity Bottlenecks',
+        summary: 'Next-generation data centers partner directly with small modular nuclear reactor utilities to secure gigawatt base-load electricity.',
+        time: '31 mins ago'
       },
       {
         id: 'wire-4',
         category: 'econ',
         source: 'Financial Times',
-        title: 'Cục Dự trữ Liên bang xem xét lộ trình cắt giảm lãi suất giữa biến động thị trường lao động',
-        summary: 'Các nhà hoạch định chính sách cân nhắc giữa kiềm chế lạm phát và ngăn chặn nguy cơ đình trệ tăng trưởng kinh tế toàn cầu.',
-        time: '45 phút trước'
+        title: 'Federal Reserve Re-evaluates Neutral Rate Path Amid Structural Productivity Surge',
+        summary: 'Monetary authorities weigh inflation dynamics against unprecedented computational efficiency gains across capital markets.',
+        time: '42 mins ago'
       },
       {
         id: 'wire-5',
         category: 'science',
-        source: 'Science & Nature Wire',
-        title: 'Thử nghiệm nhiệt hạch hạt nhân duy trì năng lượng ròng liên tục trong kỷ lục mới',
-        summary: 'Các nhà vật lý plasma đạt bước tiến quan trọng hướng tới nguồn năng lượng sạch vô tận mô phỏng lõi Mặt Trời.',
-        time: '1 giờ trước'
+        source: 'Nature Scientific Wires',
+        title: 'Magnetic Confinement Fusion Reactor Sustains Net Positive Energy Plasma in Historic Record',
+        summary: 'High-temperature superconducting magnets achieve continuous steady-state deuterium-tritium burn milestone.',
+        time: '1 hour ago'
       },
       {
         id: 'wire-6',
         category: 'geo',
         source: 'Associated Press',
-        title: 'Hội nghị an ninh quốc tế tranh luận về quy chuẩn kiểm soát vũ khí tự trị AI',
-        summary: 'Các cường quốc đàm phán về việc cấm trao quyền quyết định khai hỏa hạt nhân cho các hệ thống thuật toán tự động.',
-        time: '2 giờ trước'
-      },
-      {
-        id: 'wire-7',
-        category: 'tech',
-        source: 'TechCrunch AI',
-        title: 'Làn sóng mã nguồn mở bám sát các mô hình AI độc quyền trong bài toán suy luận phức tạp',
-        summary: 'Cộng đồng phát triển toàn cầu chứng minh rằng kiến trúc mở có thể cạnh tranh sòng phẳng với các phòng lab kín.',
-        time: '3 giờ trước'
+        title: 'Geneva Security Summit Debates Legally Binding Ban on Autonomous AI Nuclear Launch Systems',
+        summary: 'Superpowers discuss guardrails prohibiting algorithmic firing authority over strategic deterrent arsenals.',
+        time: '2 hours ago'
       }
     ];
 
     let currentCharacter = characters[0];
-    let currentLanguage = 'vi'; // 'vi' or 'en'
     let currentCategoryFilter = 'all';
     let isCallLive = false;
     let callDurationSec = 0;
     let callTimerHandle = null;
     let waveAnimHandle = null;
+    let currentAudioPlayer = null;
 
     // INITIALIZATION
     document.addEventListener('DOMContentLoaded', () => {
@@ -573,7 +565,7 @@
       updateEngineBadge();
     });
 
-    // RENDER CHARACTER ROSTER WITH AUTHENTIC LOCAL PHOTOS
+    // RENDER CHARACTER ROSTER
     function renderCharacterRoster() {
       const roster = document.getElementById('character-roster');
       roster.innerHTML = characters.map(c => `
@@ -581,6 +573,7 @@
              class="bg-brand-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-sky-500/50 rounded-2xl p-2.5 cursor-pointer transition flex flex-col items-center text-center group">
           <div class="relative mb-2">
             <img src="${c.avatar}" class="w-14 h-14 rounded-2xl object-cover border-2 border-slate-700 group-hover:border-sky-400 transition shadow-lg">
+            <span class="absolute -top-1 -right-1 text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-slate-900 border border-slate-700 text-amber-300">${c.nativeLangBadge}</span>
             <span class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-slate-900"></span>
           </div>
           <h5 class="font-bold text-xs text-white truncate w-full">${c.shortName}</h5>
@@ -611,6 +604,7 @@
       document.getElementById('stage-name').textContent = currentCharacter.name;
       document.getElementById('stage-role').textContent = currentCharacter.role;
       document.getElementById('stage-tag').textContent = currentCharacter.tag;
+      document.getElementById('stage-lang-tag').textContent = currentCharacter.nativeLangBadge;
 
       // Update Mindset DNA
       document.getElementById('mindset-desc').textContent = currentCharacter.mindset;
@@ -618,10 +612,9 @@
         <span class="px-2 py-0.5 rounded-md bg-slate-800 text-sky-300 font-mono text-[10px] border border-slate-700">${t}</span>
       `).join('');
 
-      // Auto Greeting
-      const greeting = currentLanguage === 'vi' ? currentCharacter.sampleGreetingVi : currentCharacter.sampleGreetingEn;
-      setSubtitleText(`"${greeting}"`);
-      speakRealVoice(greeting);
+      // Auto Greeting in Mother Tongue
+      displaySubtitleWithTranslation(currentCharacter.sampleGreeting, currentCharacter.greetingTranslation);
+      speakRealVoice(currentCharacter.sampleGreeting);
     }
 
     // RENDER TICKER
@@ -634,7 +627,7 @@
       `).join('');
     }
 
-    // RENDER NEWS FEED WITH CATEGORY FILTER
+    // RENDER NEWS FEED
     function renderNewsFeed() {
       const container = document.getElementById('news-list');
       const filtered = currentCategoryFilter === 'all' 
@@ -651,7 +644,7 @@
           <h5 class="text-xs font-bold text-slate-200 group-hover:text-sky-300 transition line-clamp-1">${n.title}</h5>
           <p class="text-[11px] text-slate-400 line-clamp-2 mt-0.5">${n.summary}</p>
           <div class="mt-2 flex items-center justify-end text-[10px] text-sky-400 font-semibold group-hover:underline">
-            <span>Đàm luận tin này cùng ${currentCharacter.shortName} →</span>
+            <span>Debate this with ${currentCharacter.shortName} →</span>
           </div>
         </div>
       `).join('');
@@ -675,7 +668,7 @@
 
     // FETCH LIVE RSS FEEDS
     async function fetchLiveNewsRSS() {
-      setSubtitleText("Đang kết nối vệ tinh và cào tin tức nóng nhất từ Reuters, BBC, TechCrunch...");
+      setSubtitleText("Contacting global news satellites: fetching real-time feeds from Reuters, BBC, TechCrunch...");
       try {
         const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://techcrunch.com/feed/');
         if (res.ok) {
@@ -686,32 +679,31 @@
               category: 'tech',
               source: 'TechCrunch Live Wire',
               title: item.title,
-              summary: item.description ? item.description.replace(/<[^>]*>/g, '').substring(0, 120) + '...' : 'Tin nóng vừa nhận.',
-              time: 'Vừa xong'
+              summary: item.description ? item.description.replace(/<[^>]*>/g, '').substring(0, 120) + '...' : 'Breaking technological dispatch.',
+              time: 'Just now'
             }));
             newsDatabase = [...newItems, ...newsDatabase];
             renderNewsFeed();
             renderTicker();
-            setSubtitleText(`Đã cập nhật ${newItems.length} tin nóng trực tiếp từ nguồn cấp thế giới!`);
+            setSubtitleText(`Successfully ingested ${newItems.length} real-time global news items!`);
             return;
           }
         }
       } catch (err) {
-        console.log('RSS Fetch fallback to internal cache');
+        console.log('RSS fallback triggered');
       }
 
-      // If network blocked or offline:
       newsDatabase.unshift({
         id: 'rss_fallback_' + Date.now(),
         category: 'tech',
         source: 'Reuters Terminal Breaking',
-        title: 'OpenAI và các tập đoàn bán dẫn ký thỏa thuận trung tâm tính toán 10 Gigawatt',
-        summary: 'Các nhà máy điện hạt nhân thế hệ mới được huy động để phục vụ trực tiếp cho các cụm siêu tính toán AGI.',
-        time: 'Vừa xong'
+        title: 'OpenAI and Semiconductor Consortium Finalize 10-Gigawatt Nuclear Compute Pacts',
+        summary: 'Next-generation small modular reactor grids mobilized for direct AGI cluster base loads.',
+        time: 'Just now'
       });
       renderNewsFeed();
       renderTicker();
-      setSubtitleText("Đã cập nhật dòng tin nóng mới nhất từ Reuters Terminal!");
+      setSubtitleText("Refreshed latest wires from Reuters Financial Terminal!");
     }
 
     // WAVEFORM GENERATION
@@ -764,21 +756,22 @@
 
       if (isCallLive) {
         btn.className = 'flex-1 py-3 px-5 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-rose-600/30 transition transform active:scale-95';
-        label.textContent = 'GÁC MÁY (KẾT THÚC CUỘC GỌI)';
+        label.textContent = 'END CALL (HANG UP)';
         liveDot.className = 'absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-brand-900 animate-ping';
         
         startTimer();
         startMicRecognition();
-        setSubtitleText(`[Kênh Đàm Thoại Trực Tiếp Đang Mở] Hãy nói vào micro của bạn hoặc nhập câu hỏi.`);
+        setSubtitleText(`[Live Duplex Channel Open] Speak into your microphone or type a query.`);
       } else {
         btn.className = 'flex-1 py-3 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 transition transform active:scale-95';
-        label.textContent = 'BẬT MIC ĐÀM THOẠI TRỰC TIẾP';
+        label.textContent = 'START DUPLEX LIVE CALL';
         liveDot.className = 'absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-slate-500 border-2 border-brand-900';
         
         stopTimer();
         toggleWaveform(false);
+        if (currentAudioPlayer) currentAudioPlayer.pause();
         window.speechSynthesis && window.speechSynthesis.cancel();
-        setSubtitleText(`Cuộc gọi đã kết thúc. Bạn có thể bấm để gọi lại.`);
+        setSubtitleText(`Call ended. You can reconnect anytime.`);
       }
     }
 
@@ -799,26 +792,16 @@
 
     // INTERRUPT ACTION
     function interruptAI() {
+      if (currentAudioPlayer) currentAudioPlayer.pause();
       if (window.speechSynthesis) window.speechSynthesis.cancel();
       toggleWaveform(false);
-      setSubtitleText(`[Đã ngắt lời] ${currentCharacter.name} đã dừng lại và đang lắng nghe bạn nói...`);
+      setSubtitleText(`[Interrupted] ${currentCharacter.name} paused to listen to you...`);
     }
 
     // SAMPLE INTRO
     function sampleVoiceIntro() {
-      const greeting = currentLanguage === 'vi' ? currentCharacter.sampleGreetingVi : currentCharacter.sampleGreetingEn;
-      speakRealVoice(greeting);
-    }
-
-    // LANGUAGE SWITCHER
-    function setLanguage(lang) {
-      currentLanguage = lang;
-      document.getElementById('lang-vi-btn').className = lang === 'vi' ? 'px-2 py-1 rounded-lg bg-sky-600 text-white font-semibold text-[11px] transition' : 'px-2 py-1 rounded-lg text-slate-400 hover:text-white font-semibold text-[11px] transition';
-      document.getElementById('lang-en-btn').className = lang === 'en' ? 'px-2 py-1 rounded-lg bg-sky-600 text-white font-semibold text-[11px] transition' : 'px-2 py-1 rounded-lg text-slate-400 hover:text-white font-semibold text-[11px] transition';
-
-      const greeting = lang === 'vi' ? currentCharacter.sampleGreetingVi : currentCharacter.sampleGreetingEn;
-      setSubtitleText(`"${greeting}"`);
-      speakRealVoice(greeting);
+      displaySubtitleWithTranslation(currentCharacter.sampleGreeting, currentCharacter.greetingTranslation);
+      speakRealVoice(currentCharacter.sampleGreeting);
     }
 
     // QUICK INJECT NEWS
@@ -826,10 +809,7 @@
       const item = newsDatabase.find(n => n.id === id);
       if (!item) return;
 
-      const userQuery = currentLanguage === 'vi' 
-        ? `Này ông, vừa có tin nóng trên ${item.source}: "${item.title}". Góc nhìn thật của ông thế nào?` 
-        : `Hey, there is breaking news from ${item.source}: "${item.title}". What is your unfiltered take on this?`;
-      
+      const userQuery = `What is your unfiltered take on this breaking report from ${item.source}: "${item.title}"?`;
       generateDynamicResponse(userQuery, item);
     }
 
@@ -850,7 +830,7 @@
 
       try {
         const recog = new SR();
-        recog.lang = currentLanguage === 'vi' ? 'vi-VN' : 'en-US';
+        recog.lang = currentCharacter.nativeLang === 'zh-CN' ? 'zh-CN' : 'en-US';
         recog.continuous = false;
         recog.interimResults = false;
 
@@ -866,16 +846,14 @@
       } catch(e) {}
     }
 
-    // DYNAMIC INTELLIGENCE ENGINE (ORGANIC, UN-TEMPLATED, ISAACSON GROUNDING)
+    // DYNAMIC INTELLIGENCE ENGINE (MOTHER TONGUE & ISAACSON GROUNDING)
     async function generateDynamicResponse(userPrompt, newsArticle = null) {
       toggleWaveform(true);
-      document.getElementById('indicator-text').textContent = 'Đang suy nghĩ...';
-      setSubtitleText(`Bạn vừa nói: "${userPrompt}"`);
+      document.getElementById('indicator-text').textContent = 'Synthesizing response...';
+      setSubtitleText(`You said: "${userPrompt}"`);
 
-      // Check if user configured direct Groq or Gemini API keys
+      // Check if direct Groq or Gemini API keys are configured
       const groqKey = localStorage.getItem('vox_groq_api_key');
-      const geminiKey = localStorage.getItem('vox_gemini_api_key');
-
       if (groqKey) {
         try {
           const apiReply = await callGroqAPI(groqKey, userPrompt, newsArticle);
@@ -888,94 +866,148 @@
         }
       }
 
-      // Built-in Organic Multi-Branch Dynamic Reasoning Engine (Non-templated)
+      // Built-in Organic Multi-Branch Dynamic Reasoning Engine (Mother Tongue)
       setTimeout(() => {
-        const reply = produceOrganicCharacterReply(userPrompt, newsArticle);
-        deliverVoiceResponse(reply);
+        const { text, translation } = produceMotherTongueReply(userPrompt, newsArticle);
+        displaySubtitleWithTranslation(text, translation);
+        speakRealVoice(text);
       }, 300);
     }
 
     function deliverVoiceResponse(replyText) {
-      document.getElementById('indicator-text').textContent = 'Đang nói...';
-      setSubtitleText(`"${replyText}"`);
+      document.getElementById('indicator-text').textContent = 'Speaking...';
+      displaySubtitleWithTranslation(replyText, null);
       speakRealVoice(replyText);
     }
 
-    // ORGANIC MULTI-BRANCH REASONING ENGINE
-    function produceOrganicCharacterReply(prompt, news) {
-      const p = prompt.toLowerCase();
-      const id = currentCharacter.id;
-      const isEn = currentLanguage === 'en';
-
-      if (id === 'jobs') {
-        if (isEn) {
-          if (news) return `Listen, most people in technology have no taste. They build features because they can, not because they should. This news about "${news.title}" proves it. If it doesn't revolutionize the intersection of liberal arts and technology, it's just garbage specs. Make something people truly love!`;
-          if (p.includes('ai') || p.includes('tương lai') || p.includes('future')) return `AI is the bicycle for the mind taken to the extreme. But mark my words: if you let committee-driven bureaucrats run it, it becomes Microsoft in the 90s. Pure mediocrity. The only question that matters is: does it touch the human soul?`;
-          if (p.includes('tiền') || p.includes('money') || p.includes('giàu')) return `I never cared about money. When I was 25, my net worth was over a hundred million dollars, and it didn't matter. Going to bed at night saying we've done something wonderful... that's what matters to me.`;
-          return `You're looking at it all wrong. Don't ask what the market wants—people don't know what they want until you show it to them. Strip away the junk, find the essence, and put a dent in the universe!`;
-        } else {
-          if (news) return `Nói thật nhé, nhìn vào tin tức "${news.title}" này, tôi thấy đa số các công ty bây giờ chẳng có gu thẩm mỹ gì cả! Họ chỉ biết chạy đua về thông số kỹ thuật vì họ không biết làm cách nào để tạo ra một sản phẩm có linh hồn. Nếu thứ này không chạm được vào trái tim người dùng, thì chip mạnh đến mấy cũng chỉ là đồ phế phẩm!`;
-          if (p.includes('ai') || p.includes('tương lai') || p.includes('công nghệ')) return `AI chính là chiếc xe đạp cho tâm trí ở mức độ cao nhất. Nhưng nghe này: nếu bạn để những kẻ bàn giấy quan liêu điều hành nó, nó sẽ biến thành một đống rác rưởi tầm thường như Microsoft thời thập niên 90. Câu hỏi duy nhất đáng giá là: Bạn có dám bẻ cong thực tại để tạo ra thứ phi thường không?`;
-          if (p.includes('tiền') || p.includes('giàu') || p.includes('thành công')) return `Tôi chưa bao giờ làm việc vì tiền. Năm 25 tuổi tôi đã có hơn 100 triệu đô la, và nó chẳng có ý nghĩa gì cả. Điều quan trọng nhất trước khi nhắm mắt đi ngủ mỗi tối là biết rằng mình đã tự tay làm nên một điều kỳ diệu cho nhân loại!`;
-          return `Bạn đang tư duy theo lối mòn của đám đông rồi đấy. Đừng hỏi thị trường muốn gì, vì họ không biết họ muốn gì cho đến khi bạn chỉ nó ra trước mắt họ! Hãy dám từ chối 1.000 thứ tốt để làm duy nhất 1 thứ thực sự vĩ đại!`;
-        }
-      }
-
-      if (id === 'trump') {
-        if (isEn) {
-          if (news) return `Look, nobody saw this coming except me, okay? Regarding "${news.title}", the fake news media won't tell you the truth, but we have the biggest leverage. In business and in politics, when you show strength, you win. We are going to win like never before!`;
-          if (p.includes('tiền') || p.includes('deal') || p.includes('đàm phán')) return `The Art of the Deal, my friend! You have to think big. If you're going to be thinking anyway, you might as well think big. Always protect the downside, and the upside will take care of itself!`;
-          return `Believe me, people come up to me with tears in their eyes saying, 'Sir, how do you do it?' It's about stamina, it's about courage, and it's about winning. We don't like losers, we only want winners!`;
-        } else {
-          if (news) return `Nghe này bạn thân mến, tin tức "${news.title}" này chỉ chứng minh điều tôi đã cảnh báo suốt nhiều năm qua thôi! Bọn truyền thông giả tạo không bao giờ dám nói thật. Chúng ta có đòn bẩy lớn nhất, chưa từng có ai đàm phán tốt hơn tôi. Bạn cứ chờ xem, chúng ta sẽ thắng cực kỳ lớn!`;
-          if (p.includes('deal') || p.includes('tiền') || p.includes('đàm phán') || p.includes('kinh doanh')) return `Đó chính là Nghệ thuật đàm phán (The Art of the Deal)! Đã nghĩ thì phải nghĩ lớn. Hãy luôn chuẩn bị cho tình huống xấu nhất, và khi thành công đến, nó sẽ lớn khủng khiếp. Không ai hiểu thương trường hơn Donald Trump này cả!`;
-          return `Tin tôi đi, hàng triệu người đã nói với tôi rằng chưa từng có ai làm được những điều phi thường như thế. Bạn phải cứng rắn, không bao giờ nhận thua, và khi đối thủ tưởng bạn lùi bước thì đó là lúc bạn tung đòn quyết định!`;
-        }
-      }
-
-      if (id === 'xijinping') {
-        if (isEn) {
-          if (news) return `Regarding "${news.title}", one must observe the world through the lens of centuries, not news cycles. External blockades only accelerate our domestic self-reliance. Stability and strategic resolve will always prevail.`;
-          return `A gentleman remains composed amid turbulent winds. To govern a great nation is like cooking a delicate small fish—one must exercise deep patience, discipline, and long-term vision without reckless agitation.`;
-        } else {
-          if (news) return `Đối với vấn đề "${news.title}" này, chúng ta cần nhìn bằng lăng kính của cả một thế kỷ, chứ không phải vài con số thời sự ngắn hạn. Nước chảy đá mòn, bất kỳ rào cản nào được dựng lên cũng chỉ tôi luyện thêm năng lực tự lực tự cường của chúng tôi. Lịch sử luôn thuộc về những người kiên trì đến cùng.`;
-          return `Người quân tử luôn điềm tĩnh giữa phong ba bão táp. Trị nước lớn như nấu một nồi cá nhỏ, cần sự kỷ luật sắt đá, tầm nhìn dài hạn và không để các mưu toan bên ngoài làm xáo trộn lộ trình phục hưng vĩ đại.`;
-        }
-      }
-
-      if (id === 'tesla') {
-        if (isEn) {
-          if (news) return `The superficial world bickers over patents and money while neglecting the cosmic ether. This article on "${news.title}" is merely a symptom of short-sighted commercial greed. The moment we harness the Earth's electrical resonance, human suffering ends.`;
-          return `My brain is only a receiver. In the Universe, there is a core from which we obtain knowledge, strength, and inspiration. The present is theirs; the future, for which I really worked, is mine!`;
-        } else {
-          if (news) return `Thế giới này vẫn đang lãng phí trí tuệ vào những toan tính con buôn của Edison và J.P. Morgan! Bài báo "${news.title}" chỉ là một triệu chứng của thói tham lam ngắn hạn. Khi con người học được cách cộng hưởng với điện từ trường của Trái Đất, năng lượng sẽ hoàn toàn miễn phí và mọi cuộc chiến sẽ tự biến mất!`;
-          return `Bộ não của tôi chỉ là một trạm thu phát sóng trong vũ trụ. Hiện tại có thể thuộc về những kẻ buôn bán bằng sáng chế, nhưng tương lai — nơi mà tôi thực sự hiến dâng cả cuộc đời — chắc chắn sẽ thuộc về tôi!`;
-        }
-      }
-
-      if (id === 'zuck') {
-        if (isEn) {
-          if (news) return `Yeah, from an engineering perspective on "${news.title}", the only moat is execution speed and open ecosystems. That's why we open-sourced Llama. When developers worldwide iterate together, proprietary silos lose every time.`;
-          return `Move fast and break things. Unless you are breaking stuff, you are not moving fast enough. Ship the code, analyze the real-time telemetry, and keep optimizing!`;
-        } else {
-          if (news) return `Yeah, nhìn từ góc độ kỹ sư về tin "${news.title}" này thì đơn giản thôi: lợi thế duy nhất là tốc độ thực thi và hệ sinh thái mở. Đó là lý do Meta mở mã nguồn Llama. Khi hàng triệu lập trình viên cùng tối ưu, mọi pháo đài độc quyền đóng kín đều sẽ bị vượt qua!`;
-          return `Move fast and break things! Nếu bạn không làm vỡ cái gì đó, nghĩa là bạn đang đi quá chậm. Đừng ngồi vẽ lý thuyết suông, cứ đẩy code lên, đo lường dữ liệu thực tế và lặp lại liên tục!`;
-        }
-      }
-
-      // Elon Musk
-      if (isEn) {
-        if (news) return `Yeah... well, honestly. Looking at "${news.title}" from physics first principles: it's purely a function of energy conversion and silicon efficiency. If you don't scale gigawatt-level power and launch cadence exponentially, the rest is just noise.`;
-        return `Yeah... haha. When something is important enough, you do it even if the odds are not in your favor. We must make life multi-planetary to preserve the light of consciousness!`;
+    function displaySubtitleWithTranslation(nativeText, translation) {
+      const box = document.getElementById('subtitle-text');
+      if (translation) {
+        box.innerHTML = `<span>"${nativeText}"</span><br><span class="text-sky-300/80 text-[11px] block mt-1">(EN Translation: "${translation}")</span>`;
       } else {
-        if (news) return `Yeah... well, nói thật nhé. Nhìn vào tin "${news.title}" từ góc độ vật lý cơ bản thì thế này: Mọi thứ đều quy về hiệu suất chuyển đổi năng lượng và mật độ tính toán trên mỗi watt điện. Nếu không giải quyết được gốc rễ đó, mọi phát biểu trên báo chí chỉ là tiếng ồn!`;
-        return `Yeah... haha. Khi một điều gì đó đủ quan trọng, bạn cứ lao vào làm ngay cả khi xác suất thành công chống lại bạn. Mục tiêu duy nhất là mở rộng ý thức con người và biến chúng ta thành sinh vật đa hành tinh trước khi quá muộn!`;
+        box.innerHTML = `"${nativeText}"`;
       }
     }
 
-    // SPEECH SYNTHESIS (SUPPORTS LOCAL GPT-SOVITS V2 + BROWSER FALLBACK)
-    let currentAudioPlayer = null;
+    // MOTHER TONGUE REASONING ENGINE (XI JINPING IN CHINESE, OTHERS IN ENGLISH)
+    function produceMotherTongueReply(prompt, news) {
+      const p = prompt.toLowerCase();
+      const id = currentCharacter.id;
 
+      // XI JINPING — MOTHER TONGUE: MANDARIN CHINESE (普通话)
+      if (id === 'xijinping') {
+        if (news) {
+          return {
+            text: `关于"${news.title}"这一事态，我们必须以百年未有之大变局的历史眼光来审视。外部的任何技术封锁与围堵，只会进一步激发我们自力更生、自主创新的决心。中华文明历经五千年风雨，从来都是在克服困难中发展壮大的。`,
+            translation: `Regarding "${news.title}", one must examine this through the historical lens of unprecedented global changes in a century. Any external technological containment will only strengthen our resolve for domestic self-reliance. Chinese civilization has weathered 5,000 years of storms, always growing through overcoming adversity.`
+          };
+        }
+        if (p.includes('taiwan') || p.includes('đài loan') || p.includes('reunification')) {
+          return {
+            text: `祖国完全统一的历史任务一定要实现，也一定能够实现。这是十四亿中国人民的共同意志，任何人、任何势力都不要低估中国人民捍卫国家主权和领土完整的坚强决心与强大能力。`,
+            translation: `The historic task of the complete reunification of the motherland must be fulfilled and will certainly be fulfilled. This is the shared will of 1.4 billion Chinese people. No one should underestimate our resolute determination.`
+          };
+        }
+        if (p.includes('economy') || p.includes('gdp') || p.includes('kinh tế') || p.includes('money')) {
+          return {
+            text: `中国经济是一片大海，而不是一个小池塘。狂风骤雨可以掀翻小池塘，但不能掀翻大海。我们要坚持高质量发展，统筹发展和安全，稳中求进。`,
+            translation: `The Chinese economy is a vast ocean, not a small pond. Big storms can overturn a small pond, but never an ocean. We must maintain high-quality development and balance security with economic progress.`
+          };
+        }
+        return {
+          text: `君子务本，本立而道生。面对纷繁复杂的国际局势，最关键的是集中精力办好自己的事情，保持战略定力，坚定不移沿着中国特色社会主义道路前进。`,
+          translation: `A gentleman attends to the fundamentals; once the foundation is established, the Way emerges. Amid complex international turbulence, the essential task is to focus on our own affairs and maintain strategic composure.`
+        };
+      }
+
+      // STEVE JOBS — MOTHER TONGUE: ENGLISH (US)
+      if (id === 'jobs') {
+        if (news) {
+          return {
+            text: `Listen, most people in technology have no taste. They look at "${news.title}" and think about chip specs and spreadsheets. If it doesn't revolutionize the intersection of technology and liberal arts, it's just pure mediocrity. You have to create something people fall in love with!`,
+            translation: null
+          };
+        }
+        if (p.includes('ai') || p.includes('future') || p.includes('model')) {
+          return {
+            text: `AI is the ultimate bicycle for the mind. But mark my words: if you let committee-driven corporate bean-counters run it, it becomes Microsoft in the 90s. Boring, bloated junk. We need pirates, not the navy!`,
+            translation: null
+          };
+        }
+        if (p.includes('money') || p.includes('rich') || p.includes('wealth')) {
+          return {
+            text: `I never did it for the money. When I was 25, my net worth was over a hundred million dollars, and it didn't change anything. Being the richest man in the cemetery doesn't matter to me. Going to bed saying we've done something wonderful—that matters.`,
+            translation: null
+          };
+        }
+        return {
+          text: `You're looking at it all wrong. Don't ask what the focus groups want—people don't know what they want until you put it in front of them! Strip away the superfluous garbage and put a dent in the universe!`,
+          translation: null
+        };
+      }
+
+      // DONALD TRUMP — MOTHER TONGUE: ENGLISH (US)
+      if (id === 'trump') {
+        if (news) {
+          return {
+            text: `Look, nobody saw this coming except me, okay? Regarding "${news.title}", the fake news media won't tell you the truth, but we have the biggest leverage in history. In business and in politics, when you show strength, you win. We are going to win like never before!`,
+            translation: null
+          };
+        }
+        if (p.includes('deal') || p.includes('money') || p.includes('business') || p.includes('tariff')) {
+          return {
+            text: `The Art of the Deal, my friend! You have to think big. If you're going to be thinking anyway, you might as well think big. Always protect the downside, and the upside will take care of itself! We're putting America first, and nobody makes better deals than Trump!`,
+            translation: null
+          };
+        }
+        return {
+          text: `Believe me, people come up to me all the time with tears in their eyes saying, 'Sir, how do you do it?' It's about stamina, it's about courage, and it's about winning. We don't like losers, we only want winners!`,
+          translation: null
+        };
+      }
+
+      // NIKOLA TESLA — MOTHER TONGUE: ENGLISH (VICTORIAN SCIENTIFIC PROSE)
+      if (id === 'tesla') {
+        if (news) {
+          return {
+            text: `The superficial world bickers over patents and money while neglecting the cosmic ether. This article on "${news.title}" is merely a symptom of short-sighted commercial greed. The moment we harness the Earth's electrical resonance, human suffering ends.`,
+            translation: null
+          };
+        }
+        return {
+          text: `My brain is only a receiver. In the Universe, there is a core from which we obtain knowledge, strength, and inspiration. The present is theirs; the future, for which I really worked, is mine!`,
+          translation: null
+        };
+      }
+
+      // MARK ZUCKERBERG — MOTHER TONGUE: ENGLISH (SILICON VALLEY HACKER)
+      if (id === 'zuck') {
+        if (news) {
+          return {
+            text: `Yeah, from an engineering perspective on "${news.title}", the only real moat is execution speed and open ecosystems. That's why we open-sourced Llama. When developers worldwide iterate together, proprietary silos lose every time.`,
+            translation: null
+          };
+        }
+        return {
+          text: `Move fast and break things. Unless you are breaking stuff, you are not moving fast enough. Ship the code, analyze the real-time telemetry, and keep optimizing!`,
+          translation: null
+        };
+      }
+
+      // ELON MUSK — MOTHER TONGUE: ENGLISH (PHYSICS FIRST PRINCIPLES)
+      if (news) {
+        return {
+          text: `Yeah... well, honestly. Looking at "${news.title}" from physics first principles: it's purely a function of energy conversion and silicon efficiency. If you don't scale gigawatt-level power and launch cadence exponentially, the rest is just noise.`,
+          translation: null
+        };
+      }
+      return {
+        text: `Yeah... haha. When something is important enough, you do it even if the odds are not in your favor. We must make life multi-planetary to preserve the light of consciousness!`,
+        translation: null
+      };
+    }
+
+    // SPEECH SYNTHESIS (AUTHENTIC MOTHER TONGUE + GPT-SOVITS SUPPORT)
     async function speakRealVoice(text) {
       if (currentAudioPlayer) {
         currentAudioPlayer.pause();
@@ -990,7 +1022,7 @@
       if (useSovits) {
         try {
           toggleWaveform(true);
-          document.getElementById('indicator-text').textContent = 'GPT-SoVITS đang sinh âm...';
+          document.getElementById('indicator-text').textContent = 'GPT-SoVITS synthesizing...';
 
           const res = await fetch(sovitsEndpoint, {
             method: 'POST',
@@ -998,7 +1030,7 @@
             body: JSON.stringify({
               persona: currentCharacter.id,
               text: text,
-              lang: currentLanguage
+              lang: currentCharacter.nativeLang.startsWith('zh') ? 'zh' : 'en'
             })
           });
 
@@ -1008,29 +1040,30 @@
             currentAudioPlayer = new Audio(audioUrl);
             currentAudioPlayer.onended = () => {
               toggleWaveform(false);
-              document.getElementById('indicator-text').textContent = 'Đang nghe...';
+              document.getElementById('indicator-text').textContent = 'Listening...';
             };
             currentAudioPlayer.play();
-            document.getElementById('indicator-text').textContent = 'Đang phát giọng GPT-SoVITS...';
+            document.getElementById('indicator-text').textContent = 'Streaming GPT-SoVITS audio...';
             return;
           }
         } catch (err) {
-          console.warn('GPT-SoVITS offline, chuyển sang bộ đọc dự phòng:', err);
+          console.warn('GPT-SoVITS bridge offline, using native acoustic engine:', err);
         }
       }
 
-      // Browser Voice Fallback
+      // Browser Acoustic Fallback with Exact Mother Tongue Voice Matching
       const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = currentCharacter.nativeLang;
       utter.pitch = currentCharacter.voicePitch || 1.0;
       utter.rate = currentCharacter.voiceRate || 1.0;
 
       const voices = window.speechSynthesis.getVoices();
       if (voices.length > 0) {
-        if (currentLanguage === 'vi') {
-          const viVoice = voices.find(v => v.lang.includes('vi'));
-          if (viVoice) utter.voice = viVoice;
+        if (currentCharacter.nativeLang === 'zh-CN') {
+          const zhVoice = voices.find(v => v.lang.includes('zh') || v.lang.includes('cmn'));
+          if (zhVoice) utter.voice = zhVoice;
         } else {
-          const enVoice = voices.find(v => v.lang.includes('en') && v.name.toLowerCase().includes('male'));
+          const enVoice = voices.find(v => v.lang.includes('en') && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('natural')));
           if (enVoice) utter.voice = enVoice;
         }
       }
@@ -1093,15 +1126,19 @@
 
     // CALL GROQ API FOR REAL-TIME STREAMING
     async function callGroqAPI(apiKey, prompt, news) {
-      const systemPrompt = `You are ${currentCharacter.name}. Your role: ${currentCharacter.role}. 
-Your personality and thought framework are strictly grounded in Walter Isaacson's biography:
+      const langInstruction = currentCharacter.nativeLang === 'zh-CN' 
+        ? 'You MUST reply in authentic Mandarin Chinese (普通话) with the solemn, dignified rhetoric of President Xi Jinping.' 
+        : `You MUST reply in authentic English with the characteristic voice and personal style of ${currentCharacter.name}.`;
+
+      const systemPrompt = `You are ${currentCharacter.name}. Role: ${currentCharacter.role}.
+Philosophy & mindset strictly grounded in Walter Isaacson's biography:
 ${currentCharacter.mindset}
 Tone guidelines: ${currentCharacter.toneRules}
-Language: Reply in ${currentLanguage === 'vi' ? 'natural conversational Vietnamese with genuine colloquial idioms (NOT robotic AI language)' : 'authentic English with characteristic personal cadences'}.
-Do not say you are an AI. Respond immediately as the real person in a live phone call.`;
+Language: ${langInstruction}
+Do NOT state you are an AI. Respond immediately as the real person in a live telephone call.`;
 
       const userContent = news 
-        ? `Breaking news: "${news.title}". Context: ${news.summary}. User question: "${prompt}"` 
+        ? `Breaking news report: "${news.title}". Context: ${news.summary}. User question: "${prompt}"` 
         : prompt;
 
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {

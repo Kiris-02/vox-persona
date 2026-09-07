@@ -1,6 +1,7 @@
 """
 VOX IMPERIUM — GPT-SoVITS Bridge Server
-Cầu nối API kết nối giao diện VOX Web với mô hình GPT-SoVITS V2 chạy cục bộ.
+API bridge connecting VOX Web Studio with local GPT-SoVITS V2 model.
+Each persona speaks in their authentic mother tongue (Xi Jinping in Chinese, others in English).
 """
 
 import os
@@ -11,43 +12,43 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 PORT = 9885
 GPT_SOVITS_URL = os.getenv("SOVITS_URL", "http://127.0.0.1:9880/tts")
 
-# Reference voice profiles for each character
+# Reference voice profiles for each character with their authentic native languages
 VOICE_PROFILES = {
     "jobs": {
         "ref_audio_path": "voices/steve_jobs_ref.wav",
         "prompt_text": "Stay hungry, stay foolish.",
         "prompt_lang": "en",
-        "default_lang": "vi"
+        "default_lang": "en"
     },
     "trump": {
         "ref_audio_path": "voices/trump_ref.wav",
         "prompt_text": "We are going to make our country greater than ever before.",
         "prompt_lang": "en",
-        "default_lang": "vi"
+        "default_lang": "en"
     },
     "xijinping": {
         "ref_audio_path": "voices/xijinping_ref.wav",
-        "prompt_text": "Chiến lược trường kỳ vì sự phục hưng vĩ đại.",
+        "prompt_text": "坚定不移推进中华民族伟大复兴历史进程。",
         "prompt_lang": "zh",
-        "default_lang": "vi"
+        "default_lang": "zh"
     },
     "tesla": {
         "ref_audio_path": "voices/tesla_ref.wav",
-        "prompt_text": "The present is theirs, the future is mine.",
+        "prompt_text": "The present is theirs, the future for which I worked is mine.",
         "prompt_lang": "en",
-        "default_lang": "vi"
+        "default_lang": "en"
     },
     "zuck": {
         "ref_audio_path": "voices/zuck_ref.wav",
-        "prompt_text": "Move fast and build open source infrastructure.",
+        "prompt_text": "Move fast and build open source infrastructure for everyone.",
         "prompt_lang": "en",
-        "default_lang": "vi"
+        "default_lang": "en"
     },
     "musk": {
         "ref_audio_path": "voices/musk_ref.wav",
-        "prompt_text": "First principles thinking is the only way to invent the future.",
+        "prompt_text": "First principles physics is the only framework to invent the future.",
         "prompt_lang": "en",
-        "default_lang": "vi"
+        "default_lang": "en"
     }
 }
 
@@ -86,11 +87,11 @@ class SovitsBridgeHandler(BaseHTTPRequestHandler):
             try:
                 data = json.loads(body)
                 persona = data.get('persona', 'jobs')
-                text = data.get('text', '')
-                lang = data.get('lang', 'vi')
-
                 profile = VOICE_PROFILES.get(persona, VOICE_PROFILES['jobs'])
                 
+                text = data.get('text', '')
+                lang = data.get('lang', profile.get('default_lang', 'en'))
+
                 payload = {
                     "text": text,
                     "text_lang": lang,
@@ -123,13 +124,13 @@ class SovitsBridgeHandler(BaseHTTPRequestHandler):
                 err_resp = {
                     "error": "GPT-SoVITS Server Not Reachable",
                     "details": str(e),
-                    "tip": "Hãy đảm bảo GPT-SoVITS repo đang chạy lệnh: python api_v2.py -a 127.0.0.1 -p 9880"
+                    "tip": "Ensure GPT-SoVITS is running: python api_v2.py -a 127.0.0.1 -p 9880"
                 }
                 self.wfile.write(json.dumps(err_resp).encode())
 
 def run():
-    print(f"🔱 VOX GPT-SoVITS Bridge khởi động trên cổng {PORT}...")
-    print(f"🔗 Kết nối đích tới GPT-SoVITS tại: {GPT_SOVITS_URL}")
+    print(f"🔱 VOX GPT-SoVITS Bridge running on port {PORT}...")
+    print(f"🔗 Target GPT-SoVITS at: {GPT_SOVITS_URL}")
     server = HTTPServer(('0.0.0.0', PORT), SovitsBridgeHandler)
     server.serve_forever()
 
