@@ -805,8 +805,20 @@
       });
     }
 
+    function unlockAudioContext() {
+      if (window.AudioContext || window.webkitAudioContext) {
+        if (!window._voxAudioCtx) {
+          window._voxAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (window._voxAudioCtx.state === 'suspended') {
+          window._voxAudioCtx.resume();
+        }
+      }
+    }
+
     // HANDLE USER INPUT (SEND)
     function handleUserSpeechSend() {
+      unlockAudioContext();
       const input = document.getElementById('call-speech-input');
       const text = input.value.trim();
       if (!text) return;
@@ -817,6 +829,7 @@
     }
 
     function handleCustomNewsSubmit() {
+      unlockAudioContext();
       const input = document.getElementById('custom-news-input');
       const text = input.value.trim();
       if (!text) return;
@@ -827,6 +840,7 @@
     }
 
     function quickInjectNews(id) {
+      unlockAudioContext();
       const item = newsDatabase.find(n => n.id === id);
       if (!item) return;
 
@@ -835,30 +849,73 @@
       dispatchDynamicIntelligence(prompt, item);
     }
 
-    // DYNAMIC INTELLIGENCE DISPATCHER (OPENROUTER / GROQ / DEEP REASONING)
+    // DYNAMIC INTELLIGENCE DISPATCHER (CLOUD NEURAL BRAIN / GROQ / OPENROUTER / FALLBACK)
     async function dispatchDynamicIntelligence(userQuery, newsContext = null) {
       toggleWaveform(true);
-      document.getElementById('indicator-text').textContent = 'Synthesizing reasoning...';
+      const indicator = document.getElementById('indicator-text');
+      indicator.textContent = `Consulting ${currentCharacter.name} via Neural Brain...`;
 
+      // 1. Primary: Cloud Neural Brain Gateway (Render Gemini 3.1 Flash-Lite Core)
+      const cloudChatEndpoint = localStorage.getItem('vox_cloud_chat_endpoint') || 'https://vox-persona.onrender.com/api/chat';
+      try {
+        const controller = new AbortController();
+        const slowTimer = setTimeout(() => {
+          indicator.textContent = `Waking up Neural Core on Render (~25s cold start)...`;
+        }, 3000);
+        const timeoutId = setTimeout(() => controller.abort(), 35000);
+
+        const history = (characterHistories[currentCharacter.id] || []).slice(-6).map(m => ({
+          role: m.sender === 'user' ? 'user' : 'assistant',
+          content: m.text
+        }));
+
+        const chatPayload = {
+          persona: currentCharacter.id,
+          message: userQuery,
+          history: history,
+          news: newsContext ? { title: newsContext.title, summary: newsContext.summary || newsContext.headline } : null
+        };
+
+        const res = await fetch(cloudChatEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(chatPayload),
+          signal: controller.signal
+        });
+        clearTimeout(slowTimer);
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.text) {
+            handleBotReplyDelivery(data.text, data.translation || null);
+            return;
+          }
+        }
+      } catch (cloudChatErr) {
+        console.warn('Cloud Neural Brain unavailable, trying secondary channels:', cloudChatErr);
+      }
+
+      // 2. Secondary: Groq API if key present
       const groqKey = localStorage.getItem('vox_groq_api_key');
-      const openRouterKey = localStorage.getItem('vox_openrouter_api_key');
-
-      // 1. Try Groq API if key present
       if (groqKey) {
         try {
+          indicator.textContent = `Generating via Groq Llama-3.3...`;
           const reply = await executeGroqCall(groqKey, userQuery, newsContext);
           if (reply) {
             handleBotReplyDelivery(reply);
             return;
           }
         } catch (e) {
-          console.warn('Groq failed, trying fallback:', e);
+          console.warn('Groq failed, trying OpenRouter:', e);
         }
       }
 
-      // 2. Try OpenRouter API if key present
+      // 3. Tertiary: OpenRouter API if key present
+      const openRouterKey = localStorage.getItem('vox_openrouter_api_key');
       if (openRouterKey) {
         try {
+          indicator.textContent = `Generating via OpenRouter...`;
           const reply = await executeOpenRouterCall(openRouterKey, userQuery, newsContext);
           if (reply) {
             handleBotReplyDelivery(reply);
@@ -869,11 +926,12 @@
         }
       }
 
-      // 3. High-Capacity Contextual Biographic Generator (Always responsive, unscripted)
+      // 4. Offline Biographic Fallback
+      indicator.textContent = `Synthesizing offline reply...`;
       setTimeout(() => {
         const { text, translation } = generateDeepBiographicReply(userQuery, newsContext);
         handleBotReplyDelivery(text, translation);
-      }, 350);
+      }, 300);
     }
 
     function handleBotReplyDelivery(replyText, translation = null) {
@@ -1180,13 +1238,18 @@ Never say you are an AI. Reply directly, immersively, and conversationally as th
       const cloudTtsEndpoint = localStorage.getItem('vox_cloud_tts_endpoint') || 'https://vox-persona.onrender.com/api/tts';
       try {
         toggleWaveform(true);
-        document.getElementById('indicator-text').textContent = `Speaking as ${currentCharacter.name} (Cloud Neural Voice)...`;
+        const indicator = document.getElementById('indicator-text');
+        indicator.textContent = `Speaking as ${currentCharacter.name} (Cloud Neural Voice)...`;
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
+        const slowTimer = setTimeout(() => {
+          indicator.textContent = `Warming up Neural Voice stream (~15s)...`;
+        }, 3000);
+        const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout for cold start
 
         const ttsUrl = `${cloudTtsEndpoint}?persona=${encodeURIComponent(currentCharacter.id)}&text=${encodeURIComponent(text)}`;
         const res = await fetch(ttsUrl, { signal: controller.signal });
+        clearTimeout(slowTimer);
         clearTimeout(timeoutId);
 
         if (res.ok) {
