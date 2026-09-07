@@ -240,12 +240,12 @@ async def chat_endpoint(req: ChatRequest):
     }
 
 ELEVEN_VOICE_IDS = {
-    "jobs": "pNInz6obpgDQGcFmaJgB",
-    "trump": "JBFqnCBsd6RMkjVDRZzb",
-    "xijinping": "VR6AewLTigWG4xSOukaG",
-    "tesla": "flq6f7yk4E4fJM5XTYuZ",
-    "zuck": "TxGEqnHWrfWFTfGW9XjX",
-    "musk": "CYw3kZ02Hs0563khs1Fj",
+    "jobs": "pNInz6obpgDQGcFmaJgB",       # Adam (Visionary)
+    "trump": "JBFqnCBsd6RMkjVDRZzb",      # George (Warm, raspy, authoritative)
+    "xijinping": "VR6AewLTigWG4xSOukaG",  # Arnold (Deep, crisp)
+    "tesla": "onwK4e9ZLuTAKqWW03F9",      # Daniel (Deep, formal intellectual)
+    "zuck": "IKne3meq5aSn9XLyUdCD",       # Charlie (Fast, technical tech pacing)
+    "musk": "ErXwobaYiN019PkySvjV",       # Antoni (Thoughtful, intellectual)
 }
 
 @app.get("/api/tts")
