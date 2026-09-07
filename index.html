@@ -345,6 +345,22 @@
           <span class="text-[10px] text-slate-500 font-sans block mt-1">Hỗ trợ lý luận sâu và xử lý ngữ cảnh đa góc nhìn.</span>
         </div>
 
+        <!-- GPT-SoVITS Neural Cloner Configuration -->
+        <div class="bg-slate-950 p-3.5 rounded-2xl border border-sky-500/40 shadow-inner">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-emerald-400 font-bold">🎙️ GPT-SoVITS V2 Neural Cloner (Local API):</label>
+            <label class="flex items-center space-x-1.5 cursor-pointer">
+              <input type="checkbox" id="use-sovits-checkbox" class="w-4 h-4 accent-sky-500 rounded">
+              <span class="text-[11px] text-sky-300 font-semibold">Bật GPT-SoVITS</span>
+            </label>
+          </div>
+          <input type="text" id="sovits-endpoint-input" placeholder="http://127.0.0.1:9885/synthesize hoặc http://127.0.0.1:9880/tts" 
+                 class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400 font-mono">
+          <span class="text-[10px] text-slate-400 font-sans block mt-1.5 leading-relaxed">
+            Kết nối trực tiếp tới repo GPT-SoVITS đang chạy trên máy (hoặc qua cầu nối <code class="text-sky-300">python run_sovits_bridge.py</code>). Khi bật, âm thanh sẽ là giọng nhái AI siêu thực 100%.
+          </span>
+        </div>
+
       </div>
 
       <div class="mt-5 flex items-center justify-between">
@@ -542,11 +558,18 @@
         if (e.key === 'Enter') handleUserChat();
       });
 
-      // Load saved API keys
+      // Load saved API keys & GPT-SoVITS config
       const groqKey = localStorage.getItem('vox_groq_api_key');
       const geminiKey = localStorage.getItem('vox_gemini_api_key');
+      const sovitsEndpoint = localStorage.getItem('vox_sovits_endpoint');
+      const useSovits = localStorage.getItem('vox_use_sovits') === 'true';
+
       if (groqKey) document.getElementById('groq-api-key').value = groqKey;
       if (geminiKey) document.getElementById('gemini-api-key').value = geminiKey;
+      if (sovitsEndpoint) document.getElementById('sovits-endpoint-input').value = sovitsEndpoint;
+      if (document.getElementById('use-sovits-checkbox')) {
+        document.getElementById('use-sovits-checkbox').checked = useSovits;
+      }
       updateEngineBadge();
     });
 
@@ -950,11 +973,53 @@
       }
     }
 
-    // SPEECH SYNTHESIS
-    function speakRealVoice(text) {
-      if (!('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel();
+    // SPEECH SYNTHESIS (SUPPORTS LOCAL GPT-SOVITS V2 + BROWSER FALLBACK)
+    let currentAudioPlayer = null;
 
+    async function speakRealVoice(text) {
+      if (currentAudioPlayer) {
+        currentAudioPlayer.pause();
+        currentAudioPlayer = null;
+      }
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+      // Check if user enabled GPT-SoVITS local server
+      const sovitsEndpoint = localStorage.getItem('vox_sovits_endpoint') || 'http://127.0.0.1:9885/synthesize';
+      const useSovits = localStorage.getItem('vox_use_sovits') === 'true';
+
+      if (useSovits) {
+        try {
+          toggleWaveform(true);
+          document.getElementById('indicator-text').textContent = 'GPT-SoVITS đang sinh âm...';
+
+          const res = await fetch(sovitsEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              persona: currentCharacter.id,
+              text: text,
+              lang: currentLanguage
+            })
+          });
+
+          if (res.ok && res.headers.get('content-type')?.includes('audio')) {
+            const blob = await res.blob();
+            const audioUrl = URL.createObjectURL(blob);
+            currentAudioPlayer = new Audio(audioUrl);
+            currentAudioPlayer.onended = () => {
+              toggleWaveform(false);
+              document.getElementById('indicator-text').textContent = 'Đang nghe...';
+            };
+            currentAudioPlayer.play();
+            document.getElementById('indicator-text').textContent = 'Đang phát giọng GPT-SoVITS...';
+            return;
+          }
+        } catch (err) {
+          console.warn('GPT-SoVITS offline, chuyển sang bộ đọc dự phòng:', err);
+        }
+      }
+
+      // Browser Voice Fallback
       const utter = new SpeechSynthesisUtterance(text);
       utter.pitch = currentCharacter.voicePitch || 1.0;
       utter.rate = currentCharacter.voiceRate || 1.0;
@@ -990,12 +1055,17 @@
     function saveApiKeys() {
       const groq = document.getElementById('groq-api-key').value.trim();
       const gemini = document.getElementById('gemini-api-key').value.trim();
+      const sovitsUrl = document.getElementById('sovits-endpoint-input').value.trim();
+      const useSovits = document.getElementById('use-sovits-checkbox').checked;
 
       if (groq) localStorage.setItem('vox_groq_api_key', groq);
       else localStorage.removeItem('vox_groq_api_key');
 
       if (gemini) localStorage.setItem('vox_gemini_api_key', gemini);
       else localStorage.removeItem('vox_gemini_api_key');
+
+      localStorage.setItem('vox_sovits_endpoint', sovitsUrl || 'http://127.0.0.1:9885/synthesize');
+      localStorage.setItem('vox_use_sovits', useSovits ? 'true' : 'false');
 
       const statusEl = document.getElementById('save-status');
       statusEl.classList.remove('hidden');
@@ -1007,9 +1077,12 @@
     function updateEngineBadge() {
       const groqKey = localStorage.getItem('vox_groq_api_key');
       const geminiKey = localStorage.getItem('vox_gemini_api_key');
+      const useSovits = localStorage.getItem('vox_use_sovits') === 'true';
       const badge = document.getElementById('engine-badge-label');
 
-      if (groqKey) {
+      if (useSovits) {
+        badge.textContent = '🎙️ GPT-SoVITS Active';
+      } else if (groqKey) {
         badge.textContent = '⚡ Groq LPU (Llama 3.3)';
       } else if (geminiKey) {
         badge.textContent = '✨ Gemini 2.0 Flash';
