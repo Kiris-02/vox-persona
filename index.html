@@ -398,6 +398,7 @@
         nativeLang: 'en-US',
         nativeLangBadge: 'EN',
         avatar: 'assets/trump.jpg',
+        sampleAudio: 'assets/audio/trump_speech.mp3',
         voicePitch: 0.9,
         voiceRate: 1.05,
         mindset: 'Supreme negotiation dominance (The Art of the Deal). Always operate from extreme leverage. Use powerful superlatives, bold confidence, and never concede defeat. Direct, highly charismatic communication.',
@@ -415,6 +416,7 @@
         nativeLang: 'zh-CN',
         nativeLangBadge: 'ZH',
         avatar: 'assets/xijinping.jpg',
+        sampleAudio: 'assets/audio/xijinping_speech.ogg',
         voicePitch: 0.82,
         voiceRate: 0.90,
         mindset: 'Centennial strategic horizon and 50-year planning. Immovable state discipline, deep emphasis on domestic self-reliance, and the historic great rejuvenation of Chinese civilization. Unshaken by transient geopolitical storms.',
@@ -466,6 +468,7 @@
         nativeLang: 'en-US',
         nativeLangBadge: 'EN',
         avatar: 'assets/musk.jpg',
+        sampleAudio: 'assets/audio/musk_speech.wav',
         voicePitch: 0.92,
         voiceRate: 1.05,
         mindset: 'Physics first-principles reasoning. Delete outdated constraints, scale gigawatt compute and orbital launch cadence exponentially. Protect the light of consciousness by making life multi-planetary.',
@@ -798,10 +801,40 @@
       setSubtitleText(`[Interrupted] ${currentCharacter.name} paused to listen to you...`);
     }
 
-    // SAMPLE INTRO
+    // SAMPLE INTRO (PLAYS REAL AUTHENTIC AUDIO CLIP IF AVAILABLE)
     function sampleVoiceIntro() {
       displaySubtitleWithTranslation(currentCharacter.sampleGreeting, currentCharacter.greetingTranslation);
-      speakRealVoice(currentCharacter.sampleGreeting);
+      if (currentCharacter.sampleAudio) {
+        playDirectAudioFile(currentCharacter.sampleAudio);
+      } else {
+        speakRealVoice(currentCharacter.sampleGreeting);
+      }
+    }
+
+    function playDirectAudioFile(audioSrc) {
+      if (currentAudioPlayer) {
+        currentAudioPlayer.pause();
+        currentAudioPlayer = null;
+      }
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+      toggleWaveform(true);
+      document.getElementById('indicator-text').textContent = 'Playing authentic voice clip...';
+
+      currentAudioPlayer = new Audio(audioSrc);
+      currentAudioPlayer.onended = () => {
+        toggleWaveform(false);
+        document.getElementById('indicator-text').textContent = 'Listening...';
+      };
+      currentAudioPlayer.onerror = (e) => {
+        console.warn('Audio playback error, fallback to TTS:', e);
+        toggleWaveform(false);
+        speakRealVoice(currentCharacter.sampleGreeting);
+      };
+      currentAudioPlayer.play().catch(err => {
+        console.warn('Auto-play prevented, fallback to TTS:', err);
+        speakRealVoice(currentCharacter.sampleGreeting);
+      });
     }
 
     // QUICK INJECT NEWS
