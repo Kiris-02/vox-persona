@@ -9,10 +9,12 @@ from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel
 import edge_tts
 import httpx
-from dotenv import load_dotenv
-
 # 1. Environment & Secret Initialization (Server-side only)
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "").strip()
