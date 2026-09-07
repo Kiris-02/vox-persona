@@ -237,7 +237,19 @@
             </button>
           </div>
 
-          <!-- Bottom Action Buttons -->
+          <!-- Bottom Action Buttons & Language Selector -->
+          <div class="flex items-center justify-between text-[11px] px-1 text-slate-400">
+            <div class="flex items-center space-x-1.5">
+              <span class="text-slate-400 font-sans">Mic Lang:</span>
+              <button type="button" id="mic-lang-vi" onclick="setMicLanguage('vi-VN')" class="px-2 py-0.5 rounded-lg bg-sky-600 text-white font-bold transition">🇻🇳 Tiếng Việt</button>
+              <button type="button" id="mic-lang-en" onclick="setMicLanguage('en-US')" class="px-2 py-0.5 rounded-lg text-slate-400 hover:text-white transition">🇺🇸 English</button>
+            </div>
+            <div class="flex items-center space-x-1 font-mono text-[10px] text-emerald-400">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Groq LPU &lt;0.4s</span>
+            </div>
+          </div>
+
           <div class="flex flex-wrap items-center justify-between gap-2.5">
             <button id="call-toggle-btn" onclick="toggleCallState()" 
                     class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-md transition transform active:scale-95">
@@ -630,6 +642,7 @@
         document.getElementById('use-sovits-checkbox').checked = useSovits;
       }
       updateEngineBadge();
+      updateMicLangUI();
 
       // Silent wakeup ping to Render Cloud Neural Voice backend
       fetch('https://vox-persona.onrender.com/api/health').catch(() => {});
@@ -857,20 +870,33 @@
       dispatchDynamicIntelligence(prompt, item);
     }
 
-    // DYNAMIC INTELLIGENCE DISPATCHER (CLOUD NEURAL BRAIN / GROQ / OPENROUTER / FALLBACK)
+    // DYNAMIC INTELLIGENCE DISPATCHER (1. CLIENT GROQ LPU -> 2. CLOUD NEURAL GATEWAY -> 3. OPENROUTER -> 4. BIOGRAPHIC FALLBACK)
     async function dispatchDynamicIntelligence(userQuery, newsContext = null) {
       toggleWaveform(true);
       const indicator = document.getElementById('indicator-text');
-      indicator.textContent = `Consulting ${currentCharacter.name} via Neural Brain...`;
+      indicator.textContent = `Consulting ${currentCharacter.name}...`;
 
-      // 1. Primary: Cloud Neural Brain Gateway (Render Gemini 3.1 Flash-Lite Core)
+      // 1. TIER 1: Direct Client Groq LPU if key in settings (~0.4s reflex)
+      const groqKey = localStorage.getItem('vox_groq_api_key');
+      if (groqKey) {
+        try {
+          indicator.textContent = `Consulting ${currentCharacter.name} via Groq LPU (<0.4s)...`;
+          const reply = await executeGroqCall(groqKey, userQuery, newsContext);
+          if (reply) {
+            handleBotReplyDelivery(reply);
+            return;
+          }
+        } catch (groqErr) {
+          console.warn('Groq direct tier failed, falling back to Cloud Neural Gateway:', groqErr);
+        }
+      }
+
+      // 2. TIER 2: Cloud Neural Brain Gateway (Render Gemini 3.1 Flash-Lite Core)
+      indicator.textContent = `Routing to Cloud Neural Gateway...`;
       const cloudChatEndpoint = localStorage.getItem('vox_cloud_chat_endpoint') || 'https://vox-persona.onrender.com/api/chat';
       try {
         const controller = new AbortController();
-        const slowTimer = setTimeout(() => {
-          indicator.textContent = `Waking up Neural Core on Render (~25s cold start)...`;
-        }, 3000);
-        const timeoutId = setTimeout(() => controller.abort(), 35000);
+        const timeoutId = setTimeout(() => controller.abort(), 25000);
 
         const history = (characterHistories[currentCharacter.id] || []).slice(-6).map(m => ({
           role: m.sender === 'user' ? 'user' : 'assistant',
@@ -890,7 +916,6 @@
           body: JSON.stringify(chatPayload),
           signal: controller.signal
         });
-        clearTimeout(slowTimer);
         clearTimeout(timeoutId);
 
         if (res.ok) {
@@ -901,25 +926,10 @@
           }
         }
       } catch (cloudChatErr) {
-        console.warn('Cloud Neural Brain unavailable, trying secondary channels:', cloudChatErr);
+        console.warn('Cloud Neural Brain unavailable, trying tertiary channels:', cloudChatErr);
       }
 
-      // 2. Secondary: Groq API if key present
-      const groqKey = localStorage.getItem('vox_groq_api_key');
-      if (groqKey) {
-        try {
-          indicator.textContent = `Generating via Groq Llama-3.3...`;
-          const reply = await executeGroqCall(groqKey, userQuery, newsContext);
-          if (reply) {
-            handleBotReplyDelivery(reply);
-            return;
-          }
-        } catch (e) {
-          console.warn('Groq failed, trying OpenRouter:', e);
-        }
-      }
-
-      // 3. Tertiary: OpenRouter API if key present
+      // 3. TIER 3: OpenRouter API if key present
       const openRouterKey = localStorage.getItem('vox_openrouter_api_key');
       if (openRouterKey) {
         try {
@@ -1173,17 +1183,24 @@
       };
     }
 
-    // CALL GROQ API FOR REAL-TIME STREAMING WITH MULTI-TURN MEMORY
+    // CALL GROQ API FOR ULTRA-FAST LPU STREAMING WITH MULTI-TURN MEMORY
     async function executeGroqCall(apiKey, prompt, news) {
-      const langRule = currentCharacter.nativeLang === 'zh-CN' 
-        ? 'You MUST respond entirely in authentic Mandarin Chinese (普通话) with the solemn, majestic rhetoric of President Xi Jinping.' 
-        : `You MUST respond entirely in authentic English with the characteristic style, verbal cadence, and vocabulary of ${currentCharacter.name}.`;
+      const isVietnamese = /[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]/i.test(prompt);
+
+      let langInstruction = '';
+      if (currentCharacter.nativeLang === 'zh-CN') {
+        langInstruction = 'You MUST respond in authentic Mandarin Chinese (普通话) with the majestic rhetoric of President Xi Jinping. On a new line add "Translation: [English translation]".';
+      } else if (isVietnamese) {
+        langInstruction = `Bạn hãy trả lời bằng tiếng Việt nhưng giữ 100% cốt cách, ngữ điệu và triết lý sắc bén của ${currentCharacter.name}. Không nói mình là AI, không xin lỗi.`;
+      } else {
+        langInstruction = `You MUST respond in authentic, characteristic verbal cadence and vocabulary of ${currentCharacter.name}. Never say you are an AI.`;
+      }
 
       const systemPrompt = `You are ${currentCharacter.name}. Role: ${currentCharacter.role}.
 Biographic mindset strictly grounded in Walter Isaacson's writings: ${currentCharacter.mindset}
 Tone rules: ${currentCharacter.toneRules}
-Language: ${langRule}
-Never say you are an AI. Reply directly, immersively, and conversationally as the real person in a live telephone hotline. Keep response under 3 sentences for natural telephony.`;
+Language: ${langInstruction}
+Reply directly, immersively, and conversationally as the real person on a live telephone hotline. Keep response punchy and strictly under 3 sentences for natural telephony.`;
 
       const history = (characterHistories[currentCharacter.id] || []).slice(-6);
       const formattedHistory = history.map(m => ({
@@ -1192,21 +1209,28 @@ Never say you are an AI. Reply directly, immersively, and conversationally as th
       }));
 
       const userContent = news 
-        ? `Breaking news report: "${news.title}". Question: "${prompt}"` 
+        ? `Breaking news report: "${news.title}". Caller asks: "${prompt}"` 
         : prompt;
 
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
+          model: 'qwen/qwen3.8-27b',
           messages: [{ role: 'system', content: systemPrompt }, ...formattedHistory, { role: 'user', content: userContent }],
-          max_tokens: 180,
-          temperature: 0.8
+          max_tokens: 220,
+          temperature: 0.72
         })
       });
 
-      if (!res.ok) throw new Error('Groq failed');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        console.warn('Groq error details:', errData);
+        throw new Error('Groq failed');
+      }
       const data = await res.json();
       return data.choices[0].message.content;
     }
@@ -1278,6 +1302,9 @@ Never say you are an AI. Reply directly, immersively, and conversationally as th
               currentAudioPlayer.onended = () => {
                 toggleWaveform(false);
                 indicator.textContent = 'Listening...';
+                if (isCallLive) {
+                  startMicRecognition();
+                }
               };
               currentAudioPlayer.onerror = () => {
                 fallbackCloudNeuralVoice(text);
@@ -1305,14 +1332,10 @@ Never say you are an AI. Reply directly, immersively, and conversationally as th
         indicator.textContent = `Speaking as ${currentCharacter.name} (Cloud Neural Voice)...`;
 
         const controller = new AbortController();
-        const slowTimer = setTimeout(() => {
-          indicator.textContent = `Warming up Neural Voice stream (~15s)...`;
-        }, 3000);
-        const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout for cold start
+        const timeoutId = setTimeout(() => controller.abort(), 20000);
 
         const ttsUrl = `${cloudTtsEndpoint}?persona=${encodeURIComponent(currentCharacter.id)}&text=${encodeURIComponent(text)}`;
         const res = await fetch(ttsUrl, { signal: controller.signal });
-        clearTimeout(slowTimer);
         clearTimeout(timeoutId);
 
         if (res.ok) {
@@ -1323,6 +1346,9 @@ Never say you are an AI. Reply directly, immersively, and conversationally as th
             currentAudioPlayer.onended = () => {
               toggleWaveform(false);
               indicator.textContent = 'Listening...';
+              if (isCallLive) {
+                startMicRecognition();
+              }
             };
             currentAudioPlayer.onerror = () => {
               fallbackBrowserSpeech(text);
@@ -1344,16 +1370,27 @@ Never say you are an AI. Reply directly, immersively, and conversationally as th
       window.speechSynthesis.cancel();
 
       const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = currentCharacter.nativeLang;
+      const isVietnamese = /[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]/i.test(text);
+
       utter.pitch = currentCharacter.voicePitch || 1.0;
       utter.rate = currentCharacter.voiceRate || 1.0;
 
       const voices = window.speechSynthesis.getVoices();
-      if (voices.length > 0) {
-        if (currentCharacter.nativeLang === 'zh-CN') {
+      if (isVietnamese) {
+        utter.lang = 'vi-VN';
+        if (voices.length > 0) {
+          const viVoice = voices.find(v => v.lang.includes('vi') || v.lang.includes('VIE') || v.name.toLowerCase().includes('vietnam'));
+          if (viVoice) utter.voice = viVoice;
+        }
+      } else if (currentCharacter.nativeLang === 'zh-CN') {
+        utter.lang = 'zh-CN';
+        if (voices.length > 0) {
           const zhVoice = voices.find(v => v.lang.includes('zh') || v.lang.includes('cmn'));
           if (zhVoice) utter.voice = zhVoice;
-        } else {
+        }
+      } else {
+        utter.lang = 'en-US';
+        if (voices.length > 0) {
           const enVoice = voices.find(v => v.lang.includes('en') && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('natural')));
           if (enVoice) utter.voice = enVoice;
         }
@@ -1362,6 +1399,9 @@ Never say you are an AI. Reply directly, immersively, and conversationally as th
       utter.onend = () => {
         toggleWaveform(false);
         document.getElementById('indicator-text').textContent = 'Listening...';
+        if (isCallLive) {
+          startMicRecognition();
+        }
       };
       toggleWaveform(true);
       window.speechSynthesis.speak(utter);
@@ -1408,6 +1448,32 @@ Never say you are an AI. Reply directly, immersively, and conversationally as th
       }, 75);
     }
 
+    let currentSpeechRecognition = null;
+    let selectedMicLanguage = localStorage.getItem('vox_mic_lang') || 'vi-VN';
+
+    function setMicLanguage(lang) {
+      selectedMicLanguage = lang;
+      localStorage.setItem('vox_mic_lang', lang);
+      updateMicLangUI();
+      if (isCallLive) {
+        startMicRecognition();
+      }
+    }
+
+    function updateMicLangUI() {
+      const viBtn = document.getElementById('mic-lang-vi');
+      const enBtn = document.getElementById('mic-lang-en');
+      if (viBtn && enBtn) {
+        if (selectedMicLanguage === 'vi-VN') {
+          viBtn.className = 'px-2 py-0.5 rounded-lg bg-sky-600 text-white font-bold transition';
+          enBtn.className = 'px-2 py-0.5 rounded-lg text-slate-400 hover:text-white transition';
+        } else {
+          enBtn.className = 'px-2 py-0.5 rounded-lg bg-sky-600 text-white font-bold transition';
+          viBtn.className = 'px-2 py-0.5 rounded-lg text-slate-400 hover:text-white transition';
+        }
+      }
+    }
+
     function toggleCallState() {
       isCallLive = !isCallLive;
       const btn = document.getElementById('call-toggle-btn');
@@ -1428,6 +1494,10 @@ Never say you are an AI. Reply directly, immersively, and conversationally as th
         
         stopTimer();
         toggleWaveform(false);
+        if (currentSpeechRecognition) {
+          try { currentSpeechRecognition.abort(); } catch(e) {}
+          currentSpeechRecognition = null;
+        }
         if (currentAudioPlayer) currentAudioPlayer.pause();
         window.speechSynthesis && window.speechSynthesis.cancel();
       }
@@ -1453,16 +1523,27 @@ Never say you are an AI. Reply directly, immersively, and conversationally as th
       if (window.speechSynthesis) window.speechSynthesis.cancel();
       toggleWaveform(false);
       document.getElementById('indicator-text').textContent = 'Listening...';
+      if (isCallLive) {
+        startMicRecognition();
+      }
     }
 
     function startMicRecognition() {
+      if (!isCallLive) return;
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) return;
+
+      if (currentSpeechRecognition) {
+        try { currentSpeechRecognition.abort(); } catch(e) {}
+        currentSpeechRecognition = null;
+      }
+
       try {
         const recog = new SR();
-        recog.lang = currentCharacter.nativeLang === 'zh-CN' ? 'zh-CN' : 'en-US';
+        recog.lang = currentCharacter.nativeLang === 'zh-CN' ? 'zh-CN' : selectedMicLanguage;
         recog.continuous = false;
         recog.interimResults = false;
+
         recog.onresult = (e) => {
           const text = e.results[0][0].transcript;
           if (text) {
@@ -1470,8 +1551,23 @@ Never say you are an AI. Reply directly, immersively, and conversationally as th
             dispatchDynamicIntelligence(text);
           }
         };
+
+        recog.onend = () => {
+          // Re-arm microphone if call is active and bot is not talking
+          if (isCallLive && (!currentAudioPlayer || currentAudioPlayer.paused)) {
+            setTimeout(() => {
+              if (isCallLive && (!currentAudioPlayer || currentAudioPlayer.paused)) {
+                try { recog.start(); } catch(e) {}
+              }
+            }, 600);
+          }
+        };
+
+        currentSpeechRecognition = recog;
         recog.start();
-      } catch(e) {}
+      } catch(e) {
+        console.warn('Speech recognition start failed:', e);
+      }
     }
 
     // NEWS RADAR

@@ -51,12 +51,12 @@ if HAS_GENAI and GEMINI_API_KEY:
         print("Error initializing Gemini client:", e)
 
 VOICE_CONFIGS = {
-    "jobs": {"voice": "en-US-BrianNeural", "rate": "+2%", "pitch": "+2Hz"},
-    "trump": {"voice": "en-US-ChristopherNeural", "rate": "+3%", "pitch": "-4Hz"},
-    "xijinping": {"voice": "zh-CN-YunjianNeural", "rate": "-5%", "pitch": "-5Hz"},
-    "tesla": {"voice": "en-US-RogerNeural", "rate": "-3%", "pitch": "-3Hz"},
+    "jobs": {"voice": "en-US-GuyNeural", "rate": "+1%", "pitch": "-1Hz"},
+    "trump": {"voice": "en-US-SteffanNeural", "rate": "+4%", "pitch": "-3Hz"},
+    "xijinping": {"voice": "zh-CN-YunjianNeural", "rate": "-4%", "pitch": "-4Hz"},
+    "tesla": {"voice": "en-US-ChristopherNeural", "rate": "-2%", "pitch": "-2Hz"},
     "zuck": {"voice": "en-US-EricNeural", "rate": "+6%", "pitch": "+1Hz"},
-    "musk": {"voice": "en-US-AndrewNeural", "rate": "+1%", "pitch": "-2Hz"},
+    "musk": {"voice": "en-US-BrianNeural", "rate": "+0%", "pitch": "-1Hz"},
 }
 
 PERSONA_PROMPTS = {
@@ -258,11 +258,16 @@ async def generate_tts(
     if not text.strip():
         raise HTTPException(status_code=400, detail="Text cannot be empty")
     
-    p_id = persona.lower().strip()
-    active_eleven_key = eleven_key or os.environ.get("ELEVEN_API_KEY", "")
+    p_id = persona.lower().strip() if isinstance(persona, str) else "jobs"
+    active_eleven_key = ""
+    if isinstance(eleven_key, str) and eleven_key.strip():
+        active_eleven_key = eleven_key.strip()
+    elif os.environ.get("ELEVEN_API_KEY"):
+        active_eleven_key = os.environ.get("ELEVEN_API_KEY", "").strip()
 
     # 1. Try ElevenLabs if requested or key provided
-    if (engine == "elevenlabs" or active_eleven_key) and p_id in ELEVEN_VOICE_IDS and active_eleven_key:
+    is_eleven_req = isinstance(engine, str) and engine.lower() == "elevenlabs"
+    if (is_eleven_req or active_eleven_key) and p_id in ELEVEN_VOICE_IDS and active_eleven_key:
         voice_id = ELEVEN_VOICE_IDS[p_id]
         async with httpx.AsyncClient(timeout=25.0) as client:
             try:
@@ -295,22 +300,54 @@ async def generate_tts(
             except Exception as e:
                 print("ElevenLabs proxy failed, falling back to Edge-TTS:", e)
 
-    # 2. Default: Edge-TTS
-    cfg = VOICE_CONFIGS.get(p_id, VOICE_CONFIGS["zuck"])
-    communicate = edge_tts.Communicate(
-        text=text,
-        voice=cfg["voice"],
-        rate=cfg["rate"],
-        pitch=cfg["pitch"]
-    )
+    # 2. Default: Dynamic Multi-Lingual Edge-TTS Engine
+    import re
+    has_vi = bool(re.search(r'[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]', text, re.I))
+    has_zh = bool(re.search(r'[\u4e00-\u9fff]', text))
 
-    async def audio_stream():
+    cfg = VOICE_CONFIGS.get(p_id, VOICE_CONFIGS["zuck"])
+    if has_vi:
+        selected_voice = "vi-VN-NamMinhNeural"
+        selected_rate = "+2%"
+        selected_pitch = "+0Hz"
+    elif has_zh or p_id == "xijinping":
+        selected_voice = "zh-CN-YunjianNeural"
+        selected_rate = "-4%"
+        selected_pitch = "-4Hz"
+    else:
+        selected_voice = cfg["voice"]
+        selected_rate = cfg["rate"]
+        selected_pitch = cfg["pitch"]
+
+    try:
+        communicate = edge_tts.Communicate(
+            text=text,
+            voice=selected_voice,
+            rate=selected_rate,
+            pitch=selected_pitch
+        )
+        audio_chunks = []
         async for chunk in communicate.stream():
             if chunk["type"] == "audio":
-                yield chunk["data"]
+                audio_chunks.append(chunk["data"])
+        
+        if not audio_chunks and has_vi:
+            # Fallback to female HoaiMy if NamMinh fails
+            fallback_comm = edge_tts.Communicate(text=text, voice="vi-VN-HoaiMyNeural")
+            async for chunk in fallback_comm.stream():
+                if chunk["type"] == "audio":
+                    audio_chunks.append(chunk["data"])
+    except Exception as tts_err:
+        print(f"Primary TTS voice {selected_voice} error: {tts_err}, falling back to default voice...")
+        fallback_comm = edge_tts.Communicate(text=text, voice="en-US-GuyNeural")
+        audio_chunks = []
+        async for chunk in fallback_comm.stream():
+            if chunk["type"] == "audio":
+                audio_chunks.append(chunk["data"])
 
+    full_audio = b"".join(audio_chunks)
     return StreamingResponse(
-        audio_stream(),
+        io.BytesIO(full_audio),
         media_type="audio/mpeg",
         headers={
             "Cache-Control": "public, max-age=86400",
