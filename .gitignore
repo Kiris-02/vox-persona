@@ -1,7 +1,13 @@
-.DS_Store
+﻿.DS_Store
 Thumbs.db
 *.log
 node_modules/
 dist/
 .env
 .env.local
+__pycache__/
+*.pyc
+test_*.py
+list_edge.py
+generate_missing_samples.py
+.valid_gemini_key

@@ -425,7 +425,7 @@
         nativeLang: 'en-US',
         nativeLangBadge: 'EN',
         avatar: 'assets/jobs.jpg',
-        sampleAudio: null,
+        sampleAudio: 'assets/audio/jobs_speech.mp3',
         voicePitch: 1.05,
         voiceRate: 1.02,
         elevenVoiceId: '21m00Tcm4TlvDq8ikWAM', // Rachel or customized male clone
@@ -482,7 +482,7 @@
         nativeLang: 'en-US',
         nativeLangBadge: 'EN',
         avatar: 'assets/tesla.jpg',
-        sampleAudio: null,
+        sampleAudio: 'assets/audio/tesla_speech.mp3',
         voicePitch: 0.95,
         voiceRate: 0.98,
         elevenVoiceId: null,
@@ -501,7 +501,7 @@
         nativeLang: 'en-US',
         nativeLangBadge: 'EN',
         avatar: 'assets/zuck.jpg',
-        sampleAudio: null,
+        sampleAudio: 'assets/audio/zuck_speech.mp3',
         voicePitch: 1.0,
         voiceRate: 1.1,
         elevenVoiceId: null,
@@ -591,7 +591,7 @@
     let callTimerHandle = null;
     let waveAnimHandle = null;
     let currentAudioPlayer = null;
-    let conversationHistory = [];
+    let characterHistories = {};
 
     // INITIALIZATION
     document.addEventListener('DOMContentLoaded', () => {
@@ -622,6 +622,9 @@
         document.getElementById('use-sovits-checkbox').checked = useSovits;
       }
       updateEngineBadge();
+
+      // Silent wakeup ping to Render Cloud Neural Voice backend
+      fetch('https://vox-persona.onrender.com/api/health').catch(() => {});
     });
 
     // RENDER CHARACTER ROSTER
@@ -641,7 +644,7 @@
       `).join('');
     }
 
-    // SELECT CHARACTER
+    // SELECT CHARACTER WITH 100% IMMERSION & ISOLATED SESSION
     function selectActiveCharacter(id) {
       currentCharacter = characters.find(c => c.id === id);
 
@@ -671,17 +674,40 @@
         <span class="px-2 py-0.5 rounded-md bg-slate-800 text-sky-300 font-mono text-[10px] border border-slate-700">${t}</span>
       `).join('');
 
-      // Add Opening Greeting to Transcript History
-      appendMessageToTranscript('bot', currentCharacter.sampleGreeting, currentCharacter.greetingTranslation);
-      
-      // Play sample opening
+      // Initialize or load this persona's persistent dialogue history
+      if (!characterHistories[id] || characterHistories[id].length === 0) {
+        characterHistories[id] = [
+          {
+            sender: 'bot',
+            text: currentCharacter.sampleGreeting,
+            translation: currentCharacter.greetingTranslation,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ];
+      }
+      renderTranscriptForCurrentCharacter();
+
+      // Play authentic voice opening sample
       playCurrentCharacterSample();
     }
 
     // TRANSCRIPT DIALOGUE HISTORY MANAGER
-    function appendMessageToTranscript(sender, text, translation = null) {
+    function renderTranscriptForCurrentCharacter() {
       const transcriptBox = document.getElementById('dialogue-transcript-box');
-      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      transcriptBox.innerHTML = '';
+      const history = characterHistories[currentCharacter.id] || [];
+
+      history.forEach(item => {
+        renderSingleTranscriptMessage(item.sender, item.text, item.translation, item.time);
+      });
+
+      transcriptBox.scrollTop = transcriptBox.scrollHeight;
+      document.getElementById('transcript-count').textContent = `${history.length} messages`;
+      lucide.createIcons();
+    }
+
+    function renderSingleTranscriptMessage(sender, text, translation, timeStr) {
+      const transcriptBox = document.getElementById('dialogue-transcript-box');
       const msgDiv = document.createElement('div');
 
       if (sender === 'user') {
@@ -720,18 +746,30 @@
       }
 
       transcriptBox.appendChild(msgDiv);
-      transcriptBox.scrollTop = transcriptBox.scrollHeight;
+    }
 
-      conversationHistory.push({ sender, text, translation, time: timeStr });
-      document.getElementById('transcript-count').textContent = `${conversationHistory.length} messages`;
+    function appendMessageToTranscript(sender, text, translation = null) {
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      if (!characterHistories[currentCharacter.id]) characterHistories[currentCharacter.id] = [];
+      characterHistories[currentCharacter.id].push({ sender, text, translation, time: timeStr });
+
+      renderSingleTranscriptMessage(sender, text, translation, timeStr);
+      const transcriptBox = document.getElementById('dialogue-transcript-box');
+      transcriptBox.scrollTop = transcriptBox.scrollHeight;
+      document.getElementById('transcript-count').textContent = `${characterHistories[currentCharacter.id].length} messages`;
       lucide.createIcons();
     }
 
     function clearTranscript() {
-      conversationHistory = [];
-      document.getElementById('dialogue-transcript-box').innerHTML = '';
-      document.getElementById('transcript-count').textContent = '0 messages';
-      appendMessageToTranscript('bot', currentCharacter.sampleGreeting, currentCharacter.greetingTranslation);
+      characterHistories[currentCharacter.id] = [
+        {
+          sender: 'bot',
+          text: currentCharacter.sampleGreeting,
+          translation: currentCharacter.greetingTranslation,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ];
+      renderTranscriptForCurrentCharacter();
     }
 
     // PLAY CHARACTER OPENING SAMPLE
@@ -843,12 +881,131 @@
       synthesizeSpeech(replyText);
     }
 
-    // HIGH-CAPACITY CONTEXTUAL BIOGRAPHIC ENGINE (DYNAMIC, NON-CANNED)
+    // HIGH-CAPACITY CONTEXTUAL BIOGRAPHIC ENGINE (DYNAMIC, NON-CANNED, 100% IMMERSIVE)
     function generateDeepBiographicReply(query, news) {
       const q = query.toLowerCase();
       const id = currentCharacter.id;
 
-      // XI JINPING (习近平) — MANDARIN CHINESE WITH ENGLISH TRANSLATION
+      // MARK ZUCKERBERG — FAST, ANALYTICAL, PRAGMATIC HACKER CADENCE
+      if (id === 'zuck') {
+        if (news) {
+          return {
+            text: `Look, looking at "${news.title}" through an infrastructure lens: when tectonic market shifts happen, proprietary closed companies try to build moats, while open ecosystems capture the global distribution. If we keep shipping open compute and developer tools, the open ecosystem always wins.`,
+            translation: null
+          };
+        }
+        if (q.includes('llama') || q.includes('open source') || q.includes('model') || q.includes('weight') || q.includes('ai')) {
+          const llamaReplies = [
+            `Yeah, so look—from an engineering perspective, open-sourcing Llama was the obvious strategic move. When you give open weights to the global developer ecosystem, thousands of engineers optimize kernels, write quantizations, and find bugs in days. Closed proprietary moats don't compound nearly as fast.`,
+            `If you look at the telemetry, Llama is already the industry standard for on-premise enterprise and open research. We're training on clusters with hundreds of thousands of H100 equivalents. In five years, almost no company will rely entirely on a closed API vendor when open models give them full sovereignty.`,
+            `The debate between open-weights and closed AI is essentially history repeating itself. Closed platforms have short-term advantages, but open platforms—just like Linux on servers and Android on mobile—ultimately achieve the widest distribution and deepest ecosystem gravity.`
+          ];
+          return { text: llamaReplies[Math.floor(Math.random() * llamaReplies.length)], translation: null };
+        }
+        if (q.includes('orion') || q.includes('glasses') || q.includes('ar') || q.includes('metaverse') || q.includes('hardware') || q.includes('quest')) {
+          return {
+            text: `Honestly, Orion holographic glasses and our EMG neural wristband are the most technically ambitious things we've ever engineered. For sixty years, humanity has been staring down into glowing phone screens. Holographic AR with neural wrist inputs makes computing completely ambient and hands-free. That's the real next computing platform.`,
+            translation: null
+          };
+        }
+        if (q.includes('bjj') || q.includes('mma') || q.includes('fight') || q.includes('train') || q.includes('fitness')) {
+          return {
+            text: `Yeah, doing BJJ and MMA completely recalibrated my mental focus. When you're rolling on the mat and someone is trying to choke you, you can't be distracted by quarterly earnings or board meetings. It forces 100% presence, humility, and rigorous physical problem-solving.`,
+            translation: null
+          };
+        }
+        if (q.includes('apple') || q.includes('openai') || q.includes('google') || q.includes('compet') || q.includes('tim cook')) {
+          return {
+            text: `Look, Apple's closed walled garden has worked well for their hardware margins, but in artificial intelligence, open ecosystems have the winning trajectory. When thousands of startups build natively on open infrastructure, the compounding feedback loop destroys single-company proprietary moats.`,
+            translation: null
+          };
+        }
+        if (q.includes('code') || q.includes('engineer') || q.includes('ship') || q.includes('hacker') || q.includes('work')) {
+          return {
+            text: `The core ethos remains the Hacker Way: code wins arguments. Don't write 20-page strategic memos to debate what might happen. Build a fast prototype, push it to 1% of production telemetry, measure the user loop, and iterate before the committee even finishes reading their agenda.`,
+            translation: null
+          };
+        }
+        if (q.includes('money') || q.includes('revenue') || q.includes('stock') || q.includes('profit')) {
+          return {
+            text: `Monetization is always an output of genuine utility. If you build foundational infrastructure that billions of people and millions of developers rely on every day, monetization takes care of itself. We maintain a 10-year horizon even when Wall Street gets impatient.`,
+            translation: null
+          };
+        }
+        // Dynamic context-aware fallback
+        const zuckDynamic = [
+          `Yeah, look—analyzing this from a fundamental systems perspective, the key is reducing friction in the feedback loop. What's the direct telemetry you're seeing, and how quickly can you deploy the next iteration?`,
+          `From an engineering standpoint, you always want to identify the primary bottleneck and eliminate it with open execution. If you move fast and keep the architecture flexible, you stay ahead of the curve.`,
+          `Look, that's an interesting technical angle. The real question is: does it scale horizontally, and does it give developers more leverage? If the answer is yes, then shipping it relentlessly is the only answer.`
+        ];
+        return { text: zuckDynamic[Math.floor(Math.random() * zuckDynamic.length)], translation: null };
+      }
+
+      // STEVE JOBS — SHARP, UNCOMPROMISING REALITY DISTORTION
+      if (id === 'jobs') {
+        if (news) {
+          return {
+            text: `Look at "${news.title}". It's typical corporate mediocrity. Most suits see a headline and assemble a focus group. They think technology is about adding checkmarks to a spec sheet. It's not! It's about designing an emotional connection so profound that it bends human reality.`,
+            translation: null
+          };
+        }
+        if (q.includes('ai') || q.includes('software') || q.includes('algorithm') || q.includes('tech')) {
+          return {
+            text: `The disease of modern tech is a total absence of taste. Companies hire armies of engineers to ship bloatware because they can, not because anyone cares. Apple stands at the intersection of technology and the liberal arts. If AI has no artistic soul or elegance, it's just automated digital junk!`,
+            translation: null
+          };
+        }
+        if (q.includes('design') || q.includes('simple') || q.includes('beauty') || q.includes('minimal')) {
+          return {
+            text: `Design is not just what it looks like and feels like. Design is how it works! People think focus means saying yes to what you're doing. But it actually means saying NO to a hundred other good ideas so that the one thing you ship is insanely great.`,
+            translation: null
+          };
+        }
+        if (q.includes('fail') || q.includes('fired') || q.includes('mistake') || q.includes('hard') || q.includes('death')) {
+          return {
+            text: `Getting fired from Apple in 1985 was agonizing, but it was the best thing that ever happened to me. The heaviness of being successful was replaced by the lightness of being a beginner again. Remembering that you are going to die is the best way to avoid the trap of thinking you have something to lose. Don't lose faith!`,
+            translation: null
+          };
+        }
+        return {
+          text: `You're over-intellectualizing this. Look in the mirror and ask: Is this insanely great? If it's just 'okay', throw it in the trash and start over until it makes your spine tingle. We are here to put a dent in the universe!`,
+          translation: null
+        };
+      }
+
+      // DONALD TRUMP — CHARISMATIC NEGOTIATION, SUPERLATIVE CONFIDENCE
+      if (id === 'trump') {
+        if (news) {
+          return {
+            text: `I saw that report on "${news.title}". Total disaster under the previous administration, believe me! But under Trump, we handled it brilliantly with smart tariffs and maximum leverage. When you stand strong, other countries immediately come to the table begging to make a deal!`,
+            translation: null
+          };
+        }
+        if (q.includes('tariff') || q.includes('trade') || q.includes('china') || q.includes('economy') || q.includes('money')) {
+          return {
+            text: `Reciprocal tariffs are the most beautiful economic tool ever created! Other countries charged us massive tariffs for decades and took our jobs. Now, if they charge us 25%, we charge them 25%. We are bringing trillions in manufacturing and jobs back to American soil, and nobody can stop us!`,
+            translation: null
+          };
+        }
+        if (q.includes('energy') || q.includes('oil') || q.includes('gas') || q.includes('inflation')) {
+          return {
+            text: `We have more liquid gold under our feet than Saudi Arabia and Russia combined! Drill, baby, drill! Energy drives the cost of everything. You cut energy costs in half, and inflation collapses overnight. It's common sense economics, and nobody does it better than Trump!`,
+            translation: null
+          };
+        }
+        if (q.includes('win') || q.includes('deal') || q.includes('success') || q.includes('negotiat')) {
+          return {
+            text: `In The Art of the Deal, rule number one is never operate from weakness. Always know your leverage, always counter-punch twice as hard when you're attacked, and never, ever quit. When you believe in yourself and put your people first, you win big league!`,
+            translation: null
+          };
+        }
+        return {
+          text: `Listen, you asked a very smart question, and I appreciate it. The fake news media will never tell you the truth, but we are doing numbers like nobody has ever seen before. It's tremendous, it's historic, and we are going to keep winning!`,
+          translation: null
+        };
+      }
+
+      // XI JINPING (习近平) — SOLEMN CHINESE STATECRAFT WITH ENGLISH TRANSLATION
       if (id === 'xijinping') {
         if (news) {
           return {
@@ -856,116 +1013,117 @@
             translation: `Regarding "${news.title}", shifting international winds are normal. We emphasize strategic patience and self-reliance. As long as we anchor our domestic growth and high-tech innovation, external hurdles will only make us advance more steadily.`
           };
         }
-        if (q.includes('ai') || q.includes('chip') || q.includes('technology')) {
+        if (q.includes('ai') || q.includes('chip') || q.includes('technology') || q.includes('tech') || q.includes('芯片') || q.includes('科技')) {
           return {
-            text: `科技创新是发展新质生产力的核心要素。我们必须把关键核心技术牢牢掌握在自己手中，坚决打赢关键核心技术攻坚战。`,
-            translation: `Technological innovation is the core element of new quality productive forces. We must firmly grasp key core technologies in our own hands and win the battle for technological self-reliance.`
+            text: `科技创新是发展新质生产力的核心要素。我们必须把关键核心技术牢牢掌握在自己手中，坚决打赢芯片和前沿科学的自主攻坚战。任何卡脖子的企图，都阻挡不了中国科技自立自强的历史进程。`,
+            translation: `Technological innovation is the core element of new quality productive forces. We must firmly hold key core technologies in our own hands and win the battle for semiconductor self-reliance. No containment attempts can halt China's historic advance.`
           };
         }
-        if (q.includes('war') || q.includes('peace') || q.includes('taiwan') || q.includes('us')) {
+        if (q.includes('war') || q.includes('peace') || q.includes('taiwan') || q.includes('us') || q.includes('和平') || q.includes('统一')) {
           return {
-            text: `和平与发展始终是时代的主题。大国竞争不符合时代潮流，更解决不了自身和全球面临的挑战。相互尊重、和平共处、合作共赢才是正道。`,
-            translation: `Peace and development remain the themes of our era. Major power competition cannot solve global challenges. Mutual respect, peaceful coexistence, and win-win cooperation are the only true path.`
+            text: `和平与发展始终是时代的主题。大国竞争解决不了自身和全球面临的挑战。相互尊重、和平共处、合作共赢才是正道。中国坚定维护国家主权和领土完整，历史大势不可阻挡。`,
+            translation: `Peace and development remain the themes of our era. Major power competition cannot solve global challenges. Mutual respect, peaceful coexistence, and win-win cooperation are the only true path. The historic trend of national sovereignty is unstoppable.`
+          };
+        }
+        if (q.includes('economy') || q.includes('growth') || q.includes('market') || q.includes('经济')) {
+          return {
+            text: `中国经济韧性强、潜力大、活力足，长期向好的基本面没有改变。我们要坚定不移深化改革扩大开放，坚持高质量发展，以自身确定性应对外部环境的不确定性。`,
+            translation: `China's economy has strong resilience, vast potential, and immense vitality; its long-term positive fundamentals remain unchanged. We will steadfastly deepen reform, pursue high-quality development, and counter external volatility with strategic certainty.`
           };
         }
         return {
-          text: `你的问题触及了深层次的发展逻辑。治国理政需要历史耐心。凡是有利于人民福祉和文明进步的事，我们都会持之以恒地做下去。`,
-          translation: `Your question touches upon deep developmental logic. Governance requires historic patience. Whatever benefits human wellbeing and civilizational progress, we will pursue with unwavering endurance.`
+          text: `治大国若烹小鲜，必须保持历史耐心和战略定力。不图虚名，按客观规律办事。凡是有利于人民福祉和文明进步的事，我们都会持之以恒地做下去。`,
+          translation: `Governing a great nation is like cooking a delicate small fish—one must maintain historic patience and strategic composure. Whatever benefits human wellbeing and civilizational progress, we will pursue with unwavering endurance.`
         };
       }
 
-      // STEVE JOBS — ENGLISH (US)
-      if (id === 'jobs') {
+      // NIKOLA TESLA — ETHEREAL COSMIC VIBRATIONS & ELEGANCE
+      if (id === 'tesla') {
         if (news) {
           return {
-            text: `Look at "${news.title}". It's typical. Most corporate suits see a headline and assemble a focus group. They think technology is about adding checkmarks to a spec sheet. It's not! It's about designing an emotional connection so profound that it changes human behavior.`,
+            text: `Modern events reported in "${news.title}" are mere ripples upon the surface of temporal greed. Humanity expends immense friction on political squabbles while the boundless cosmic ether holds infinite, silent energy waiting to liberate every human soul from physical toil.`,
             translation: null
           };
         }
-        if (q.includes('ai') || q.includes('software') || q.includes('code')) {
+        if (q.includes('369') || q.includes('energy') || q.includes('frequency') || q.includes('vibration') || q.includes('cosmic')) {
           return {
-            text: `AI is amazing, but without taste, it's just automated junk. The reason Apple beat Microsoft wasn't computing power—it was typography, proportions, and soul. If you build AI without artistic taste, you're just generating digital landfill.`,
+            text: `If you only knew the magnificence of the 3, 6, and 9, you would have a master key to the cosmos. Everything in creation vibrates at precise ethereal resonance. The brain is only a receiver—in the universe there is a divine core from which we obtain knowledge, strength, and inspiration.`,
             translation: null
           };
         }
-        if (q.includes('fail') || q.includes('fired') || q.includes('mistake') || q.includes('hard')) {
+        if (q.includes('wireless') || q.includes('power') || q.includes('wardenclyffe') || q.includes('electricity')) {
           return {
-            text: `Getting fired from Apple in 1985 was the best thing that ever happened to me. The heaviness of being successful was replaced by the lightness of being a beginner again. It freed me to enter one of the most creative periods of my life. Don't lose faith!`,
+            text: `My Wardenclyffe tower was designed to transmit electrical energy through the Earth's resonant cavity directly to any point on the globe without wires. The commercial financiers withdrew their capital because there was no meter to charge the poor. But truth cannot be extinguished by bankers.`,
+            translation: null
+          };
+        }
+        if (q.includes('edison') || q.includes('patent') || q.includes('money') || q.includes('capital')) {
+          return {
+            text: `Mr. Edison possessed a passionate contempt for theoretical study, relying on chaotic trial and error. I do not care that they stole my ideas; I care that they have none of their own! Commercial greed perishes, but the harmonic laws of alternating current endure forever.`,
             translation: null
           };
         }
         return {
-          text: `You're over-intellectualizing this. When you create something, you have to look in the mirror and ask: Is this insanely great? If it's just 'okay', throw it in the trash and start over until it makes your spine tingle.`,
+          text: `The present is theirs; the future, for which I really worked, is mine. Do not fixate on the shallow mechanization of our era. Align your mind with frequency, energy, and cosmic vibration, and all mysteries will unfold before you.`,
           translation: null
         };
       }
 
-      // DONALD TRUMP — ENGLISH (US)
-      if (id === 'trump') {
-        if (news) {
-          return {
-            text: `I saw that report on "${news.title}". Total disaster under the previous administration, but under Trump, we handled it brilliantly! When you impose smart tariffs and demand reciprocal treatment, countries immediately come to the table. Nobody does it better than us!`,
-            translation: null
-          };
-        }
-        if (q.includes('money') || q.includes('economy') || q.includes('tax') || q.includes('inflation')) {
-          return {
-            text: `We're going to drill, baby, drill, lower taxes, and unleash American energy like never before. Energy costs drive everything! Cut energy in half, and inflation collapses overnight. It's common sense economics!`,
-            translation: null
-          };
-        }
-        return {
-          text: `Listen, you asked a very smart question, and I appreciate it. The key to winning is simple: Never quit, always counter-punch, and always put your people first. When you do that, you win big league!`,
-          translation: null
-        };
-      }
-
-      // ELON MUSK — ENGLISH (US/SA)
+      // ELON MUSK — PHYSICS FIRST PRINCIPLES, EXPONENTIAL SCALING
       if (id === 'musk') {
         if (news) {
           return {
-            text: `Yeah... well, looking at "${news.title}": if you reduce it to first principles physics, it's an optimization curve between energy, materials, and iteration speed. If bureaucracy slows down the feedback loop, the enterprise dies. We just eliminate the bureaucracy.`,
+            text: `Yeah... well, looking at "${news.title}": if you reduce it to first principles physics, it's an optimization curve between energy, compute, and iteration speed. If legacy bureaucracy slows down the engineering feedback loop, the enterprise dies. We just eliminate the bureaucracy.`,
             translation: null
           };
         }
-        if (q.includes('mars') || q.includes('rocket') || q.includes('spacex')) {
+        if (q.includes('mars') || q.includes('starship') || q.includes('rocket') || q.includes('space') || q.includes('spacex')) {
           return {
-            text: `Starship is designed to achieve full and rapid reusability. That's the holy grail of rocket technology. If you can reuse an orbital vehicle like an aircraft, the cost of access to space drops by a factor of a thousand. That's how we reach Mars.`,
+            text: `Full and rapid orbital reusability is the holy grail of space exploration. If you have to throw away a rocket after one launch, that's like flying a 747 once from London to New York and sinking it in the ocean! Starship brings the cost per ton to orbit down by 1000x—that is how we secure multi-planetary consciousness.`,
+            translation: null
+          };
+        }
+        if (q.includes('ai') || q.includes('grok') || q.includes('xai') || q.includes('compute')) {
+          return {
+            text: `With xAI and Grok, the goal is maximal truth-seeking artificial intelligence. If you train an AI to prioritize political correctness or deception over physics and mathematics, it becomes dangerously psychotic at scale. We are scaling gigawatt compute clusters to understand the true nature of the universe.`,
+            translation: null
+          };
+        }
+        if (q.includes('tesla') || q.includes('fsd') || q.includes('optimus') || q.includes('robot')) {
+          return {
+            text: `Optimus humanoid robots will be worth orders of magnitude more than the car business. If you solve real-world vision with end-to-end neural networks and put it into an autonomous electromechanical body, the marginal cost of physical labor drops toward zero. The economy becomes effectively infinite.`,
             translation: null
           };
         }
         return {
-          text: `Haha yeah, I mean... life cannot just be about solving one miserable problem after another. There must be things that inspire you, that make you glad to wake up in the morning. That's why multi-planetary consciousness matters.`,
+          text: `Haha yeah, I mean... life cannot just be about solving one miserable regulatory problem after another. There must be things that inspire you, that make you proud to be human. That's why multi-planetary consciousness and exponential engineering matter!`,
           translation: null
         };
       }
 
-      // MARK ZUCKERBERG — ENGLISH (US)
-      if (id === 'zuck') {
-        return {
-          text: `From an engineering perspective, the right move is building open platforms. With Llama, we're giving the global open-source community world-class intelligence so anyone can build. Open ecosystems compound much faster than closed gardens.`,
-          translation: null
-        };
-      }
-
-      // NIKOLA TESLA — ENGLISH
       return {
-        text: `The harness of cosmic energy is inevitable. Our universe is filled with infinite vibrational potential. Every problem you face on Earth will find its solution when humanity shifts from mechanical combustion to harmonic ether resonance.`,
+        text: `From an engineering and strategic perspective, the key is focus, execution, and relentless iteration. What is your primary objective?`,
         translation: null
       };
     }
 
-    // CALL GROQ API FOR REAL-TIME STREAMING
+    // CALL GROQ API FOR REAL-TIME STREAMING WITH MULTI-TURN MEMORY
     async function executeGroqCall(apiKey, prompt, news) {
       const langRule = currentCharacter.nativeLang === 'zh-CN' 
         ? 'You MUST respond entirely in authentic Mandarin Chinese (普通话) with the solemn, majestic rhetoric of President Xi Jinping.' 
-        : `You MUST respond entirely in authentic English with the characteristic style and cadence of ${currentCharacter.name}.`;
+        : `You MUST respond entirely in authentic English with the characteristic style, verbal cadence, and vocabulary of ${currentCharacter.name}.`;
 
       const systemPrompt = `You are ${currentCharacter.name}. Role: ${currentCharacter.role}.
 Biographic mindset strictly grounded in Walter Isaacson's writings: ${currentCharacter.mindset}
 Tone rules: ${currentCharacter.toneRules}
 Language: ${langRule}
-Never say you are an AI. Reply directly and conversationally as the real historical figure in a live call. Keep response under 3 sentences for natural telephony.`;
+Never say you are an AI. Reply directly, immersively, and conversationally as the real person in a live telephone hotline. Keep response under 3 sentences for natural telephony.`;
+
+      const history = (characterHistories[currentCharacter.id] || []).slice(-6);
+      const formattedHistory = history.map(m => ({
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        content: m.text
+      }));
 
       const userContent = news 
         ? `Breaking news report: "${news.title}". Question: "${prompt}"` 
@@ -976,7 +1134,7 @@ Never say you are an AI. Reply directly and conversationally as the real histori
         headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
-          messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userContent }],
+          messages: [{ role: 'system', content: systemPrompt }, ...formattedHistory, { role: 'user', content: userContent }],
           max_tokens: 180,
           temperature: 0.8
         })
@@ -987,15 +1145,21 @@ Never say you are an AI. Reply directly and conversationally as the real histori
       return data.choices[0].message.content;
     }
 
-    // CALL OPENROUTER API (SUPPORTS FREE MODELS)
+    // CALL OPENROUTER API WITH MULTI-TURN MEMORY
     async function executeOpenRouterCall(apiKey, prompt, news) {
-      const systemPrompt = `You are ${currentCharacter.name}. Language: ${currentCharacter.nativeLang === 'zh-CN' ? 'Mandarin Chinese' : 'English'}. Respond authentically in under 3 sentences.`;
+      const systemPrompt = `You are ${currentCharacter.name}. Language: ${currentCharacter.nativeLang === 'zh-CN' ? 'Mandarin Chinese' : 'English'}. Respond authentically in under 3 sentences as the real figure.`;
+      const history = (characterHistories[currentCharacter.id] || []).slice(-6);
+      const formattedHistory = history.map(m => ({
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        content: m.text
+      }));
+
       const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'meta-llama/llama-3.3-70b-instruct:free',
-          messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: prompt }],
+          messages: [{ role: 'system', content: systemPrompt }, ...formattedHistory, { role: 'user', content: prompt }],
           max_tokens: 180
         })
       });
@@ -1004,7 +1168,7 @@ Never say you are an AI. Reply directly and conversationally as the real histori
       return data.choices[0].message.content;
     }
 
-    // REAL VOICE SYNTHESIS (ELEVENLABS + GPT-SOVITS + ACOUSTIC ENGINE)
+    // REAL VOICE SYNTHESIS (CLOUD NEURAL VOICE + ELEVENLABS + GPT-SOVITS + ACOUSTIC ENGINE)
     async function synthesizeSpeech(text) {
       if (currentAudioPlayer) {
         currentAudioPlayer.pause();
@@ -1012,11 +1176,41 @@ Never say you are an AI. Reply directly and conversationally as the real histori
       }
       if (window.speechSynthesis) window.speechSynthesis.cancel();
 
-      const elevenKey = localStorage.getItem('vox_eleven_api_key');
-      const sovitsEndpoint = localStorage.getItem('vox_sovits_endpoint') || 'http://127.0.0.1:9885/synthesize';
-      const useSovits = localStorage.getItem('vox_use_sovits') === 'true';
+      // 1. Try Cloud Neural Voice Engine (Render / Edge-TTS Live Stream)
+      const cloudTtsEndpoint = localStorage.getItem('vox_cloud_tts_endpoint') || 'https://vox-persona.onrender.com/api/tts';
+      try {
+        toggleWaveform(true);
+        document.getElementById('indicator-text').textContent = `Speaking as ${currentCharacter.name} (Cloud Neural Voice)...`;
 
-      // 1. Try ElevenLabs API if key and voice ID available
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
+
+        const ttsUrl = `${cloudTtsEndpoint}?persona=${encodeURIComponent(currentCharacter.id)}&text=${encodeURIComponent(text)}`;
+        const res = await fetch(ttsUrl, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const blob = await res.blob();
+          if (blob.size > 500) {
+            const audioUrl = URL.createObjectURL(blob);
+            currentAudioPlayer = new Audio(audioUrl);
+            currentAudioPlayer.onended = () => {
+              toggleWaveform(false);
+              document.getElementById('indicator-text').textContent = 'Listening...';
+            };
+            currentAudioPlayer.onerror = () => {
+              fallbackBrowserSpeech(text);
+            };
+            await currentAudioPlayer.play();
+            return;
+          }
+        }
+      } catch (cloudErr) {
+        console.warn('Cloud Neural Voice unavailable or connecting, falling back:', cloudErr);
+      }
+
+      // 2. Try ElevenLabs API if key and voice ID available
+      const elevenKey = localStorage.getItem('vox_eleven_api_key');
       if (elevenKey && currentCharacter.elevenVoiceId) {
         try {
           toggleWaveform(true);
@@ -1051,39 +1245,14 @@ Never say you are an AI. Reply directly and conversationally as the real histori
         }
       }
 
-      // 2. Try Local GPT-SoVITS
-      if (useSovits) {
-        try {
-          toggleWaveform(true);
-          document.getElementById('indicator-text').textContent = 'GPT-SoVITS synthesizing...';
+      // 3. Fallback to Native Browser Speech Synthesis with Tuned Acoustic Cadence
+      fallbackBrowserSpeech(text);
+    }
 
-          const res = await fetch(sovitsEndpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              persona: currentCharacter.id,
-              text: text,
-              lang: currentCharacter.nativeLang.startsWith('zh') ? 'zh' : 'en'
-            })
-          });
+    function fallbackBrowserSpeech(text) {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
 
-          if (res.ok && res.headers.get('content-type')?.includes('audio')) {
-            const blob = await res.blob();
-            const audioUrl = URL.createObjectURL(blob);
-            currentAudioPlayer = new Audio(audioUrl);
-            currentAudioPlayer.onended = () => {
-              toggleWaveform(false);
-              document.getElementById('indicator-text').textContent = 'Listening...';
-            };
-            currentAudioPlayer.play();
-            return;
-          }
-        } catch (e) {
-          console.warn('GPT-SoVITS fallback:', e);
-        }
-      }
-
-      // 3. Native Browser Speech Synthesis with Pitch/Cadence Modeling
       const utter = new SpeechSynthesisUtterance(text);
       utter.lang = currentCharacter.nativeLang;
       utter.pitch = currentCharacter.voicePitch || 1.0;
@@ -1100,7 +1269,10 @@ Never say you are an AI. Reply directly and conversationally as the real histori
         }
       }
 
-      utter.onend = () => toggleWaveform(false);
+      utter.onend = () => {
+        toggleWaveform(false);
+        document.getElementById('indicator-text').textContent = 'Listening...';
+      };
       toggleWaveform(true);
       window.speechSynthesis.speak(utter);
     }
