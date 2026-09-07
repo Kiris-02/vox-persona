@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import edge_tts
+import httpx
 
 try:
     from google import genai
@@ -186,15 +187,64 @@ async def chat_endpoint(req: ChatRequest):
         "engine": "gemini-neural-core"
     }
 
+ELEVEN_VOICE_IDS = {
+    "jobs": "pNInz6obpgDQGcFmaJgB",
+    "trump": "JBFqnCBsd6RMkjVDRZzb",
+    "xijinping": "VR6AewLTigWG4xSOukaG",
+    "tesla": "flq6f7yk4E4fJM5XTYuZ",
+    "zuck": "TxGEqnHWrfWFTfGW9XjX",
+    "musk": "CYw3kZ02Hs0563khs1Fj",
+}
+
 @app.get("/api/tts")
 async def generate_tts(
     persona: str = Query("zuck", description="Character ID"),
-    text: str = Query(..., description="Text to synthesize")
+    text: str = Query(..., description="Text to synthesize"),
+    engine: Optional[str] = Query(None, description="tts engine: edge or elevenlabs"),
+    eleven_key: Optional[str] = Query(None, description="Optional ElevenLabs API key")
 ):
     if not text.strip():
         raise HTTPException(status_code=400, detail="Text cannot be empty")
     
-    cfg = VOICE_CONFIGS.get(persona.lower(), VOICE_CONFIGS["zuck"])
+    p_id = persona.lower().strip()
+    active_eleven_key = eleven_key or os.environ.get("ELEVEN_API_KEY", "")
+
+    # 1. Try ElevenLabs if requested or key provided
+    if (engine == "elevenlabs" or active_eleven_key) and p_id in ELEVEN_VOICE_IDS and active_eleven_key:
+        voice_id = ELEVEN_VOICE_IDS[p_id]
+        async with httpx.AsyncClient(timeout=25.0) as client:
+            try:
+                resp = await client.post(
+                    f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
+                    headers={
+                        "xi-api-key": active_eleven_key,
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "text": text,
+                        "model_id": "eleven_multilingual_v2",
+                        "voice_settings": {
+                            "stability": 0.45,
+                            "similarity_boost": 0.85,
+                            "style": 0.35,
+                            "use_speaker_boost": True
+                        }
+                    }
+                )
+                if resp.status_code == 200:
+                    return StreamingResponse(
+                        io.BytesIO(resp.content),
+                        media_type="audio/mpeg",
+                        headers={
+                            "Cache-Control": "public, max-age=86400",
+                            "Content-Disposition": f"inline; filename={p_id}_elevenlabs.mp3"
+                        }
+                    )
+            except Exception as e:
+                print("ElevenLabs proxy failed, falling back to Edge-TTS:", e)
+
+    # 2. Default: Edge-TTS
+    cfg = VOICE_CONFIGS.get(p_id, VOICE_CONFIGS["zuck"])
     communicate = edge_tts.Communicate(
         text=text,
         voice=cfg["voice"],
@@ -212,7 +262,7 @@ async def generate_tts(
         media_type="audio/mpeg",
         headers={
             "Cache-Control": "public, max-age=86400",
-            "Content-Disposition": f"inline; filename={persona}_tts.mp3"
+            "Content-Disposition": f"inline; filename={p_id}_tts.mp3"
         }
     )
 

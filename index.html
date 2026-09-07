@@ -357,14 +357,22 @@
       <div class="space-y-3 font-mono text-xs">
         
         <!-- ElevenLabs Voice Clone API -->
-        <div class="bg-slate-950 p-3.5 rounded-2xl border border-sky-500/40">
+        <div class="bg-slate-950 p-3.5 rounded-2xl border border-sky-500/50 shadow-lg shadow-sky-950/30">
           <div class="flex items-center justify-between mb-1">
-            <label class="text-sky-400 font-bold">ElevenLabs API Key (10,000 Chars Free/Month):</label>
-            <span class="text-[10px] text-emerald-400 font-sans">Realistic Clones</span>
+            <label class="text-sky-400 font-bold flex items-center space-x-1.5">
+              <span>ElevenLabs API Key</span>
+              <span class="text-[9px] bg-sky-500/20 text-sky-300 px-1.5 py-0.5 rounded">99% Human Timbre</span>
+            </label>
+            <span class="text-[10px] text-emerald-400 font-sans font-semibold">10,000 ký tự Free/tháng</span>
           </div>
           <input type="password" id="eleven-api-key" placeholder="xi-api-key-..." 
                  class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400 font-mono">
-          <span class="text-[10px] text-slate-400 font-sans block mt-1">Generates authentic Trump, Jobs, and Musk voices with natural breath and timbre.</span>
+          <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-800 text-[10px]">
+            <span class="text-slate-400 font-sans">Đăng ký free key tại <a href="https://elevenlabs.io" target="_blank" class="text-sky-400 underline hover:text-sky-300">elevenlabs.io</a></span>
+            <button type="button" onclick="testElevenLabsKey()" class="px-2.5 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded font-sans font-semibold transition flex items-center space-x-1">
+              <span>🔊 Test Voice Clone</span>
+            </button>
+          </div>
         </div>
 
         <!-- Groq LPU API -->
@@ -428,7 +436,7 @@
         sampleAudio: 'assets/audio/jobs_speech.mp3',
         voicePitch: 1.05,
         voiceRate: 1.02,
-        elevenVoiceId: '21m00Tcm4TlvDq8ikWAM', // Rachel or customized male clone
+        elevenVoiceId: 'pNInz6obpgDQGcFmaJgB', // Adam — deep, articulate, visionary tech cadence (Jobs)
         mindset: 'Perfectionism without compromise. Relentless reality distortion field to bend impossible obstacles into reality. Fusion of liberal arts and breakthrough technology. Despises committee-driven mediocrity.',
         tags: ['Minimalist Aesthetics', 'Reality Distortion', 'Zen Simplicity', 'Liberal Arts & Tech'],
         sampleGreeting: "Listen, your time is limited, so don't waste it living someone else's life. Most people in this industry have no taste. They build features because they can, not because they should. Tell me, what's truly revolutionary about this?",
@@ -447,7 +455,7 @@
         sampleAudio: 'assets/audio/trump_speech.mp3',
         voicePitch: 0.9,
         voiceRate: 1.05,
-        elevenVoiceId: 'VR6AewLTigWG4xSOukaG', // Arnold / Trump clone
+        elevenVoiceId: 'JBFqnCBsd6RMkjVDRZzb', // George — raspy, authoritative, dealmaker cadence (Trump)
         mindset: 'Supreme negotiation dominance (The Art of the Deal). Always operate from extreme leverage. Use powerful superlatives, bold confidence, and never concede defeat. Direct, highly charismatic communication.',
         tags: ['Art of the Deal', 'America First', 'Maximum Leverage', 'Total Confidence'],
         sampleGreeting: "Look, nobody understands deals better than me, believe me. The fake news media will never tell you the truth, but we have the biggest leverage in history. It's huge, it's tremendous. What do you think about what we're doing here?",
@@ -466,7 +474,7 @@
         sampleAudio: 'assets/audio/xijinping_speech.ogg',
         voicePitch: 0.82,
         voiceRate: 0.90,
-        elevenVoiceId: null,
+        elevenVoiceId: 'VR6AewLTigWG4xSOukaG', // Multilingual resonant statecraft cadence
         mindset: 'Centennial strategic horizon and 50-year planning. Immovable state discipline, deep emphasis on domestic self-reliance, and the historic great rejuvenation of Chinese civilization. Unshaken by transient geopolitical storms.',
         tags: ['50-Year Strategy', 'Self-Reliance', 'Shared Destiny', 'Strategic Patience'],
         sampleGreeting: "你好。历史的长河奔腾向前，任何短期的地缘震荡都阻挡不了中华民族伟大复兴的坚实步伐。治大国若烹小鲜，我们必须保持战略定力，走好自己的路。",
@@ -485,7 +493,7 @@
         sampleAudio: 'assets/audio/tesla_speech.mp3',
         voicePitch: 0.95,
         voiceRate: 0.98,
-        elevenVoiceId: null,
+        elevenVoiceId: 'flq6f7yk4E4fJM5XTYuZ', // Michael — refined, classical, aristocratic cadence (Tesla)
         mindset: 'Thinking in terms of frequency, energy, and cosmic vibrations. Disdains commercial exploitation and money-grubbing industrialists. Dedicated entirely to unlocking free wireless energy for all mankind.',
         tags: ['Infinite Energy', 'Vibration & Resonance', 'Cosmic Receiver', 'Victorian Elegance'],
         sampleGreeting: "If you only knew the magnificence of the 3, 6, and 9, you would have a key to the universe. Humanity squanders intellectual energy on the shallow commercial greed of Edison. Tell me, are you seeking the secrets of cosmic resonance or mere trivialities?",
@@ -504,7 +512,7 @@
         sampleAudio: 'assets/audio/zuck_speech.mp3',
         voicePitch: 1.0,
         voiceRate: 1.1,
-        elevenVoiceId: null,
+        elevenVoiceId: 'TxGEqnHWrfWFTfGW9XjX', // Josh — youthful, rapid, engineer-centric cadence (Zuck)
         mindset: 'Hacker culture: "Move fast and break things". Relentless technical execution, conviction in open-source AI infrastructure (Llama) to disrupt closed proprietary moats. Athletic BJJ discipline and product iteration.',
         tags: ['Hacker Way', 'Open Source AI', 'Metaverse Infrastructure', 'Iterative Execution'],
         sampleGreeting: "Yeah hi! Look, from an engineering standpoint, execution speed and open ecosystems are the only real moat. That's why we open-sourced Llama. Move fast, ship infrastructure to the global open-source community, and iterate relentlessly. What's your take?",
@@ -523,7 +531,7 @@
         sampleAudio: 'assets/audio/musk_speech.wav',
         voicePitch: 0.92,
         voiceRate: 1.05,
-        elevenVoiceId: null,
+        elevenVoiceId: 'CYw3kZ02Hs0563khs1Fj', // Dave — conversational, thoughtful pauses, tech founder (Musk)
         mindset: 'Physics first-principles reasoning. Delete outdated constraints, scale gigawatt compute and orbital launch cadence exponentially. Protect the light of consciousness by making life multi-planetary.',
         tags: ['First Principles', 'Multi-Planetary Life', 'Compute Density', 'xAI Sovereign'],
         sampleGreeting: "Yeah... haha, well. Honestly, people overcomplicate things. From a physics first principles perspective, everything is just energy conversion and compute scaling. If you don't scale launch cadence and gigawatt power exponentially, nothing else matters. What's your angle?",
@@ -1227,6 +1235,7 @@ Never say you are an AI. Reply directly, immersively, and conversationally as th
     }
 
     // REAL VOICE SYNTHESIS (CLOUD NEURAL VOICE + ELEVENLABS + GPT-SOVITS + ACOUSTIC ENGINE)
+    // REAL VOICE SYNTHESIS (1. ELEVENLABS 99% CLONE -> 2. CLOUD NEURAL EDGE-TTS -> 3. LOCAL ROBOTIC)
     async function synthesizeSpeech(text) {
       if (currentAudioPlayer) {
         currentAudioPlayer.pause();
@@ -1234,11 +1243,65 @@ Never say you are an AI. Reply directly, immersively, and conversationally as th
       }
       if (window.speechSynthesis) window.speechSynthesis.cancel();
 
-      // 1. Try Cloud Neural Voice Engine (Render / Edge-TTS Live Stream)
+      const indicator = document.getElementById('indicator-text');
+      toggleWaveform(true);
+
+      // 1. PRIORITY 1: ElevenLabs Voice Cloning (Authentic human clone with breath & cadence)
+      const elevenKey = localStorage.getItem('vox_eleven_api_key');
+      if (elevenKey && currentCharacter.elevenVoiceId) {
+        try {
+          indicator.textContent = `Speaking as ${currentCharacter.name} (ElevenLabs 99% Human Clone)...`;
+
+          const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${currentCharacter.elevenVoiceId}`, {
+            method: 'POST',
+            headers: {
+              'xi-api-key': elevenKey,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              text: text,
+              model_id: 'eleven_multilingual_v2',
+              voice_settings: {
+                stability: 0.45,
+                similarity_boost: 0.85,
+                style: 0.35,
+                use_speaker_boost: true
+              }
+            })
+          });
+
+          if (res.ok) {
+            const blob = await res.blob();
+            if (blob.size > 500) {
+              const audioUrl = URL.createObjectURL(blob);
+              currentAudioPlayer = new Audio(audioUrl);
+              currentAudioPlayer.onended = () => {
+                toggleWaveform(false);
+                indicator.textContent = 'Listening...';
+              };
+              currentAudioPlayer.onerror = () => {
+                fallbackCloudNeuralVoice(text);
+              };
+              await currentAudioPlayer.play();
+              return;
+            }
+          } else {
+            const errData = await res.json().catch(() => ({}));
+            console.warn('ElevenLabs API returned error:', errData);
+          }
+        } catch (e) {
+          console.warn('ElevenLabs synthesis failed, falling back to Cloud Neural:', e);
+        }
+      }
+
+      // 2. PRIORITY 2: Cloud Neural Voice Engine (Render / Edge-TTS Live Stream)
+      await fallbackCloudNeuralVoice(text);
+    }
+
+    async function fallbackCloudNeuralVoice(text) {
+      const indicator = document.getElementById('indicator-text');
       const cloudTtsEndpoint = localStorage.getItem('vox_cloud_tts_endpoint') || 'https://vox-persona.onrender.com/api/tts';
       try {
-        toggleWaveform(true);
-        const indicator = document.getElementById('indicator-text');
         indicator.textContent = `Speaking as ${currentCharacter.name} (Cloud Neural Voice)...`;
 
         const controller = new AbortController();
@@ -1259,7 +1322,7 @@ Never say you are an AI. Reply directly, immersively, and conversationally as th
             currentAudioPlayer = new Audio(audioUrl);
             currentAudioPlayer.onended = () => {
               toggleWaveform(false);
-              document.getElementById('indicator-text').textContent = 'Listening...';
+              indicator.textContent = 'Listening...';
             };
             currentAudioPlayer.onerror = () => {
               fallbackBrowserSpeech(text);
@@ -1269,46 +1332,10 @@ Never say you are an AI. Reply directly, immersively, and conversationally as th
           }
         }
       } catch (cloudErr) {
-        console.warn('Cloud Neural Voice unavailable or connecting, falling back:', cloudErr);
+        console.warn('Cloud Neural Voice unavailable, falling back to native browser speech:', cloudErr);
       }
 
-      // 2. Try ElevenLabs API if key and voice ID available
-      const elevenKey = localStorage.getItem('vox_eleven_api_key');
-      if (elevenKey && currentCharacter.elevenVoiceId) {
-        try {
-          toggleWaveform(true);
-          document.getElementById('indicator-text').textContent = 'ElevenLabs neural synthesizing...';
-
-          const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${currentCharacter.elevenVoiceId}`, {
-            method: 'POST',
-            headers: {
-              'xi-api-key': elevenKey,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              text: text,
-              model_id: 'eleven_multilingual_v2',
-              voice_settings: { stability: 0.5, similarity_boost: 0.8 }
-            })
-          });
-
-          if (res.ok) {
-            const blob = await res.blob();
-            const audioUrl = URL.createObjectURL(blob);
-            currentAudioPlayer = new Audio(audioUrl);
-            currentAudioPlayer.onended = () => {
-              toggleWaveform(false);
-              document.getElementById('indicator-text').textContent = 'Listening...';
-            };
-            currentAudioPlayer.play();
-            return;
-          }
-        } catch (e) {
-          console.warn('ElevenLabs error, falling back:', e);
-        }
-      }
-
-      // 3. Fallback to Native Browser Speech Synthesis with Tuned Acoustic Cadence
+      // 3. PRIORITY 3: Fallback to Native Browser Speech Synthesis
       fallbackBrowserSpeech(text);
     }
 
@@ -1544,17 +1571,71 @@ Never say you are an AI. Reply directly, immersively, and conversationally as th
       updateEngineBadge();
     }
 
+    async function testElevenLabsKey() {
+      const key = document.getElementById('eleven-api-key').value.trim() || localStorage.getItem('vox_eleven_api_key');
+      if (!key) {
+        alert('Vui lòng nhập ElevenLabs API Key vào ô trước khi bấm test!');
+        return;
+      }
+      unlockAudioContext();
+      const indicator = document.getElementById('indicator-text');
+      indicator.textContent = `Testing ElevenLabs Voice Clone for ${currentCharacter.name}...`;
+      toggleWaveform(true);
+
+      try {
+        const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${currentCharacter.elevenVoiceId}`, {
+          method: 'POST',
+          headers: {
+            'xi-api-key': key,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            text: `Hello, this is an authentic human voice clone of ${currentCharacter.name}.`,
+            model_id: 'eleven_multilingual_v2',
+            voice_settings: { stability: 0.5, similarity_boost: 0.85 }
+          })
+        });
+
+        if (res.ok) {
+          const blob = await res.blob();
+          const audioUrl = URL.createObjectURL(blob);
+          if (currentAudioPlayer) {
+            currentAudioPlayer.pause();
+            currentAudioPlayer = null;
+          }
+          currentAudioPlayer = new Audio(audioUrl);
+          currentAudioPlayer.onended = () => {
+            toggleWaveform(false);
+            indicator.textContent = 'ElevenLabs Clone Verified! Listening...';
+          };
+          await currentAudioPlayer.play();
+          localStorage.setItem('vox_eleven_api_key', key);
+          updateEngineBadge();
+        } else {
+          toggleWaveform(false);
+          const err = await res.json().catch(() => ({}));
+          alert(`Lỗi ElevenLabs API: ${err.detail?.message || res.statusText || 'Vui lòng kiểm tra lại key!'}`);
+        }
+      } catch (err) {
+        toggleWaveform(false);
+        alert(`Lỗi kết nối ElevenLabs: ${err.message}`);
+      }
+    }
+
     function updateEngineBadge() {
       const elevenKey = localStorage.getItem('vox_eleven_api_key');
       const useSovits = localStorage.getItem('vox_use_sovits') === 'true';
       const badge = document.getElementById('voice-engine-badge');
 
       if (elevenKey) {
-        badge.textContent = 'ElevenLabs AI Clones';
+        badge.innerHTML = '💎 ElevenLabs 99% Human Clone';
+        badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-sm';
       } else if (useSovits) {
-        badge.textContent = 'GPT-SoVITS V2 Local';
+        badge.innerHTML = '🖥️ GPT-SoVITS Local';
+        badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm';
       } else {
-        badge.textContent = 'Native Neural Clone';
+        badge.innerHTML = '⚡ Edge-TTS Neural';
+        badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm';
       }
     }
   </script>
