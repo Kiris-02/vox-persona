@@ -101,7 +101,7 @@
           <div class="hidden md:flex items-center bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-800 text-xs font-mono">
             <span class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
             <span class="text-slate-400 mr-1.5">Voice Engine:</span>
-            <span id="voice-engine-badge" class="text-emerald-400 font-semibold">Native Neural Clone</span>
+            <span id="voice-engine-badge" class="text-emerald-400 font-semibold">Edge-TTS Neural</span>
           </div>
 
           <!-- Settings Modal Button -->
@@ -350,7 +350,22 @@
 
   </main>
 
-  <!-- SETTINGS / VOICE CLONE & API CONFIG MODAL -->
+  <!-- FOOTER DISCLAIMER -->
+  <footer class="mt-auto py-5 border-t border-slate-800 bg-slate-950/80 text-xs text-slate-400 font-sans">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center space-x-2 text-slate-300">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
+        <span class="font-semibold text-white">VOX IMPERIUM</span>
+        <span class="text-slate-600">|</span>
+        <span class="text-slate-400">Canonical Persona Voice Hotline</span>
+      </div>
+      <p class="text-slate-400 text-[11px] max-w-2xl text-center sm:text-right">
+        <b>Disclaimer:</b> All voices and persona interactions are simulated AI approximations generated using neural models for educational, research, and entertainment purposes. No biometric impersonation, live recording, or real-person endorsement is implied.
+      </p>
+    </div>
+  </footer>
+
+  <!-- SETTINGS / DEVELOPER BYOK MODE MODAL -->
   <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-brand-900 border border-slate-800 max-w-xl w-full rounded-3xl p-6 shadow-2xl relative">
       <button onclick="toggleSettingsModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
@@ -359,30 +374,30 @@
 
       <div class="flex items-center space-x-2 text-sky-400 mb-2">
         <i data-lucide="sliders-horizontal" class="w-5 h-5"></i>
-        <h3 class="font-bold text-base uppercase tracking-wider text-white">Voice Clone & LLM Engine Settings</h3>
+        <h3 class="font-bold text-base uppercase tracking-wider text-white">Developer BYOK Mode (Optional Local Overrides)</h3>
       </div>
       
       <p class="text-xs text-slate-300 mb-4 leading-relaxed">
-        Prioritize free usage ($1/week cap). Connect your API keys to unlock authentic human voice cloning & real-time reasoning:
+        Standard production mode uses server-side environment secrets with zero setup. To use your own API accounts, configure client overrides below (saved locally in your browser's localStorage; never logged or sent via URL parameters):
       </p>
 
       <div class="space-y-3 font-mono text-xs">
         
-        <!-- ElevenLabs Voice Clone API -->
+        <!-- ElevenLabs Voice Model API -->
         <div class="bg-slate-950 p-3.5 rounded-2xl border border-sky-500/50 shadow-lg shadow-sky-950/30">
           <div class="flex items-center justify-between mb-1">
             <label class="text-sky-400 font-bold flex items-center space-x-1.5">
               <span>ElevenLabs API Key</span>
-              <span class="text-[9px] bg-sky-500/20 text-sky-300 px-1.5 py-0.5 rounded">99% Human Timbre</span>
+              <span class="text-[9px] bg-sky-500/20 text-sky-300 px-1.5 py-0.5 rounded">AI Persona Voice</span>
             </label>
-            <span class="text-[10px] text-emerald-400 font-sans font-semibold">10,000 ký tự Free/tháng</span>
+            <span class="text-[10px] text-emerald-400 font-sans font-semibold">Optional BYOK Override</span>
           </div>
           <input type="password" id="eleven-api-key" placeholder="xi-api-key-..." 
                  class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400 font-mono">
           <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-800 text-[10px]">
-            <span class="text-slate-400 font-sans">Đăng ký free key tại <a href="https://elevenlabs.io" target="_blank" class="text-sky-400 underline hover:text-sky-300">elevenlabs.io</a></span>
+            <span class="text-slate-400 font-sans">Get personal key at <a href="https://elevenlabs.io" target="_blank" class="text-sky-400 underline hover:text-sky-300">elevenlabs.io</a></span>
             <button type="button" onclick="testElevenLabsKey()" class="px-2.5 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded font-sans font-semibold transition flex items-center space-x-1">
-              <span>🔊 Test Voice Clone</span>
+              <span>🔊 Test Persona Voice</span>
             </button>
           </div>
         </div>
@@ -406,7 +421,7 @@
           <span class="text-[10px] text-slate-400 font-sans block mt-1">Supports free models like meta-llama/llama-3.3-70b-instruct:free or Gemini 2.0 Flash.</span>
         </div>
 
-        <!-- GPT-SoVITS Neural Cloner Configuration -->
+        <!-- GPT-SoVITS Local TTS Configuration -->
         <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
           <div class="flex items-center justify-between mb-1.5">
             <label class="block text-emerald-400 font-bold">🎙️ GPT-SoVITS V2 Local Endpoint:</label>
@@ -612,6 +627,9 @@
     let waveAnimHandle = null;
     let currentAudioPlayer = null;
     let characterHistories = {};
+    let activePersonaSwitchToken = 0;
+    let activeTtsAbortController = null;
+    let activeChatAbortController = null;
 
     // INITIALIZATION
     document.addEventListener('DOMContentLoaded', () => {
@@ -665,9 +683,41 @@
       `).join('');
     }
 
-    // SELECT CHARACTER WITH 100% IMMERSION & ISOLATED SESSION
+    // SELECT CHARACTER WITH STRICT VOICE IDENTITY ISOLATION & CANCELLATION
     function selectActiveCharacter(id) {
-      currentCharacter = characters.find(c => c.id === id);
+      activePersonaSwitchToken++;
+      const currentToken = activePersonaSwitchToken;
+
+      // 1. Stop currently playing audio immediately
+      if (currentAudioPlayer) {
+        try {
+          currentAudioPlayer.pause();
+          currentAudioPlayer.currentTime = 0;
+        } catch(e) {}
+        currentAudioPlayer = null;
+      }
+      if (window.speechSynthesis) {
+        try { window.speechSynthesis.cancel(); } catch(e) {}
+      }
+
+      // 2. Abort in-flight TTS or Chat fetches immediately
+      if (activeTtsAbortController) {
+        try { activeTtsAbortController.abort(); } catch(e) {}
+        activeTtsAbortController = null;
+      }
+      if (activeChatAbortController) {
+        try { activeChatAbortController.abort(); } catch(e) {}
+        activeChatAbortController = null;
+      }
+
+      // 3. Reset waveform animation and indicator text
+      toggleWaveform(false);
+      document.getElementById('indicator-text').textContent = 'Listening...';
+
+      // 4. Set new canonical persona ID
+      const target = characters.find(c => c.id === id);
+      if (!target) return;
+      currentCharacter = target;
 
       // Update card active classes
       characters.forEach(c => {
@@ -708,8 +758,8 @@
       }
       renderTranscriptForCurrentCharacter();
 
-      // Play authentic voice opening sample
-      playCurrentCharacterSample();
+      // 5. Synthesize or play reference sample ONLY after state switch has completed
+      playCurrentCharacterSample(currentToken);
     }
 
     // TRANSCRIPT DIALOGUE HISTORY MANAGER
@@ -743,42 +793,35 @@
           </div>
         `;
       } else {
-        msgDiv.className = 'flex justify-start space-x-2';
-        const transHtml = translation 
-          ? `<div class="mt-1.5 pt-1.5 border-t border-slate-700 text-sky-300 text-[11px] font-sans italic">
-               <b>EN Translation:</b> "${translation}"
-             </div>` 
-          : '';
-
+        msgDiv.className = 'flex justify-start space-x-2.5';
         msgDiv.innerHTML = `
-          <img src="${currentCharacter.avatar}" class="w-8 h-8 rounded-lg object-cover border border-slate-700 shrink-0 mt-0.5">
-          <div class="max-w-[85%] bg-slate-900 border border-slate-800 text-slate-200 p-3 rounded-2xl rounded-tl-none text-xs shadow-md">
-            <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono mb-1">
-              <span class="font-bold text-white">${currentCharacter.name}</span>
-              <div class="flex items-center space-x-1.5">
-                <span class="text-sky-400 text-[9px] font-bold">[${currentCharacter.nativeLangBadge}]</span>
-                <span>${timeStr}</span>
-              </div>
+          <img src="${currentCharacter.avatar}" class="w-8 h-8 rounded-full border border-sky-400/50 object-cover shrink-0 mt-0.5">
+          <div class="max-w-[85%] bg-slate-900 border border-slate-800 p-3.5 rounded-2xl rounded-tl-none text-xs shadow-md space-y-1.5">
+            <div class="flex items-center justify-between text-[10px] text-sky-400 font-mono">
+              <span class="font-bold">${currentCharacter.name}</span>
+              <span class="text-slate-500">${timeStr}</span>
             </div>
-            <div class="leading-relaxed font-sans">${text}</div>
-            ${transHtml}
+            <div class="leading-relaxed text-slate-100 font-sans">${text}</div>
+            ${translation ? `<div class="text-[11px] text-slate-400 italic pt-1 border-t border-slate-800">${translation}</div>` : ''}
           </div>
         `;
       }
 
       transcriptBox.appendChild(msgDiv);
+      transcriptBox.scrollTop = transcriptBox.scrollHeight;
     }
 
     function appendMessageToTranscript(sender, text, translation = null) {
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       if (!characterHistories[currentCharacter.id]) characterHistories[currentCharacter.id] = [];
-      characterHistories[currentCharacter.id].push({ sender, text, translation, time: timeStr });
-
+      characterHistories[currentCharacter.id].push({
+        sender,
+        text,
+        translation,
+        time: timeStr
+      });
       renderSingleTranscriptMessage(sender, text, translation, timeStr);
-      const transcriptBox = document.getElementById('dialogue-transcript-box');
-      transcriptBox.scrollTop = transcriptBox.scrollHeight;
       document.getElementById('transcript-count').textContent = `${characterHistories[currentCharacter.id].length} messages`;
-      lucide.createIcons();
     }
 
     function clearTranscript() {
@@ -794,35 +837,49 @@
     }
 
     // PLAY CHARACTER OPENING SAMPLE
-    function playCurrentCharacterSample() {
+    function playCurrentCharacterSample(token = null) {
+      const activeToken = token || activePersonaSwitchToken;
+      if (activeToken !== activePersonaSwitchToken) return;
+
       if (currentCharacter.sampleAudio) {
-        playDirectAudioFile(currentCharacter.sampleAudio);
+        playDirectAudioFile(currentCharacter.sampleAudio, activeToken);
       } else {
-        synthesizeSpeech(currentCharacter.sampleGreeting);
+        synthesizeSpeech(currentCharacter.sampleGreeting, activeToken);
       }
     }
 
-    function playDirectAudioFile(audioSrc) {
+    function playDirectAudioFile(audioSrc, token = null) {
+      const activeToken = token || activePersonaSwitchToken;
+      if (activeToken !== activePersonaSwitchToken) return;
+
       if (currentAudioPlayer) {
-        currentAudioPlayer.pause();
+        try { currentAudioPlayer.pause(); } catch(e) {}
         currentAudioPlayer = null;
       }
       if (window.speechSynthesis) window.speechSynthesis.cancel();
 
       toggleWaveform(true);
-      document.getElementById('indicator-text').textContent = 'Playing authentic recording...';
+      document.getElementById('indicator-text').textContent = 'Playing reference audio...';
 
-      currentAudioPlayer = new Audio(audioSrc);
-      currentAudioPlayer.onended = () => {
-        toggleWaveform(false);
-        document.getElementById('indicator-text').textContent = 'Listening...';
+      const player = new Audio(audioSrc);
+      currentAudioPlayer = player;
+
+      player.onended = () => {
+        if (currentAudioPlayer === player) {
+          toggleWaveform(false);
+          document.getElementById('indicator-text').textContent = 'Listening...';
+        }
       };
-      currentAudioPlayer.onerror = () => {
-        toggleWaveform(false);
-        synthesizeSpeech(currentCharacter.sampleGreeting);
+      player.onerror = () => {
+        if (currentAudioPlayer === player) {
+          toggleWaveform(false);
+          synthesizeSpeech(currentCharacter.sampleGreeting, activeToken);
+        }
       };
-      currentAudioPlayer.play().catch(() => {
-        synthesizeSpeech(currentCharacter.sampleGreeting);
+      player.play().catch(() => {
+        if (currentAudioPlayer === player) {
+          synthesizeSpeech(currentCharacter.sampleGreeting, activeToken);
+        }
       });
     }
 
@@ -872,21 +929,32 @@
 
     // DYNAMIC INTELLIGENCE DISPATCHER (1. CLIENT GROQ LPU -> 2. CLOUD NEURAL GATEWAY -> 3. OPENROUTER -> 4. BIOGRAPHIC FALLBACK)
     async function dispatchDynamicIntelligence(userQuery, newsContext = null) {
+      const currentToken = activePersonaSwitchToken;
+      const capturedPersona = currentCharacter;
+
+      if (activeChatAbortController) {
+        try { activeChatAbortController.abort(); } catch(e) {}
+      }
+      activeChatAbortController = new AbortController();
+      const chatSignal = activeChatAbortController.signal;
+
       toggleWaveform(true);
       const indicator = document.getElementById('indicator-text');
-      indicator.textContent = `Consulting ${currentCharacter.name}...`;
+      indicator.textContent = `Consulting ${capturedPersona.name}...`;
 
       // 1. TIER 1: Direct Client Groq LPU if key in settings (~0.4s reflex)
       const groqKey = localStorage.getItem('vox_groq_api_key');
       if (groqKey) {
         try {
-          indicator.textContent = `Consulting ${currentCharacter.name} via Groq LPU (<0.4s)...`;
-          const reply = await executeGroqCall(groqKey, userQuery, newsContext);
+          indicator.textContent = `Consulting ${capturedPersona.name} via Groq LPU (<0.4s)...`;
+          const reply = await executeGroqCall(groqKey, userQuery, newsContext, capturedPersona, chatSignal);
+          if (currentToken !== activePersonaSwitchToken) return;
           if (reply) {
-            handleBotReplyDelivery(reply);
+            handleBotReplyDelivery(reply, null, capturedPersona, currentToken);
             return;
           }
         } catch (groqErr) {
+          if (currentToken !== activePersonaSwitchToken) return;
           console.warn('Groq direct tier failed, falling back to Cloud Neural Gateway:', groqErr);
         }
       }
@@ -895,16 +963,17 @@
       indicator.textContent = `Routing to Cloud Neural Gateway...`;
       const cloudChatEndpoint = localStorage.getItem('vox_cloud_chat_endpoint') || 'https://vox-persona.onrender.com/api/chat';
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 25000);
+        const timeoutId = setTimeout(() => {
+          if (activeChatAbortController) activeChatAbortController.abort();
+        }, 25000);
 
-        const history = (characterHistories[currentCharacter.id] || []).slice(-6).map(m => ({
+        const history = (characterHistories[capturedPersona.id] || []).slice(-6).map(m => ({
           role: m.sender === 'user' ? 'user' : 'assistant',
           content: m.text
         }));
 
         const chatPayload = {
-          persona: currentCharacter.id,
+          persona: capturedPersona.id,
           message: userQuery,
           history: history,
           news: newsContext ? { title: newsContext.title, summary: newsContext.summary || newsContext.headline } : null
@@ -914,18 +983,22 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(chatPayload),
-          signal: controller.signal
+          signal: chatSignal
         });
         clearTimeout(timeoutId);
 
+        if (currentToken !== activePersonaSwitchToken) return;
+
         if (res.ok) {
           const data = await res.json();
+          if (currentToken !== activePersonaSwitchToken) return;
           if (data && data.text) {
-            handleBotReplyDelivery(data.text, data.translation || null);
+            handleBotReplyDelivery(data.text, data.translation || null, capturedPersona, currentToken);
             return;
           }
         }
       } catch (cloudChatErr) {
+        if (currentToken !== activePersonaSwitchToken) return;
         console.warn('Cloud Neural Brain unavailable, trying tertiary channels:', cloudChatErr);
       }
 
@@ -934,33 +1007,43 @@
       if (openRouterKey) {
         try {
           indicator.textContent = `Generating via OpenRouter...`;
-          const reply = await executeOpenRouterCall(openRouterKey, userQuery, newsContext);
+          const reply = await executeOpenRouterCall(openRouterKey, userQuery, newsContext, capturedPersona, chatSignal);
+          if (currentToken !== activePersonaSwitchToken) return;
           if (reply) {
-            handleBotReplyDelivery(reply);
+            handleBotReplyDelivery(reply, null, capturedPersona, currentToken);
             return;
           }
         } catch (e) {
+          if (currentToken !== activePersonaSwitchToken) return;
           console.warn('OpenRouter failed, using deep biographic generator:', e);
         }
       }
 
       // 4. Offline Biographic Fallback
+      if (currentToken !== activePersonaSwitchToken) return;
       indicator.textContent = `Synthesizing offline reply...`;
       setTimeout(() => {
-        const { text, translation } = generateDeepBiographicReply(userQuery, newsContext);
-        handleBotReplyDelivery(text, translation);
+        if (currentToken !== activePersonaSwitchToken) return;
+        const { text, translation } = generateDeepBiographicReply(userQuery, newsContext, capturedPersona);
+        handleBotReplyDelivery(text, translation, capturedPersona, currentToken);
       }, 300);
     }
 
-    function handleBotReplyDelivery(replyText, translation = null) {
+    function handleBotReplyDelivery(replyText, translation = null, persona = null, token = null) {
+      const activeToken = token !== null ? token : activePersonaSwitchToken;
+      if (activeToken !== activePersonaSwitchToken) return;
+      const targetPersona = persona || currentCharacter;
+      if (targetPersona.id !== currentCharacter.id) return;
+
       appendMessageToTranscript('bot', replyText, translation);
-      synthesizeSpeech(replyText);
+      synthesizeSpeech(replyText, activeToken, targetPersona);
     }
 
     // HIGH-CAPACITY CONTEXTUAL BIOGRAPHIC ENGINE (DYNAMIC, NON-CANNED, 100% IMMERSIVE)
-    function generateDeepBiographicReply(query, news) {
+    function generateDeepBiographicReply(query, news, persona = null) {
       const q = query.toLowerCase();
-      const id = currentCharacter.id;
+      const target = persona || currentCharacter;
+      const id = target.id;
 
       // MARK ZUCKERBERG — FAST, ANALYTICAL, PRAGMATIC HACKER CADENCE
       if (id === 'zuck') {
@@ -1184,25 +1267,26 @@
     }
 
     // CALL GROQ API FOR ULTRA-FAST LPU STREAMING WITH MULTI-TURN MEMORY
-    async function executeGroqCall(apiKey, prompt, news) {
+    async function executeGroqCall(apiKey, prompt, news, persona = null, signal = null) {
+      const target = persona || currentCharacter;
       const isVietnamese = /[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]/i.test(prompt);
 
       let langInstruction = '';
-      if (currentCharacter.nativeLang === 'zh-CN') {
+      if (target.nativeLang === 'zh-CN') {
         langInstruction = 'You MUST respond in authentic Mandarin Chinese (普通话) with the majestic rhetoric of President Xi Jinping. On a new line add "Translation: [English translation]".';
       } else if (isVietnamese) {
-        langInstruction = `Bạn hãy trả lời bằng tiếng Việt nhưng giữ 100% cốt cách, ngữ điệu và triết lý sắc bén của ${currentCharacter.name}. Không nói mình là AI, không xin lỗi.`;
+        langInstruction = `Bạn hãy trả lời bằng tiếng Việt nhưng giữ 100% cốt cách, ngữ điệu và triết lý sắc bén của ${target.name}. Không nói mình là AI, không xin lỗi.`;
       } else {
-        langInstruction = `You MUST respond in authentic, characteristic verbal cadence and vocabulary of ${currentCharacter.name}. Never say you are an AI.`;
+        langInstruction = `You MUST respond in authentic, characteristic verbal cadence and vocabulary of ${target.name}. Never say you are an AI.`;
       }
 
-      const systemPrompt = `You are ${currentCharacter.name}. Role: ${currentCharacter.role}.
-Biographic mindset strictly grounded in Walter Isaacson's writings: ${currentCharacter.mindset}
-Tone rules: ${currentCharacter.toneRules}
+      const systemPrompt = `You are ${target.name}. Role: ${target.role}.
+Biographic mindset strictly grounded in Walter Isaacson's writings: ${target.mindset}
+Tone rules: ${target.toneRules}
 Language: ${langInstruction}
 Reply directly, immersively, and conversationally as the real person on a live telephone hotline. Keep response punchy and strictly under 3 sentences for natural telephony.`;
 
-      const history = (characterHistories[currentCharacter.id] || []).slice(-6);
+      const history = (characterHistories[target.id] || []).slice(-6);
       const formattedHistory = history.map(m => ({
         role: m.sender === 'user' ? 'user' : 'assistant',
         content: m.text
@@ -1223,7 +1307,8 @@ Reply directly, immersively, and conversationally as the real person on a live t
           messages: [{ role: 'system', content: systemPrompt }, ...formattedHistory, { role: 'user', content: userContent }],
           max_tokens: 220,
           temperature: 0.72
-        })
+        }),
+        signal: signal || undefined
       });
 
       if (!res.ok) {
@@ -1236,9 +1321,10 @@ Reply directly, immersively, and conversationally as the real person on a live t
     }
 
     // CALL OPENROUTER API WITH MULTI-TURN MEMORY
-    async function executeOpenRouterCall(apiKey, prompt, news) {
-      const systemPrompt = `You are ${currentCharacter.name}. Language: ${currentCharacter.nativeLang === 'zh-CN' ? 'Mandarin Chinese' : 'English'}. Respond authentically in under 3 sentences as the real figure.`;
-      const history = (characterHistories[currentCharacter.id] || []).slice(-6);
+    async function executeOpenRouterCall(apiKey, prompt, news, persona = null, signal = null) {
+      const target = persona || currentCharacter;
+      const systemPrompt = `You are ${target.name}. Language: ${target.nativeLang === 'zh-CN' ? 'Mandarin Chinese' : 'English'}. Respond authentically in under 3 sentences as the real figure.`;
+      const history = (characterHistories[target.id] || []).slice(-6);
       const formattedHistory = history.map(m => ({
         role: m.sender === 'user' ? 'user' : 'assistant',
         content: m.text
@@ -1251,32 +1337,48 @@ Reply directly, immersively, and conversationally as the real person on a live t
           model: 'meta-llama/llama-3.3-70b-instruct:free',
           messages: [{ role: 'system', content: systemPrompt }, ...formattedHistory, { role: 'user', content: prompt }],
           max_tokens: 180
-        })
+        }),
+        signal: signal || undefined
       });
       if (!res.ok) throw new Error('OpenRouter failed');
       const data = await res.json();
       return data.choices[0].message.content;
     }
 
-    // REAL VOICE SYNTHESIS (CLOUD NEURAL VOICE + ELEVENLABS + GPT-SOVITS + ACOUSTIC ENGINE)
-    // REAL VOICE SYNTHESIS (1. ELEVENLABS 99% CLONE -> 2. CLOUD NEURAL EDGE-TTS -> 3. LOCAL ROBOTIC)
-    async function synthesizeSpeech(text) {
+    // CANONICAL VOICE SYNTHESIS PIPELINE
+    // Priority: 1. ElevenLabs Voice Model (Direct BYOK if configured) -> 2. Canonical Cloud Neural Voice -> 3. Native Browser Speech
+    async function synthesizeSpeech(text, token = null, persona = null) {
+      const activeToken = token !== null ? token : activePersonaSwitchToken;
+      if (activeToken !== activePersonaSwitchToken) return;
+      const targetPersona = persona || currentCharacter;
+
       if (currentAudioPlayer) {
-        currentAudioPlayer.pause();
+        try {
+          currentAudioPlayer.pause();
+          currentAudioPlayer.currentTime = 0;
+        } catch(e) {}
         currentAudioPlayer = null;
       }
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      if (window.speechSynthesis) {
+        try { window.speechSynthesis.cancel(); } catch(e) {}
+      }
+
+      if (activeTtsAbortController) {
+        try { activeTtsAbortController.abort(); } catch(e) {}
+      }
+      activeTtsAbortController = new AbortController();
+      const ttsSignal = activeTtsAbortController.signal;
 
       const indicator = document.getElementById('indicator-text');
       toggleWaveform(true);
 
-      // 1. PRIORITY 1: ElevenLabs Voice Cloning (Authentic human clone with breath & cadence)
+      // 1. PRIORITY 1: ElevenLabs Voice Model (Direct BYOK client call if key in settings)
       const elevenKey = localStorage.getItem('vox_eleven_api_key');
-      if (elevenKey && currentCharacter.elevenVoiceId) {
+      if (elevenKey && targetPersona.elevenVoiceId) {
         try {
-          indicator.textContent = `Speaking as ${currentCharacter.name} (ElevenLabs 99% Human Clone)...`;
+          indicator.textContent = `Speaking as ${targetPersona.name} (AI Persona Voice)...`;
 
-          const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${currentCharacter.elevenVoiceId}`, {
+          const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${targetPersona.elevenVoiceId}`, {
             method: 'POST',
             headers: {
               'xi-api-key': elevenKey,
@@ -1291,25 +1393,32 @@ Reply directly, immersively, and conversationally as the real person on a live t
                 style: 0.35,
                 use_speaker_boost: true
               }
-            })
+            }),
+            signal: ttsSignal
           });
+
+          if (activeToken !== activePersonaSwitchToken) return;
 
           if (res.ok) {
             const blob = await res.blob();
+            if (activeToken !== activePersonaSwitchToken) return;
             if (blob.size > 500) {
               const audioUrl = URL.createObjectURL(blob);
-              currentAudioPlayer = new Audio(audioUrl);
-              currentAudioPlayer.onended = () => {
-                toggleWaveform(false);
-                indicator.textContent = 'Listening...';
-                if (isCallLive) {
-                  startMicRecognition();
+              const player = new Audio(audioUrl);
+              currentAudioPlayer = player;
+              player.onended = () => {
+                if (currentAudioPlayer === player) {
+                  toggleWaveform(false);
+                  indicator.textContent = 'Listening...';
+                  if (isCallLive) startMicRecognition();
                 }
               };
-              currentAudioPlayer.onerror = () => {
-                fallbackCloudNeuralVoice(text);
+              player.onerror = () => {
+                if (currentAudioPlayer === player) {
+                  fallbackCloudNeuralVoice(text, activeToken, targetPersona);
+                }
               };
-              await currentAudioPlayer.play();
+              await player.play().catch(() => {});
               return;
             }
           } else {
@@ -1317,63 +1426,82 @@ Reply directly, immersively, and conversationally as the real person on a live t
             console.warn('ElevenLabs API returned error:', errData);
           }
         } catch (e) {
+          if (activeToken !== activePersonaSwitchToken) return;
           console.warn('ElevenLabs synthesis failed, falling back to Cloud Neural:', e);
         }
       }
 
-      // 2. PRIORITY 2: Cloud Neural Voice Engine (Render / Edge-TTS Live Stream)
-      await fallbackCloudNeuralVoice(text);
+      // 2. PRIORITY 2: Cloud Neural Voice Engine (Server Backend / Persona-isolated Edge-TTS)
+      await fallbackCloudNeuralVoice(text, activeToken, targetPersona);
     }
 
-    async function fallbackCloudNeuralVoice(text) {
+    async function fallbackCloudNeuralVoice(text, token = null, persona = null) {
+      const activeToken = token !== null ? token : activePersonaSwitchToken;
+      if (activeToken !== activePersonaSwitchToken) return;
+      const targetPersona = persona || currentCharacter;
+
       const indicator = document.getElementById('indicator-text');
       const cloudTtsEndpoint = localStorage.getItem('vox_cloud_tts_endpoint') || 'https://vox-persona.onrender.com/api/tts';
       try {
-        indicator.textContent = `Speaking as ${currentCharacter.name} (Cloud Neural Voice)...`;
+        indicator.textContent = `Speaking as ${targetPersona.name} (Cloud Neural Voice)...`;
 
         const controller = new AbortController();
+        activeTtsAbortController = controller;
         const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-        const ttsUrl = `${cloudTtsEndpoint}?persona=${encodeURIComponent(currentCharacter.id)}&text=${encodeURIComponent(text)}`;
+        // Canonical contract: GET /api/tts?persona={persona_id}&text={text} (NO API key in query params)
+        const ttsUrl = `${cloudTtsEndpoint}?persona=${encodeURIComponent(targetPersona.id)}&text=${encodeURIComponent(text)}`;
         const res = await fetch(ttsUrl, { signal: controller.signal });
         clearTimeout(timeoutId);
 
+        if (activeToken !== activePersonaSwitchToken) return;
+
         if (res.ok) {
           const blob = await res.blob();
+          if (activeToken !== activePersonaSwitchToken) return;
           if (blob.size > 500) {
             const audioUrl = URL.createObjectURL(blob);
-            currentAudioPlayer = new Audio(audioUrl);
-            currentAudioPlayer.onended = () => {
-              toggleWaveform(false);
-              indicator.textContent = 'Listening...';
-              if (isCallLive) {
-                startMicRecognition();
+            const player = new Audio(audioUrl);
+            currentAudioPlayer = player;
+            player.onended = () => {
+              if (currentAudioPlayer === player) {
+                toggleWaveform(false);
+                indicator.textContent = 'Listening...';
+                if (isCallLive) startMicRecognition();
               }
             };
-            currentAudioPlayer.onerror = () => {
-              fallbackBrowserSpeech(text);
+            player.onerror = () => {
+              if (currentAudioPlayer === player) {
+                fallbackBrowserSpeech(text, activeToken, targetPersona);
+              }
             };
-            await currentAudioPlayer.play();
+            await player.play().catch(() => {});
             return;
           }
         }
       } catch (cloudErr) {
+        if (activeToken !== activePersonaSwitchToken) return;
         console.warn('Cloud Neural Voice unavailable, falling back to native browser speech:', cloudErr);
       }
 
       // 3. PRIORITY 3: Fallback to Native Browser Speech Synthesis
-      fallbackBrowserSpeech(text);
+      if (activeToken !== activePersonaSwitchToken) return;
+      fallbackBrowserSpeech(text, activeToken, targetPersona);
     }
 
-    function fallbackBrowserSpeech(text) {
+    function fallbackBrowserSpeech(text, token = null, persona = null) {
+      const activeToken = token !== null ? token : activePersonaSwitchToken;
+      if (activeToken !== activePersonaSwitchToken) return;
+      const targetPersona = persona || currentCharacter;
+
       if (!window.speechSynthesis) return;
       window.speechSynthesis.cancel();
 
       const utter = new SpeechSynthesisUtterance(text);
       const isVietnamese = /[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]/i.test(text);
 
-      utter.pitch = currentCharacter.voicePitch || 1.0;
-      utter.rate = currentCharacter.voiceRate || 1.0;
+      utter.pitch = targetPersona.voicePitch || 1.0;
+      utter.rate = targetPersona.voiceRate || 1.0;
 
       const voices = window.speechSynthesis.getVoices();
       if (isVietnamese) {
@@ -1382,7 +1510,7 @@ Reply directly, immersively, and conversationally as the real person on a live t
           const viVoice = voices.find(v => v.lang.includes('vi') || v.lang.includes('VIE') || v.name.toLowerCase().includes('vietnam'));
           if (viVoice) utter.voice = viVoice;
         }
-      } else if (currentCharacter.nativeLang === 'zh-CN') {
+      } else if (targetPersona.nativeLang === 'zh-CN') {
         utter.lang = 'zh-CN';
         if (voices.length > 0) {
           const zhVoice = voices.find(v => v.lang.includes('zh') || v.lang.includes('cmn'));
@@ -1397,10 +1525,10 @@ Reply directly, immersively, and conversationally as the real person on a live t
       }
 
       utter.onend = () => {
-        toggleWaveform(false);
-        document.getElementById('indicator-text').textContent = 'Listening...';
-        if (isCallLive) {
-          startMicRecognition();
+        if (activeToken === activePersonaSwitchToken) {
+          toggleWaveform(false);
+          document.getElementById('indicator-text').textContent = 'Listening...';
+          if (isCallLive) startMicRecognition();
         }
       };
       toggleWaveform(true);
@@ -1675,7 +1803,7 @@ Reply directly, immersively, and conversationally as the real person on a live t
       }
       unlockAudioContext();
       const indicator = document.getElementById('indicator-text');
-      indicator.textContent = `Testing ElevenLabs Voice Clone for ${currentCharacter.name}...`;
+      indicator.textContent = `Testing AI Persona Voice for ${currentCharacter.name}...`;
       toggleWaveform(true);
 
       try {
@@ -1686,7 +1814,7 @@ Reply directly, immersively, and conversationally as the real person on a live t
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            text: `Hello, this is an authentic human voice clone of ${currentCharacter.name}.`,
+            text: `Hello, this is the simulated AI persona voice of ${currentCharacter.name}.`,
             model_id: 'eleven_turbo_v2_5',
             voice_settings: { stability: 0.5, similarity_boost: 0.85 }
           })
@@ -1702,7 +1830,7 @@ Reply directly, immersively, and conversationally as the real person on a live t
           currentAudioPlayer = new Audio(audioUrl);
           currentAudioPlayer.onended = () => {
             toggleWaveform(false);
-            indicator.textContent = 'ElevenLabs Clone Verified! Listening...';
+            indicator.textContent = 'AI Persona Voice Verified! Listening...';
           };
           await currentAudioPlayer.play();
           localStorage.setItem('vox_eleven_api_key', key);
@@ -1724,7 +1852,7 @@ Reply directly, immersively, and conversationally as the real person on a live t
       const badge = document.getElementById('voice-engine-badge');
 
       if (elevenKey) {
-        badge.innerHTML = '💎 ElevenLabs 99% Human Clone';
+        badge.innerHTML = '💎 ElevenLabs AI Voice';
         badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-sm';
       } else if (useSovits) {
         badge.innerHTML = '🖥️ GPT-SoVITS Local';

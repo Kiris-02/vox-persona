@@ -1,31 +1,36 @@
-import urllib.request
-import json
 import os
+import json
+import urllib.request
+import urllib.error
+from dotenv import load_dotenv
 
-keys = []
-for p in [r'F:\Nghịch Antigravity\knowledge_agent\.env', r'F:\Nghịch Antigravity\trident\.env', r'F:\Nghịch Antigravity\ai-agent-hub\.env']:
-    if os.path.exists(p):
-        with open(p, 'r', encoding='utf-8') as f:
-            for l in f:
-                if 'GEMINI_API_KEY=' in l:
-                    k = l.strip().split('GEMINI_API_KEY=')[1].strip('\'" \ufeff')
-                    if k: keys.append(k)
+load_dotenv()
 
-for k in set(keys):
-    print("Testing key:", k[:8] + "...")
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={k}"
-    req = urllib.request.Request(
-        url,
-        headers={'Content-Type': 'application/json'},
-        data=json.dumps({
-            "contents": [{"parts": [{"text": "Say hi as Steve Jobs in 5 words"}]}]
-        }).encode()
-    )
-    try:
-        with urllib.request.urlopen(req) as resp:
-            data = json.loads(resp.read().decode())
-            print("GEMINI SUCCESS:", data['candidates'][0]['content']['parts'][0]['text'].strip())
-            with open('.valid_gemini_key', 'w', encoding='utf-8') as out:
-                out.write(k)
-    except Exception as e:
-        print("GEMINI FAILED:", e)
+key = os.environ.get("GEMINI_API_KEY", "").strip()
+
+if not key:
+    print("[SKIP] GEMINI_API_KEY not set in environment or local .env file.")
+    exit(0)
+
+masked_key = f"{key[:6]}...{key[-4:]}" if len(key) > 10 else "***"
+print(f"Testing GEMINI_API_KEY: {masked_key}")
+
+url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={key}"
+payload = {
+    "contents": [{"parts": [{"text": "Say 'Neural core ready' in 3 words"}]}]
+}
+req = urllib.request.Request(
+    url,
+    headers={"Content-Type": "application/json"},
+    data=json.dumps(payload).encode("utf-8")
+)
+
+try:
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+        reply = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+        print(f"GEMINI SUCCESS: {reply}")
+except urllib.error.HTTPError as e:
+    print(f"GEMINI HTTP ERROR ({e.code}): {e.reason}")
+except Exception as e:
+    print(f"GEMINI CONNECTION ERROR: {e}")

@@ -1,33 +1,42 @@
-import urllib.request
-import json
 import os
+import json
+import urllib.request
+import urllib.error
+from dotenv import load_dotenv
 
-groq_key = None
-env_path = r'F:\Nghịch Antigravity\ai-agent-hub\.env'
-with open(env_path, 'r', encoding='utf-8') as f:
-    for line in f:
-        if 'GROQ_API_KEY=' in line:
-            groq_key = line.strip().split('GROQ_API_KEY=')[1].strip('\'" \ufeff')
+load_dotenv()
 
-print("Testing key:", groq_key[:12] if groq_key else "None")
+groq_key = os.environ.get("GROQ_API_KEY", "").strip()
 
+if not groq_key:
+    print("[SKIP] GROQ_API_KEY not set in environment or local .env file.")
+    exit(0)
+
+masked_key = f"{groq_key[:6]}...{groq_key[-4:]}" if len(groq_key) > 10 else "***"
+print(f"Testing GROQ_API_KEY: {masked_key}")
+
+url = "https://api.groq.com/openai/v1/chat/completions"
+payload = {
+    "model": "qwen/qwen3.8-27b",
+    "messages": [{"role": "user", "content": "Say 'LPU reflex online' in 3 words"}],
+    "max_tokens": 30
+}
 req = urllib.request.Request(
-    'https://api.groq.com/openai/v1/chat/completions',
+    url,
     headers={
-        'Authorization': f'Bearer {groq_key}',
-        'Content-Type': 'application/json'
+        "Authorization": f"Bearer {groq_key}",
+        "Content-Type": "application/json",
+        "User-Agent": "VoxImperium/2.0"
     },
-    data=json.dumps({
-        'model': 'llama-3.3-70b-versatile',
-        'messages': [{'role': 'user', 'content': 'Say hi in 5 words as Steve Jobs'}],
-        'max_tokens': 30
-    }).encode()
+    data=json.dumps(payload).encode("utf-8")
 )
 
 try:
-    with urllib.request.urlopen(req) as resp:
-        data = json.loads(resp.read().decode())
-        print("GROQ API SUCCESS:")
-        print(data['choices'][0]['message']['content'])
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+        reply = data["choices"][0]["message"]["content"].strip()
+        print(f"GROQ API SUCCESS: {reply}")
+except urllib.error.HTTPError as e:
+    print(f"GROQ HTTP ERROR ({e.code}): {e.reason}")
 except Exception as e:
-    print("GROQ API ERROR:", e)
+    print(f"GROQ CONNECTION ERROR: {e}")

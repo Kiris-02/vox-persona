@@ -1,4 +1,4 @@
-﻿.DS_Store
+.DS_Store
 Thumbs.db
 *.log
 node_modules/
@@ -8,6 +8,7 @@ dist/
 __pycache__/
 *.pyc
 test_*.py
+!test_voice_routing.py
 list_edge.py
 generate_missing_samples.py
 .valid_gemini_key

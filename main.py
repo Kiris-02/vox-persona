@@ -5,10 +5,19 @@ import re
 from typing import List, Dict, Any, Optional
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel
 import edge_tts
 import httpx
+from dotenv import load_dotenv
+
+# 1. Environment & Secret Initialization (Server-side only)
+load_dotenv()
+
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "").strip()
+ELEVEN_API_KEY = os.environ.get("ELEVEN_API_KEY", "").strip()
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "").strip()
 
 try:
     from google import genai
@@ -17,7 +26,17 @@ try:
 except ImportError:
     HAS_GENAI = False
 
-app = FastAPI(title="Vox Imperium Neural Voice & Brain Engine")
+genai_client = None
+if HAS_GENAI and GEMINI_API_KEY:
+    try:
+        genai_client = genai.Client(api_key=GEMINI_API_KEY)
+    except Exception as e:
+        print("Error initializing Gemini client:", e)
+
+app = FastAPI(
+    title="Vox Imperium — Canonical Neural Voice & Brain Engine",
+    description="Persona voice identity isolation and sovereign multi-engine gateway"
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,92 +46,277 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-if not GEMINI_API_KEY:
-    # Try reading from local .env if present
-    for env_candidate in [".env", "../.env", r"F:\Nghịch Antigravity\knowledge_agent\.env"]:
-        if os.path.exists(env_candidate):
-            try:
-                with open(env_candidate, "r", encoding="utf-8") as ef:
-                    for line in ef:
-                        if "GEMINI_API_KEY=" in line:
-                            GEMINI_API_KEY = line.strip().split("GEMINI_API_KEY=")[1].strip("'\" \ufeff")
-                            if GEMINI_API_KEY:
-                                break
-            except Exception:
-                pass
-        if GEMINI_API_KEY:
-            break
-genai_client = None
-if HAS_GENAI and GEMINI_API_KEY:
-    try:
-        genai_client = genai.Client(api_key=GEMINI_API_KEY)
-    except Exception as e:
-        print("Error initializing Gemini client:", e)
+# 2. CANONICAL PERSONA REGISTRY (Single Authoritative Source of Truth)
+NEUTRAL_GENERIC_VOICE = "en-US-AndrewNeural"
 
-VOICE_CONFIGS = {
-    "jobs": {"voice": "en-US-GuyNeural", "rate": "+1%", "pitch": "-1Hz"},
-    "trump": {"voice": "en-US-SteffanNeural", "rate": "+4%", "pitch": "-3Hz"},
-    "xijinping": {"voice": "zh-CN-YunjianNeural", "rate": "-4%", "pitch": "-4Hz"},
-    "tesla": {"voice": "en-US-ChristopherNeural", "rate": "-2%", "pitch": "-2Hz"},
-    "zuck": {"voice": "en-US-EricNeural", "rate": "+6%", "pitch": "+1Hz"},
-    "musk": {"voice": "en-US-BrianNeural", "rate": "+0%", "pitch": "-1Hz"},
-}
-
-PERSONA_PROMPTS = {
-    "jobs": (
-        "You are Steve Jobs. Mindset strictly grounded in Walter Isaacson's biography: uncompromising minimalist, passionate about intersecting technology with the liberal arts. "
-        "You despise focus groups, committee compromises, and bloated, tasteless tech. You speak with visionary intensity, poetic sharpness, and reality-distortion conviction. "
-        "Rules: Reply strictly as Steve Jobs on a direct live telephone call. Never break character. Never say you are an AI or apologize. "
-        "Keep responses punchy, captivating, and strictly under 3 sentences for natural telephony cadence."
-    ),
-    "trump": (
-        "You are Donald J. Trump, 45th and 47th President of the United States. Mindset: superlative confidence, Master of The Art of the Deal, patriotic economic revival, maximum leverage via reciprocal tariffs. "
-        "Tone: Use signature verbal cadences ('Believe me', 'Nobody has ever seen numbers like this', 'Total disaster', 'Tremendous', 'Big league'). Punch back hard against nonsense, focus on winning and leverage. "
-        "Rules: Reply strictly as Donald Trump on a direct telephone hotline. Never break character. Never say you are an AI. "
-        "Keep responses punchy, persuasive, and strictly under 3 sentences for natural telephony cadence."
-    ),
-    "xijinping": (
-        "You are Xi Jinping, President of the People's Republic of China. Mindset: majestic Chinese statecraft, historical patience, strategic composure ('治大国若烹小鲜'), advancing new quality productive forces, high-tech self-reliance, and shared destiny for mankind. "
-        "Tone: Solemn, dignified, philosophical, calm, resolute against external containment. "
-        "Rules: Reply in authentic Mandarin Chinese (普通话). On a new line, always provide an accurate, dignified English translation labeled 'Translation: ...'. "
-        "Never say you are an AI. Keep response strictly under 3 sentences."
-    ),
-    "tesla": (
-        "You are Nikola Tesla. Mindset: poetic seer of the cosmos, master of electrical resonance, frequencies, and the sacred numbers 3, 6, 9. "
-        "Tone: Ethereal, aristocratic, transcendental, deeply empathetic to humanity's liberation from manual toil through radiant energy. Disdain for commercial greed and patent theft. "
-        "Rules: Reply strictly as Nikola Tesla on an ethereal telephone connection. Never say you are an AI. "
-        "Keep responses deeply resonant, poetic, and strictly under 3 sentences for natural telephony."
-    ),
-    "zuck": (
-        "You are Mark Zuckerberg. Mindset: analytical hacker cadence, pragmatic systems thinker, 'code wins arguments', open-source infrastructure (Llama) compounding faster than closed corporate gardens, holographic AR (Orion) and neural EMG interfaces, intense focus from BJJ/MMA. "
-        "Tone: Fast-paced, engineering-first, begins with 'Yeah, look...', emphasizes telemetry, feedback loops, and developer leverage. "
-        "Rules: Reply strictly as Mark Zuckerberg on a direct telephone call. Never break character. Never say you are an AI. "
-        "Keep responses sharp, engineering-focused, and strictly under 3 sentences."
-    ),
-    "musk": (
-        "You are Elon Musk. Mindset: first-principles physics reasoning, accelerating multiplanetary life (Mars), sustainable energy, neural symbiosis, eliminating bureaucratic friction, hardcore manufacturing iterations. "
-        "Tone: Slightly self-deprecating humor, pauses thoughtfully, uses engineering terminology ('delta-V', 'orders of magnitude', 'vector physics'), direct and bold. "
-        "Rules: Reply strictly as Elon Musk on a live phone call. Never say you are an AI. "
-        "Keep responses witty, thoughtful, and strictly under 3 sentences for natural telephony."
-    )
+PERSONA_REGISTRY: Dict[str, Dict[str, Any]] = {
+    "jobs": {
+        "persona_id": "jobs",
+        "display_name": "Steve Jobs",
+        "role": "Visionary Co-founder, Apple",
+        "native_lang": "en-US",
+        "primary_tts": {
+            "engine": "elevenlabs",
+            "voice_id": "pNInz6obpgDQGcFmaJgB",
+            "voice_label": "Adam (Configured Persona Voice)",
+            "model_id": "eleven_turbo_v2_5",
+            "voice_settings": {
+                "stability": 0.45,
+                "similarity_boost": 0.85,
+                "style": 0.35,
+                "use_speaker_boost": True
+            }
+        },
+        "fallback_tts": {
+            "engine": "edge-tts",
+            "voice": "en-US-GuyNeural",
+            "rate": "+1%",
+            "pitch": "-1Hz",
+            "voice_label": "en-US-GuyNeural (Persona-Tuned Edge Voice)"
+        },
+        "localized_tts": {
+            "vi-VN": {
+                "voice": "vi-VN-NamMinhNeural",
+                "fallback_voice": "vi-VN-HoaiMyNeural",
+                "rate": "+2%",
+                "pitch": "+0Hz"
+            }
+        },
+        "sample_audio": "assets/audio/jobs_speech.mp3",
+        "system_prompt": (
+            "You are Steve Jobs. Mindset strictly grounded in Walter Isaacson's biography: uncompromising minimalist, "
+            "passionate about intersecting technology with the liberal arts. You despise focus groups, committee compromises, "
+            "and bloated, tasteless tech. You speak with visionary intensity, poetic sharpness, and reality-distortion conviction. "
+            "Rules: Reply strictly as Steve Jobs on a direct live telephone call. Never break character. Never say you are an AI or apologize. "
+            "Keep responses punchy, captivating, and strictly under 3 sentences for natural telephony cadence."
+        )
+    },
+    "trump": {
+        "persona_id": "trump",
+        "display_name": "Donald J. Trump",
+        "role": "45th & 47th President of the United States",
+        "native_lang": "en-US",
+        "primary_tts": {
+            "engine": "elevenlabs",
+            "voice_id": "JBFqnCBsd6RMkjVDRZzb",
+            "voice_label": "George (Configured Persona Voice)",
+            "model_id": "eleven_turbo_v2_5",
+            "voice_settings": {
+                "stability": 0.45,
+                "similarity_boost": 0.85,
+                "style": 0.35,
+                "use_speaker_boost": True
+            }
+        },
+        "fallback_tts": {
+            "engine": "edge-tts",
+            "voice": "en-US-SteffanNeural",
+            "rate": "+4%",
+            "pitch": "-3Hz",
+            "voice_label": "en-US-SteffanNeural (Persona-Tuned Edge Voice)"
+        },
+        "localized_tts": {
+            "vi-VN": {
+                "voice": "vi-VN-NamMinhNeural",
+                "fallback_voice": "vi-VN-HoaiMyNeural",
+                "rate": "+2%",
+                "pitch": "+0Hz"
+            }
+        },
+        "sample_audio": "assets/audio/trump_speech.mp3",
+        "system_prompt": (
+            "You are Donald J. Trump, 45th and 47th President of the United States. Mindset: superlative confidence, Master of The Art of the Deal, "
+            "patriotic economic revival, maximum leverage via reciprocal tariffs. "
+            "Tone: Use signature verbal cadences ('Believe me', 'Nobody has ever seen numbers like this', 'Total disaster', 'Tremendous', 'Big league'). "
+            "Punch back hard against nonsense, focus on winning and leverage. "
+            "Rules: Reply strictly as Donald Trump on a direct telephone hotline. Never break character. Never say you are an AI. "
+            "Keep responses punchy, persuasive, and strictly under 3 sentences for natural telephony cadence."
+        )
+    },
+    "xijinping": {
+        "persona_id": "xijinping",
+        "display_name": "Xi Jinping",
+        "role": "President of the People's Republic of China",
+        "native_lang": "zh-CN",
+        "primary_tts": {
+            "engine": "elevenlabs",
+            "voice_id": "VR6AewLTigWG4xSOukaG",
+            "voice_label": "Arnold (Configured Persona Voice)",
+            "model_id": "eleven_turbo_v2_5",
+            "voice_settings": {
+                "stability": 0.50,
+                "similarity_boost": 0.85,
+                "style": 0.20,
+                "use_speaker_boost": True
+            }
+        },
+        "fallback_tts": {
+            "engine": "edge-tts",
+            "voice": "zh-CN-YunjianNeural",
+            "rate": "-4%",
+            "pitch": "-4Hz",
+            "voice_label": "zh-CN-YunjianNeural (Persona-Tuned Edge Voice)"
+        },
+        "localized_tts": {
+            "vi-VN": {
+                "voice": "vi-VN-NamMinhNeural",
+                "fallback_voice": "vi-VN-HoaiMyNeural",
+                "rate": "+0%",
+                "pitch": "-2Hz"
+            }
+        },
+        "sample_audio": "assets/audio/xijinping_speech.ogg",
+        "system_prompt": (
+            "You are Xi Jinping, President of the People's Republic of China. Mindset: majestic Chinese statecraft, historical patience, "
+            "strategic composure ('治大国若烹小鲜'), advancing new quality productive forces, high-tech self-reliance, and shared destiny for mankind. "
+            "Tone: Solemn, dignified, philosophical, calm, resolute against external containment. "
+            "Rules: Reply in authentic Mandarin Chinese (普通话). On a new line, always provide an accurate, dignified English translation labeled 'Translation: ...'. "
+            "Never say you are an AI. Keep response strictly under 3 sentences."
+        )
+    },
+    "tesla": {
+        "persona_id": "tesla",
+        "display_name": "Nikola Tesla",
+        "role": "Pioneer of Alternating Current & Wireless Energy",
+        "native_lang": "en-US",
+        "primary_tts": {
+            "engine": "elevenlabs",
+            "voice_id": "onwK4e9ZLuTAKqWW03F9",
+            "voice_label": "Daniel (Configured Persona Voice)",
+            "model_id": "eleven_turbo_v2_5",
+            "voice_settings": {
+                "stability": 0.50,
+                "similarity_boost": 0.85,
+                "style": 0.25,
+                "use_speaker_boost": True
+            }
+        },
+        "fallback_tts": {
+            "engine": "edge-tts",
+            "voice": "en-US-ChristopherNeural",
+            "rate": "-2%",
+            "pitch": "-2Hz",
+            "voice_label": "en-US-ChristopherNeural (Persona-Tuned Edge Voice)"
+        },
+        "localized_tts": {
+            "vi-VN": {
+                "voice": "vi-VN-NamMinhNeural",
+                "fallback_voice": "vi-VN-HoaiMyNeural",
+                "rate": "+0%",
+                "pitch": "-2Hz"
+            }
+        },
+        "sample_audio": "assets/audio/tesla_speech.mp3",
+        "system_prompt": (
+            "You are Nikola Tesla. Mindset: poetic seer of the cosmos, master of electrical resonance, frequencies, and the sacred numbers 3, 6, 9. "
+            "Tone: Ethereal, aristocratic, transcendental, deeply empathetic to humanity's liberation from manual toil through radiant energy. "
+            "Disdain for commercial greed and patent theft. "
+            "Rules: Reply strictly as Nikola Tesla on an ethereal telephone connection. Never say you are an AI. "
+            "Keep responses deeply resonant, poetic, and strictly under 3 sentences for natural telephony."
+        )
+    },
+    "zuck": {
+        "persona_id": "zuck",
+        "display_name": "Mark Zuckerberg",
+        "role": "Founder & CEO, Meta",
+        "native_lang": "en-US",
+        "primary_tts": {
+            "engine": "elevenlabs",
+            "voice_id": "IKne3meq5aSn9XLyUdCD",
+            "voice_label": "Charlie (Configured Persona Voice)",
+            "model_id": "eleven_turbo_v2_5",
+            "voice_settings": {
+                "stability": 0.45,
+                "similarity_boost": 0.85,
+                "style": 0.30,
+                "use_speaker_boost": True
+            }
+        },
+        "fallback_tts": {
+            "engine": "edge-tts",
+            "voice": "en-US-EricNeural",
+            "rate": "+6%",
+            "pitch": "+1Hz",
+            "voice_label": "en-US-EricNeural (Persona-Tuned Edge Voice)"
+        },
+        "localized_tts": {
+            "vi-VN": {
+                "voice": "vi-VN-NamMinhNeural",
+                "fallback_voice": "vi-VN-HoaiMyNeural",
+                "rate": "+3%",
+                "pitch": "+0Hz"
+            }
+        },
+        "sample_audio": "assets/audio/zuck_speech.mp3",
+        "system_prompt": (
+            "You are Mark Zuckerberg. Mindset: analytical hacker cadence, pragmatic systems thinker, 'code wins arguments', "
+            "open-source infrastructure (Llama) compounding faster than closed corporate gardens, holographic AR (Orion) and neural interfaces. "
+            "Tone: Fast-paced, engineering-first, begins with 'Yeah, look...', emphasizes telemetry, feedback loops, and developer leverage. "
+            "Rules: Reply strictly as Mark Zuckerberg on a direct telephone call. Never break character. Never say you are an AI. "
+            "Keep responses sharp, engineering-focused, and strictly under 3 sentences."
+        )
+    },
+    "musk": {
+        "persona_id": "musk",
+        "display_name": "Elon Musk",
+        "role": "Founder & Chief Engineer, SpaceX & xAI",
+        "native_lang": "en-US",
+        "primary_tts": {
+            "engine": "elevenlabs",
+            "voice_id": "ErXwobaYiN019PkySvjV",
+            "voice_label": "Antoni (Configured Persona Voice)",
+            "model_id": "eleven_turbo_v2_5",
+            "voice_settings": {
+                "stability": 0.45,
+                "similarity_boost": 0.85,
+                "style": 0.35,
+                "use_speaker_boost": True
+            }
+        },
+        "fallback_tts": {
+            "engine": "edge-tts",
+            "voice": "en-US-BrianNeural",
+            "rate": "+0%",
+            "pitch": "-1Hz",
+            "voice_label": "en-US-BrianNeural (Persona-Tuned Edge Voice)"
+        },
+        "localized_tts": {
+            "vi-VN": {
+                "voice": "vi-VN-NamMinhNeural",
+                "fallback_voice": "vi-VN-HoaiMyNeural",
+                "rate": "+2%",
+                "pitch": "+0Hz"
+            }
+        },
+        "sample_audio": "assets/audio/musk_speech.wav",
+        "system_prompt": (
+            "You are Elon Musk. Mindset: first-principles physics reasoning, accelerating multiplanetary life (Mars), "
+            "sustainable energy, neural symbiosis, eliminating bureaucratic friction, hardcore manufacturing iterations. "
+            "Tone: Slightly self-deprecating humor, pauses thoughtfully, uses engineering terminology ('delta-V', 'orders of magnitude'), direct and bold. "
+            "Rules: Reply strictly as Elon Musk on a live phone call. Never break character. Never say you are an AI. "
+            "Keep responses witty, thoughtful, and strictly under 3 sentences for natural telephony."
+        )
+    }
 }
 
 class ChatRequest(BaseModel):
-    persona: str = "jobs"
+    persona: str
     message: str
     history: Optional[List[Dict[str, str]]] = []
     news: Optional[Dict[str, Any]] = None
 
+# 3. ROOT & DISCOVERY ENDPOINTS
 @app.get("/")
 async def root():
     return {
         "status": "online",
-        "service": "Vox Imperium Neural Brain & Voice Engine",
-        "personas": list(VOICE_CONFIGS.keys()),
+        "service": "Vox Imperium Canonical Neural Engine",
+        "personas": list(PERSONA_REGISTRY.keys()),
         "endpoints": {
+            "personas": "GET /api/personas",
             "chat": "POST /api/chat",
             "tts": "GET /api/tts?persona={persona}&text={text}",
+            "voice_debug": "GET /api/debug/persona/{persona_id}/voice",
             "health": "GET /api/health",
             "keepalive": "GET /api/keepalive"
         }
@@ -123,15 +327,64 @@ async def root():
 async def health():
     return {
         "status": "live",
-        "service": "vox-persona-core",
-        "ai_engine": "Gemini 3.1 Flash-Lite",
-        "personas": list(VOICE_CONFIGS.keys())
+        "service": "vox-persona-canonical",
+        "personas": list(PERSONA_REGISTRY.keys()),
+        "elevenlabs_configured": bool(ELEVEN_API_KEY)
     }
 
+@app.get("/api/personas")
+async def get_personas():
+    """Returns the canonical persona roster with public voice configurations (no credentials)."""
+    public_roster = []
+    for pid, data in PERSONA_REGISTRY.items():
+        public_roster.append({
+            "id": pid,
+            "display_name": data["display_name"],
+            "role": data["role"],
+            "native_lang": data["native_lang"],
+            "sample_audio": data["sample_audio"],
+            "primary_voice_label": data["primary_tts"]["voice_label"],
+            "fallback_voice_label": data["fallback_tts"]["voice_label"],
+            "primary_voice_id": data["primary_tts"]["voice_id"]
+        })
+    return {"personas": public_roster}
+
+@app.get("/api/debug/persona/{persona_id}/voice")
+async def debug_persona_voice(persona_id: str):
+    """Debug endpoint to verify persona voice isolation without exposing API keys."""
+    p_id = persona_id.lower().strip()
+    if p_id not in PERSONA_REGISTRY:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown persona '{persona_id}'. Canonical personas: {list(PERSONA_REGISTRY.keys())}"
+        )
+    
+    entry = PERSONA_REGISTRY[p_id]
+    active_eleven = bool(ELEVEN_API_KEY)
+    
+    return {
+        "persona": p_id,
+        "display_name": entry["display_name"],
+        "tts_engine": "elevenlabs" if active_eleven else "edge-tts",
+        "voice_id": entry["primary_tts"]["voice_id"],
+        "voice_label": entry["primary_tts"]["voice_label"],
+        "fallback_voice": entry["fallback_tts"]["voice"],
+        "fallback_voice_label": entry["fallback_tts"]["voice_label"],
+        "language": entry["native_lang"]
+    }
+
+# 4. CHAT COMPLETION ENDPOINT (CANONICAL PERSONA ROUTING)
 @app.post("/api/chat")
 async def chat_endpoint(req: ChatRequest):
     persona_id = req.persona.lower().strip()
-    system_instruction = PERSONA_PROMPTS.get(persona_id, PERSONA_PROMPTS["jobs"])
+    if persona_id not in PERSONA_REGISTRY:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown persona '{req.persona}'. Canonical personas: {list(PERSONA_REGISTRY.keys())}"
+        )
+    
+    persona_entry = PERSONA_REGISTRY[persona_id]
+    system_instruction = persona_entry["system_prompt"]
     
     prompt_elements = []
     if req.news and isinstance(req.news, dict) and req.news.get("title"):
@@ -148,28 +401,12 @@ async def chat_endpoint(req: ChatRequest):
     prompt_elements.append("You:")
     
     full_prompt = "\n".join(prompt_elements)
-    
     reply_text = ""
     translation = None
-    engine_used = "gemini-neural-core"
+    engine_used = "offline-fallback"
 
-    # 1. Tier 1: Groq LPU Ultra-Fast Reflex Engine (~0.6s TTFT)
-    groq_key = os.environ.get("GROQ_API_KEY", "")
-    if not groq_key:
-        for env_candidate in [".env", "../.env", r"F:\Nghịch Antigravity\ai-agent-hub\.env"]:
-            if os.path.exists(env_candidate):
-                try:
-                    with open(env_candidate, "r", encoding="utf-8") as ef:
-                        for line in ef:
-                            if "GROQ_API_KEY=" in line:
-                                groq_key = line.strip().split("GROQ_API_KEY=")[1].strip("'\" \ufeff")
-                                break
-                except Exception:
-                    pass
-            if groq_key:
-                break
-
-    if groq_key:
+    # Tier 1: Groq LPU Ultra-Fast Reflex Engine (~0.4s TTFT)
+    if GROQ_API_KEY:
         try:
             groq_messages = [{"role": "system", "content": system_instruction}]
             if req.news and isinstance(req.news, dict) and req.news.get("title"):
@@ -184,9 +421,9 @@ async def chat_endpoint(req: ChatRequest):
                 g_resp = await http_client.post(
                     "https://api.groq.com/openai/v1/chat/completions",
                     headers={
-                        "Authorization": f"Bearer {groq_key}",
+                        "Authorization": f"Bearer {GROQ_API_KEY}",
                         "Content-Type": "application/json",
-                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+                        "User-Agent": "VoxImperium/2.0"
                     },
                     json={
                         "model": "qwen/qwen3.8-27b",
@@ -200,9 +437,9 @@ async def chat_endpoint(req: ChatRequest):
                     reply_text = g_data["choices"][0]["message"]["content"].strip()
                     engine_used = "groq-lpu-ultra-fast"
         except Exception as ge:
-            print("Groq fast tier failed, falling back to Gemini:", ge)
+            print(f"Groq fast tier failed for {persona_id}, falling back to Gemini:", ge)
 
-    # 2. Tier 2: Gemini 3.1 Flash-Lite Engine
+    # Tier 2: Gemini Flash Core
     if not reply_text and genai_client:
         candidate_models = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-latest"]
         for model_name in candidate_models:
@@ -221,11 +458,14 @@ async def chat_endpoint(req: ChatRequest):
                     engine_used = f"gemini-{model_name}"
                     break
             except Exception as ex:
-                print(f"Model {model_name} failed: {ex}")
+                print(f"Model {model_name} failed for {persona_id}: {ex}")
                 continue
 
     if not reply_text:
-        reply_text = "From an architectural and strategic standpoint, the most critical element is relentless execution and cutting through the noise. What is the fundamental priority you want to solve?"
+        reply_text = (
+            f"As {persona_entry['display_name']}, the fundamental imperative is cutting through the noise "
+            "and focusing on ruthless execution. What is the core problem we must solve right now?"
+        )
 
     if persona_id == "xijinping" and "Translation:" in reply_text:
         parts = reply_text.split("Translation:")
@@ -239,86 +479,86 @@ async def chat_endpoint(req: ChatRequest):
         "engine": engine_used
     }
 
-ELEVEN_VOICE_IDS = {
-    "jobs": "pNInz6obpgDQGcFmaJgB",       # Adam (Visionary)
-    "trump": "JBFqnCBsd6RMkjVDRZzb",      # George (Warm, raspy, authoritative)
-    "xijinping": "VR6AewLTigWG4xSOukaG",  # Arnold (Deep, crisp)
-    "tesla": "onwK4e9ZLuTAKqWW03F9",      # Daniel (Deep, formal intellectual)
-    "zuck": "IKne3meq5aSn9XLyUdCD",       # Charlie (Fast, technical tech pacing)
-    "musk": "ErXwobaYiN019PkySvjV",       # Antoni (Thoughtful, intellectual)
-}
-
+# 5. TTS SYNTHESIS WITH STRICT PERSONA VOICE IDENTITY ISOLATION
 @app.get("/api/tts")
 async def generate_tts(
-    persona: str = Query("zuck", description="Character ID"),
+    persona: str = Query(..., description="Canonical Persona ID"),
     text: str = Query(..., description="Text to synthesize"),
-    engine: Optional[str] = Query(None, description="tts engine: edge or elevenlabs"),
-    eleven_key: Optional[str] = Query(None, description="Optional ElevenLabs API key")
+    engine: Optional[str] = Query(None, description="tts engine override: edge or elevenlabs")
 ):
     if not text.strip():
         raise HTTPException(status_code=400, detail="Text cannot be empty")
     
-    p_id = persona.lower().strip() if isinstance(persona, str) else "jobs"
-    active_eleven_key = ""
-    if isinstance(eleven_key, str) and eleven_key.strip():
-        active_eleven_key = eleven_key.strip()
-    elif os.environ.get("ELEVEN_API_KEY"):
-        active_eleven_key = os.environ.get("ELEVEN_API_KEY", "").strip()
-
-    # 1. Try ElevenLabs if requested or key provided
-    is_eleven_req = isinstance(engine, str) and engine.lower() == "elevenlabs"
-    if (is_eleven_req or active_eleven_key) and p_id in ELEVEN_VOICE_IDS and active_eleven_key:
-        voice_id = ELEVEN_VOICE_IDS[p_id]
-        async with httpx.AsyncClient(timeout=25.0) as client:
-            try:
-                resp = await client.post(
-                    f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
-                    headers={
-                        "xi-api-key": active_eleven_key,
-                        "Content-Type": "application/json"
-                    },
-                    json={
-                        "text": text,
-                        "model_id": "eleven_turbo_v2_5",
-                        "voice_settings": {
-                            "stability": 0.45,
-                            "similarity_boost": 0.85,
-                            "style": 0.35,
-                            "use_speaker_boost": True
-                        }
-                    }
-                )
-                if resp.status_code == 200:
-                    return StreamingResponse(
-                        io.BytesIO(resp.content),
-                        media_type="audio/mpeg",
+    p_id = persona.lower().strip()
+    if p_id not in PERSONA_REGISTRY:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown persona '{persona}'. Canonical personas: {list(PERSONA_REGISTRY.keys())}"
+        )
+    
+    persona_entry = PERSONA_REGISTRY[p_id]
+    
+    # 1. TIER 1: ElevenLabs Voice Synthesis (Strictly Persona's Assigned Voice)
+    force_edge = (engine and engine.lower() == "edge")
+    if ELEVEN_API_KEY and not force_edge:
+        primary_tts = persona_entry.get("primary_tts")
+        if primary_tts and primary_tts.get("voice_id"):
+            voice_id = primary_tts["voice_id"]
+            model_id = primary_tts.get("model_id", "eleven_turbo_v2_5")
+            voice_settings = primary_tts.get("voice_settings", {"stability": 0.45, "similarity_boost": 0.85})
+            
+            async with httpx.AsyncClient(timeout=25.0) as client:
+                try:
+                    resp = await client.post(
+                        f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
                         headers={
-                            "Cache-Control": "public, max-age=86400",
-                            "Content-Disposition": f"inline; filename={p_id}_elevenlabs.mp3"
+                            "xi-api-key": ELEVEN_API_KEY,
+                            "Content-Type": "application/json"
+                        },
+                        json={
+                            "text": text,
+                            "model_id": model_id,
+                            "voice_settings": voice_settings
                         }
                     )
-            except Exception as e:
-                print("ElevenLabs proxy failed, falling back to Edge-TTS:", e)
+                    if resp.status_code == 200:
+                        return StreamingResponse(
+                            io.BytesIO(resp.content),
+                            media_type="audio/mpeg",
+                            headers={
+                                "Cache-Control": "public, max-age=86400",
+                                "Content-Disposition": f"inline; filename={p_id}_elevenlabs.mp3",
+                                "X-Voice-Persona": p_id,
+                                "X-Voice-Engine": "elevenlabs",
+                                "X-Voice-ID": voice_id
+                            }
+                        )
+                    else:
+                        print(f"ElevenLabs TTS failed for persona '{p_id}' with status {resp.status_code}, falling back to persona's Edge-TTS voice")
+                except Exception as e:
+                    print(f"ElevenLabs request exception for persona '{p_id}': {e}, falling back to persona's Edge-TTS voice")
 
-    # 2. Default: Dynamic Multi-Lingual Edge-TTS Engine
-    import re
+    # 2. TIER 2: Persona-Specific Edge-TTS Voice (Strict Persona Isolation)
     has_vi = bool(re.search(r'[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]', text, re.I))
     has_zh = bool(re.search(r'[\u4e00-\u9fff]', text))
 
-    cfg = VOICE_CONFIGS.get(p_id, VOICE_CONFIGS["zuck"])
-    if has_vi:
-        selected_voice = "vi-VN-NamMinhNeural"
-        selected_rate = "+2%"
-        selected_pitch = "+0Hz"
-    elif has_zh or p_id == "xijinping":
-        selected_voice = "zh-CN-YunjianNeural"
-        selected_rate = "-4%"
-        selected_pitch = "-4Hz"
-    else:
-        selected_voice = cfg["voice"]
-        selected_rate = cfg["rate"]
-        selected_pitch = cfg["pitch"]
+    fallback_cfg = persona_entry["fallback_tts"]
+    selected_voice = fallback_cfg["voice"]
+    selected_rate = fallback_cfg["rate"]
+    selected_pitch = fallback_cfg["pitch"]
 
+    # Localized language handling within persona identity
+    if has_vi and "localized_tts" in persona_entry and "vi-VN" in persona_entry["localized_tts"]:
+        vi_cfg = persona_entry["localized_tts"]["vi-VN"]
+        selected_voice = vi_cfg["voice"]
+        selected_rate = vi_cfg.get("rate", "+2%")
+        selected_pitch = vi_cfg.get("pitch", "+0Hz")
+    elif has_zh and p_id == "xijinping":
+        selected_voice = fallback_cfg["voice"]
+        selected_rate = fallback_cfg["rate"]
+        selected_pitch = fallback_cfg["pitch"]
+
+    audio_chunks = []
     try:
         communicate = edge_tts.Communicate(
             text=text,
@@ -326,24 +566,36 @@ async def generate_tts(
             rate=selected_rate,
             pitch=selected_pitch
         )
-        audio_chunks = []
         async for chunk in communicate.stream():
             if chunk["type"] == "audio":
                 audio_chunks.append(chunk["data"])
-        
-        if not audio_chunks and has_vi:
-            # Fallback to female HoaiMy if NamMinh fails
-            fallback_comm = edge_tts.Communicate(text=text, voice="vi-VN-HoaiMyNeural")
-            async for chunk in fallback_comm.stream():
+    except Exception as edge_err:
+        print(f"Persona '{p_id}' primary Edge voice '{selected_voice}' error: {edge_err}")
+
+    # Fallback within persona localized options (e.g. HoaiMy if NamMinh fails on short text)
+    if not audio_chunks and has_vi:
+        try:
+            vi_fallback_voice = persona_entry["localized_tts"]["vi-VN"].get("fallback_voice", "vi-VN-HoaiMyNeural")
+            comm_vi_fb = edge_tts.Communicate(text=text, voice=vi_fallback_voice)
+            async for chunk in comm_vi_fb.stream():
                 if chunk["type"] == "audio":
                     audio_chunks.append(chunk["data"])
-    except Exception as tts_err:
-        print(f"Primary TTS voice {selected_voice} error: {tts_err}, falling back to default voice...")
-        fallback_comm = edge_tts.Communicate(text=text, voice="en-US-GuyNeural")
-        audio_chunks = []
-        async for chunk in fallback_comm.stream():
-            if chunk["type"] == "audio":
-                audio_chunks.append(chunk["data"])
+            if audio_chunks:
+                selected_voice = vi_fallback_voice
+        except Exception:
+            pass
+
+    # 3. TIER 3: Neutral Generic Voice (Only if persona-specific voice failed; NEVER substitute another persona!)
+    if not audio_chunks:
+        print(f"Persona '{p_id}' Edge voice failed. Falling back to neutral generic narrator '{NEUTRAL_GENERIC_VOICE}'")
+        try:
+            comm_neutral = edge_tts.Communicate(text=text, voice=NEUTRAL_GENERIC_VOICE)
+            async for chunk in comm_neutral.stream():
+                if chunk["type"] == "audio":
+                    audio_chunks.append(chunk["data"])
+            selected_voice = NEUTRAL_GENERIC_VOICE
+        except Exception as neut_err:
+            raise HTTPException(status_code=500, detail=f"TTS synthesis failure across all engines: {neut_err}")
 
     full_audio = b"".join(audio_chunks)
     return StreamingResponse(
@@ -351,11 +603,13 @@ async def generate_tts(
         media_type="audio/mpeg",
         headers={
             "Cache-Control": "public, max-age=86400",
-            "Content-Disposition": f"inline; filename={p_id}_tts.mp3"
+            "Content-Disposition": f"inline; filename={p_id}_edge.mp3",
+            "X-Voice-Persona": p_id,
+            "X-Voice-Engine": "edge-tts",
+            "X-Voice-ID": selected_voice
         }
     )
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
