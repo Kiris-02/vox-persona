@@ -151,8 +151,59 @@ async def chat_endpoint(req: ChatRequest):
     
     reply_text = ""
     translation = None
+    engine_used = "gemini-neural-core"
 
-    if genai_client:
+    # 1. Tier 1: Groq LPU Ultra-Fast Reflex Engine (~0.6s TTFT)
+    groq_key = os.environ.get("GROQ_API_KEY", "")
+    if not groq_key:
+        for env_candidate in [".env", "../.env", r"F:\Nghịch Antigravity\ai-agent-hub\.env"]:
+            if os.path.exists(env_candidate):
+                try:
+                    with open(env_candidate, "r", encoding="utf-8") as ef:
+                        for line in ef:
+                            if "GROQ_API_KEY=" in line:
+                                groq_key = line.strip().split("GROQ_API_KEY=")[1].strip("'\" \ufeff")
+                                break
+                except Exception:
+                    pass
+            if groq_key:
+                break
+
+    if groq_key:
+        try:
+            groq_messages = [{"role": "system", "content": system_instruction}]
+            if req.news and isinstance(req.news, dict) and req.news.get("title"):
+                groq_messages.append({"role": "system", "content": f"[Breaking News Context: {req.news.get('title')}]"})
+            if req.history:
+                for turn in req.history[-6:]:
+                    r = "user" if turn.get("role") == "user" else "assistant"
+                    groq_messages.append({"role": r, "content": turn.get("content", "")})
+            groq_messages.append({"role": "user", "content": req.message})
+
+            async with httpx.AsyncClient(timeout=8.0) as http_client:
+                g_resp = await http_client.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {groq_key}",
+                        "Content-Type": "application/json",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+                    },
+                    json={
+                        "model": "qwen/qwen3.8-27b",
+                        "messages": groq_messages,
+                        "max_tokens": 220,
+                        "temperature": 0.72
+                    }
+                )
+                if g_resp.status_code == 200:
+                    g_data = g_resp.json()
+                    reply_text = g_data["choices"][0]["message"]["content"].strip()
+                    engine_used = "groq-lpu-ultra-fast"
+        except Exception as ge:
+            print("Groq fast tier failed, falling back to Gemini:", ge)
+
+    # 2. Tier 2: Gemini 3.1 Flash-Lite Engine
+    if not reply_text and genai_client:
         candidate_models = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-latest"]
         for model_name in candidate_models:
             try:
@@ -167,6 +218,7 @@ async def chat_endpoint(req: ChatRequest):
                 )
                 if resp and resp.text:
                     reply_text = resp.text.strip()
+                    engine_used = f"gemini-{model_name}"
                     break
             except Exception as ex:
                 print(f"Model {model_name} failed: {ex}")
@@ -184,7 +236,7 @@ async def chat_endpoint(req: ChatRequest):
         "persona": persona_id,
         "text": reply_text,
         "translation": translation,
-        "engine": "gemini-neural-core"
+        "engine": engine_used
     }
 
 ELEVEN_VOICE_IDS = {
@@ -222,7 +274,7 @@ async def generate_tts(
                     },
                     json={
                         "text": text,
-                        "model_id": "eleven_multilingual_v2",
+                        "model_id": "eleven_turbo_v2_5",
                         "voice_settings": {
                             "stability": 0.45,
                             "similarity_boost": 0.85,
