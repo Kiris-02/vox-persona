@@ -440,17 +440,33 @@
           <span class="text-[10px] text-slate-400 font-sans block mt-1">Supports free models like meta-llama/llama-3.3-70b-instruct:free or Gemini 2.0 Flash.</span>
         </div>
 
-        <!-- GPT-SoVITS Local TTS Configuration -->
-        <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
-          <div class="flex items-center justify-between mb-1.5">
-            <label class="block text-emerald-400 font-bold">🎙️ GPT-SoVITS V2 Local Endpoint:</label>
+        <!-- GPT-SoVITS Cloud GPU Voice Clone Configuration -->
+        <div class="bg-slate-950 p-3.5 rounded-2xl border border-emerald-500/50 shadow-lg shadow-emerald-950/30">
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-emerald-400 font-bold flex items-center space-x-1.5">
+              <span>🎙️ GPT-SoVITS Free Cloud GPU</span>
+              <span class="text-[9px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-mono">100% Free • GitHub</span>
+            </label>
             <label class="flex items-center space-x-1.5 cursor-pointer">
-              <input type="checkbox" id="use-sovits-checkbox" class="w-4 h-4 accent-sky-500 rounded">
-              <span class="text-[11px] text-sky-300 font-semibold">Enable</span>
+              <input type="checkbox" id="use-sovits-checkbox" class="w-4 h-4 accent-emerald-500 rounded">
+              <span class="text-[11px] text-emerald-300 font-semibold">Enable</span>
             </label>
           </div>
-          <input type="text" id="sovits-endpoint-input" placeholder="http://127.0.0.1:9885/synthesize or http://127.0.0.1:9880/tts" 
-                 class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400 font-mono">
+          <p class="text-[11px] text-slate-300 mb-2 leading-relaxed font-sans">
+            Mượn card đồ họa NVIDIA T4 của Google chạy AI GPT-SoVITS, clone giọng thật 100%, không tốn tiền API và không tải máy.
+            <br>
+            <a href="https://colab.research.google.com/github/Kiris-02/vox-persona/blob/main/vox_gpt_sovits_colab.ipynb" target="_blank" class="inline-flex items-center space-x-1 text-sky-400 hover:text-sky-300 underline font-semibold mt-1">
+              <span>▶️ Bấm vào đây để mở Google Colab (1 Click)</span>
+            </a>
+          </p>
+          <input type="text" id="sovits-endpoint-input" placeholder="Dán link Cloudflare từ Colab vào đây (ví dụ: https://xxx.trycloudflare.com)" 
+                 class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400 font-mono">
+          <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-800 text-[10px]">
+            <span class="text-slate-400 font-sans">Chạy Colab -> Copy link `trycloudflare.com` -> Dán vào đây</span>
+            <button type="button" onclick="testSovitsKey()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-sans font-semibold transition flex items-center space-x-1">
+              <span>🔊 Test GPT-SoVITS Voice</span>
+            </button>
+          </div>
         </div>
 
       </div>
@@ -1411,6 +1427,50 @@ Reply directly, immersively, and conversationally as the real person on a live t
       const indicator = document.getElementById('indicator-text');
       toggleWaveform(true);
 
+      // -1. PRIORITY -1: GPT-SoVITS Free Cloud GPU Engine (Google Colab)
+      const useSovits = localStorage.getItem('vox_use_sovits') === 'true';
+      const sovitsEndpoint = (localStorage.getItem('vox_sovits_endpoint') || '').trim();
+      if (useSovits && sovitsEndpoint) {
+        try {
+          indicator.textContent = `Speaking as ${targetPersona.name} (GPT-SoVITS Clone)...`;
+          const cleanBase = sovitsEndpoint.replace(/\/+$/, '');
+          const sovitsUrl = cleanBase.includes('/tts') || cleanBase.includes('/synthesize')
+            ? `${cleanBase}?persona=${encodeURIComponent(targetPersona.id)}&text=${encodeURIComponent(text)}`
+            : `${cleanBase}/synthesize?persona=${encodeURIComponent(targetPersona.id)}&text=${encodeURIComponent(text)}`;
+
+          const res = await fetch(sovitsUrl, { signal: ttsSignal });
+          if (activeToken !== activePersonaSwitchToken) return;
+
+          if (res.ok) {
+            const blob = await res.blob();
+            if (activeToken !== activePersonaSwitchToken) return;
+            if (blob.size > 500) {
+              const audioUrl = URL.createObjectURL(blob);
+              const player = new Audio(audioUrl);
+              currentAudioPlayer = player;
+              player.onended = () => {
+                if (currentAudioPlayer === player) {
+                  isAiResponding = false;
+                  toggleWaveform(false);
+                  indicator.textContent = 'Listening...';
+                  if (isCallLive) startMicRecognition();
+                }
+              };
+              player.onerror = () => {
+                if (currentAudioPlayer === player) {
+                  fallbackCloudNeuralVoice(text, activeToken, targetPersona);
+                }
+              };
+              await player.play().catch(() => {});
+              return;
+            }
+          }
+        } catch (sovitsErr) {
+          if (activeToken !== activePersonaSwitchToken) return;
+          console.warn('GPT-SoVITS synthesis failed, falling back:', sovitsErr);
+        }
+      }
+
       // 0. PRIORITY 0: Fish Audio Zero-Shot Voice Clone (Authentic Clone Model via Backend Proxy)
       const fishKey = localStorage.getItem('vox_fish_api_key');
       const cloudTtsEndpoint = localStorage.getItem('vox_cloud_tts_endpoint') || 'https://vox-persona.onrender.com/api/tts';
@@ -2021,24 +2081,73 @@ Reply directly, immersively, and conversationally as the real person on a live t
       }
     }
 
+    async function testSovitsKey() {
+      const endpoint = (document.getElementById('sovits-endpoint-input') ? document.getElementById('sovits-endpoint-input').value.trim() : '') || localStorage.getItem('vox_sovits_endpoint') || '';
+      if (!endpoint) {
+        alert('Vui lòng dán link Google Colab / Cloudflare vào ô trước khi bấm test!');
+        return;
+      }
+      unlockAudioContext();
+      const indicator = document.getElementById('indicator-text');
+      indicator.textContent = `Testing GPT-SoVITS Clone for ${currentCharacter.name}...`;
+      toggleWaveform(true);
+
+      const cleanBase = endpoint.replace(/\/+$/, '');
+      const sampleText = `Hello, this is the authentic voice clone of ${currentCharacter.name} powered by GPT-SoVITS.`;
+      const sovitsUrl = cleanBase.includes('/tts') || cleanBase.includes('/synthesize')
+        ? `${cleanBase}?persona=${encodeURIComponent(currentCharacter.id)}&text=${encodeURIComponent(sampleText)}`
+        : `${cleanBase}/synthesize?persona=${encodeURIComponent(currentCharacter.id)}&text=${encodeURIComponent(sampleText)}`;
+
+      try {
+        const res = await fetch(sovitsUrl);
+        if (res.ok) {
+          const blob = await res.blob();
+          const audioUrl = URL.createObjectURL(blob);
+          if (currentAudioPlayer) {
+            currentAudioPlayer.pause();
+            currentAudioPlayer = null;
+          }
+          currentAudioPlayer = new Audio(audioUrl);
+          currentAudioPlayer.onended = () => {
+            toggleWaveform(false);
+            indicator.textContent = 'GPT-SoVITS Voice Verified! Listening...';
+          };
+          await currentAudioPlayer.play();
+          localStorage.setItem('vox_sovits_endpoint', endpoint);
+          localStorage.setItem('vox_use_sovits', 'true');
+          if (document.getElementById('use-sovits-checkbox')) {
+            document.getElementById('use-sovits-checkbox').checked = true;
+          }
+          updateEngineBadge();
+        } else {
+          toggleWaveform(false);
+          alert(`Lỗi GPT-SoVITS Server (${res.status}): Không thể tạo giọng nói. Vui lòng kiểm tra Google Colab!`);
+        }
+      } catch (err) {
+        toggleWaveform(false);
+        alert(`Lỗi kết nối GPT-SoVITS: ${err.message}\nHãy kiểm tra xem Google Colab còn đang chạy không!`);
+      }
+    }
+
     function updateEngineBadge() {
+      const useSovits = localStorage.getItem('vox_use_sovits') === 'true';
+      const sovitsEndpoint = (localStorage.getItem('vox_sovits_endpoint') || '').trim();
       const fishKey = localStorage.getItem('vox_fish_api_key');
       const elevenKey = localStorage.getItem('vox_eleven_api_key');
-      const useSovits = localStorage.getItem('vox_use_sovits') === 'true';
       const badge = document.getElementById('voice-engine-badge');
 
-      if (fishKey) {
+      if (useSovits && sovitsEndpoint) {
+        badge.innerHTML = '🤖 GPT-SoVITS Real Clone';
+        badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm';
+      } else if (fishKey) {
         badge.innerHTML = '🐟 Fish Audio Clone';
         badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm';
       } else if (elevenKey) {
         badge.innerHTML = '💎 ElevenLabs AI Voice';
         badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-sm';
-      } else if (useSovits) {
-        badge.innerHTML = '🖥️ GPT-SoVITS Local';
-        badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm';
       } else {
         badge.innerHTML = '⚡ Edge-TTS Neural';
-        badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm';
+        badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-slate-700/50 text-slate-300 border border-slate-600 shadow-sm';
       }
     }
   </script>

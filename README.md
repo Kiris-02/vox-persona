@@ -9,9 +9,10 @@
 - **Breaking News Radar**: Real-time integration with Reuters, Bloomberg, and WSJ wires.
 - **Human-like Dialogue**: Expressive, authentic speech without robotic AI clichés.
 
-## 🚀 Live Demo
-Visit the live interactive web app on GitHub Pages:
-👉 [https://kiris-02.github.io/vox-persona/](https://kiris-02.github.io/vox-persona/)
+## 🚀 Live Demo & Free Cloud Voice Cloning
+- **Web Application**: 👉 [https://kiris-02.github.io/vox-persona/](https://kiris-02.github.io/vox-persona/)
+- **Free Cloud GPU Voice Clone (GPT-SoVITS on Google Colab)**:
+  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Kiris-02/vox-persona/blob/main/vox_gpt_sovits_colab.ipynb)
 
 ---
 *Created by Kiris (`Kiris-02`)*
