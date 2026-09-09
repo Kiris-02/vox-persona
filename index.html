@@ -630,6 +630,7 @@
     let activePersonaSwitchToken = 0;
     let activeTtsAbortController = null;
     let activeChatAbortController = null;
+    let isAiResponding = false;
 
     // INITIALIZATION
     document.addEventListener('DOMContentLoaded', () => {
@@ -662,6 +663,9 @@
       updateEngineBadge();
       updateMicLangUI();
 
+      // Fetch live RSS news updates automatically
+      fetchLiveNewsRSS();
+
       // Silent wakeup ping to Render Cloud Neural Voice backend
       fetch('https://vox-persona.onrender.com/api/health').catch(() => {});
     });
@@ -687,6 +691,8 @@
     function selectActiveCharacter(id) {
       activePersonaSwitchToken++;
       const currentToken = activePersonaSwitchToken;
+      isAiResponding = false;
+      unlockAudioContext();
 
       // 1. Stop currently playing audio immediately
       if (currentAudioPlayer) {
@@ -858,6 +864,7 @@
       }
       if (window.speechSynthesis) window.speechSynthesis.cancel();
 
+      isAiResponding = true;
       toggleWaveform(true);
       document.getElementById('indicator-text').textContent = 'Playing reference audio...';
 
@@ -866,18 +873,21 @@
 
       player.onended = () => {
         if (currentAudioPlayer === player) {
+          isAiResponding = false;
           toggleWaveform(false);
           document.getElementById('indicator-text').textContent = 'Listening...';
         }
       };
       player.onerror = () => {
         if (currentAudioPlayer === player) {
+          isAiResponding = false;
           toggleWaveform(false);
           synthesizeSpeech(currentCharacter.sampleGreeting, activeToken);
         }
       };
       player.play().catch(() => {
         if (currentAudioPlayer === player) {
+          isAiResponding = false;
           synthesizeSpeech(currentCharacter.sampleGreeting, activeToken);
         }
       });
@@ -931,6 +941,8 @@
     async function dispatchDynamicIntelligence(userQuery, newsContext = null) {
       const currentToken = activePersonaSwitchToken;
       const capturedPersona = currentCharacter;
+
+      isAiResponding = true;
 
       if (activeChatAbortController) {
         try { activeChatAbortController.abort(); } catch(e) {}
@@ -1408,6 +1420,7 @@ Reply directly, immersively, and conversationally as the real person on a live t
               currentAudioPlayer = player;
               player.onended = () => {
                 if (currentAudioPlayer === player) {
+                  isAiResponding = false;
                   toggleWaveform(false);
                   indicator.textContent = 'Listening...';
                   if (isCallLive) startMicRecognition();
@@ -1465,6 +1478,7 @@ Reply directly, immersively, and conversationally as the real person on a live t
             currentAudioPlayer = player;
             player.onended = () => {
               if (currentAudioPlayer === player) {
+                isAiResponding = false;
                 toggleWaveform(false);
                 indicator.textContent = 'Listening...';
                 if (isCallLive) startMicRecognition();
@@ -1494,7 +1508,11 @@ Reply directly, immersively, and conversationally as the real person on a live t
       if (activeToken !== activePersonaSwitchToken) return;
       const targetPersona = persona || currentCharacter;
 
-      if (!window.speechSynthesis) return;
+      if (!window.speechSynthesis) {
+        isAiResponding = false;
+        toggleWaveform(false);
+        return;
+      }
       window.speechSynthesis.cancel();
 
       const utter = new SpeechSynthesisUtterance(text);
@@ -1526,6 +1544,15 @@ Reply directly, immersively, and conversationally as the real person on a live t
 
       utter.onend = () => {
         if (activeToken === activePersonaSwitchToken) {
+          isAiResponding = false;
+          toggleWaveform(false);
+          document.getElementById('indicator-text').textContent = 'Listening...';
+          if (isCallLive) startMicRecognition();
+        }
+      };
+      utter.onerror = () => {
+        if (activeToken === activePersonaSwitchToken) {
+          isAiResponding = false;
           toggleWaveform(false);
           document.getElementById('indicator-text').textContent = 'Listening...';
           if (isCallLive) startMicRecognition();
@@ -1609,6 +1636,7 @@ Reply directly, immersively, and conversationally as the real person on a live t
       const liveDot = document.getElementById('live-dot');
 
       if (isCallLive) {
+        unlockAudioContext();
         btn.className = 'flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-md transition transform active:scale-95';
         label.textContent = 'END CALL (HANG UP)';
         liveDot.className = 'absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-brand-900 animate-ping';
@@ -1616,6 +1644,7 @@ Reply directly, immersively, and conversationally as the real person on a live t
         startTimer();
         startMicRecognition();
       } else {
+        isAiResponding = false;
         btn.className = 'flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-md transition transform active:scale-95';
         label.textContent = 'START LIVE CALL (MIC)';
         liveDot.className = 'absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-slate-500 border-2 border-brand-900';
@@ -1647,6 +1676,7 @@ Reply directly, immersively, and conversationally as the real person on a live t
     }
 
     function interruptAI() {
+      isAiResponding = false;
       if (currentAudioPlayer) currentAudioPlayer.pause();
       if (window.speechSynthesis) window.speechSynthesis.cancel();
       toggleWaveform(false);
@@ -1675,16 +1705,17 @@ Reply directly, immersively, and conversationally as the real person on a live t
         recog.onresult = (e) => {
           const text = e.results[0][0].transcript;
           if (text) {
+            isAiResponding = true;
             appendMessageToTranscript('user', text);
             dispatchDynamicIntelligence(text);
           }
         };
 
         recog.onend = () => {
-          // Re-arm microphone if call is active and bot is not talking
-          if (isCallLive && (!currentAudioPlayer || currentAudioPlayer.paused)) {
+          // Re-arm microphone only if call is active, AI is not responding, and audio is paused
+          if (isCallLive && !isAiResponding && (!currentAudioPlayer || currentAudioPlayer.paused)) {
             setTimeout(() => {
-              if (isCallLive && (!currentAudioPlayer || currentAudioPlayer.paused)) {
+              if (isCallLive && !isAiResponding && (!currentAudioPlayer || currentAudioPlayer.paused)) {
                 try { recog.start(); } catch(e) {}
               }
             }, 600);
