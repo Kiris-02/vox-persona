@@ -20,6 +20,7 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "").strip()
 ELEVEN_API_KEY = os.environ.get("ELEVEN_API_KEY", "").strip()
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "").strip()
+FISH_AUDIO_API_KEY = os.environ.get("FISH_AUDIO_API_KEY", "").strip()
 
 try:
     from google import genai
@@ -57,6 +58,7 @@ PERSONA_REGISTRY: Dict[str, Dict[str, Any]] = {
         "display_name": "Steve Jobs",
         "role": "Visionary Co-founder, Apple",
         "native_lang": "en-US",
+        "fish_model_id": "7980b674846645398fa20325d70f1a9a",
         "primary_tts": {
             "engine": "elevenlabs",
             "voice_id": "pNInz6obpgDQGcFmaJgB",
@@ -98,6 +100,7 @@ PERSONA_REGISTRY: Dict[str, Dict[str, Any]] = {
         "display_name": "Donald J. Trump",
         "role": "45th & 47th President of the United States",
         "native_lang": "en-US",
+        "fish_model_id": "b3e8e2d408b049389f4dc11c75047b32",
         "primary_tts": {
             "engine": "elevenlabs",
             "voice_id": "JBFqnCBsd6RMkjVDRZzb",
@@ -140,6 +143,7 @@ PERSONA_REGISTRY: Dict[str, Dict[str, Any]] = {
         "display_name": "Xi Jinping",
         "role": "President of the People's Republic of China",
         "native_lang": "zh-CN",
+        "fish_model_id": "e46a7be78393439d91f4bc53920ff170",
         "primary_tts": {
             "engine": "elevenlabs",
             "voice_id": "VR6AewLTigWG4xSOukaG",
@@ -181,6 +185,7 @@ PERSONA_REGISTRY: Dict[str, Dict[str, Any]] = {
         "display_name": "Nikola Tesla",
         "role": "Pioneer of Alternating Current & Wireless Energy",
         "native_lang": "en-US",
+        "fish_model_id": "6376d8b2e3df4c7499695d734cf1f82f",
         "primary_tts": {
             "engine": "elevenlabs",
             "voice_id": "onwK4e9ZLuTAKqWW03F9",
@@ -222,6 +227,7 @@ PERSONA_REGISTRY: Dict[str, Dict[str, Any]] = {
         "display_name": "Mark Zuckerberg",
         "role": "Founder & CEO, Meta",
         "native_lang": "en-US",
+        "fish_model_id": "a56241a87799446d99ef87b00df74cfa",
         "primary_tts": {
             "engine": "elevenlabs",
             "voice_id": "IKne3meq5aSn9XLyUdCD",
@@ -263,6 +269,7 @@ PERSONA_REGISTRY: Dict[str, Dict[str, Any]] = {
         "display_name": "Elon Musk",
         "role": "Founder & Chief Engineer, SpaceX & xAI",
         "native_lang": "en-US",
+        "fish_model_id": "9a9cf47702da476aa4629e2506d4a857",
         "primary_tts": {
             "engine": "elevenlabs",
             "voice_id": "ErXwobaYiN019PkySvjV",
@@ -500,8 +507,44 @@ async def generate_tts(
     
     persona_entry = PERSONA_REGISTRY[p_id]
     
-    # 1. TIER 1: ElevenLabs Voice Synthesis (Strictly Persona's Assigned Voice)
+    # 0. TIER 0: Fish Audio Zero-Shot Voice Clone (Authentic Clone Model)
     force_edge = (engine and engine.lower() == "edge")
+    if FISH_AUDIO_API_KEY and not force_edge:
+        fish_model_id = persona_entry.get("fish_model_id")
+        if fish_model_id:
+            async with httpx.AsyncClient(timeout=25.0) as client:
+                try:
+                    resp = await client.post(
+                        "https://api.fish.audio/v1/tts",
+                        headers={
+                            "Authorization": f"Bearer {FISH_AUDIO_API_KEY}",
+                            "Content-Type": "application/json"
+                        },
+                        json={
+                            "text": text,
+                            "reference_id": fish_model_id,
+                            "format": "mp3",
+                            "latency": "balanced"
+                        }
+                    )
+                    if resp.status_code == 200:
+                        return StreamingResponse(
+                            io.BytesIO(resp.content),
+                            media_type="audio/mpeg",
+                            headers={
+                                "Cache-Control": "public, max-age=86400",
+                                "Content-Disposition": f"inline; filename={p_id}_fish.mp3",
+                                "X-Voice-Persona": p_id,
+                                "X-Voice-Engine": "fish-audio",
+                                "X-Voice-ID": fish_model_id
+                            }
+                        )
+                    else:
+                        print(f"Fish Audio TTS failed for persona '{p_id}' with status {resp.status_code}, falling back to secondary engines")
+                except Exception as fe:
+                    print(f"Fish Audio exception for persona '{p_id}': {fe}")
+
+    # 1. TIER 1: ElevenLabs Voice Synthesis (Strictly Persona's Assigned Voice)
     if ELEVEN_API_KEY and not force_edge:
         primary_tts = persona_entry.get("primary_tts")
         if primary_tts and primary_tts.get("voice_id"):

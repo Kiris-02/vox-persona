@@ -383,6 +383,25 @@
 
       <div class="space-y-3 font-mono text-xs">
         
+        <!-- Fish Audio Voice Clone API (Free Trial / Authentic Human Clones) -->
+        <div class="bg-slate-950 p-3.5 rounded-2xl border border-cyan-500/50 shadow-lg shadow-cyan-950/30">
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-cyan-400 font-bold flex items-center space-x-1.5">
+              <span>Fish Audio API Key</span>
+              <span class="text-[9px] bg-cyan-500/20 text-cyan-300 px-1.5 py-0.5 rounded font-mono">Voice Clone Engine</span>
+            </label>
+            <span class="text-[10px] text-emerald-400 font-sans font-semibold">Free Trial Credits</span>
+          </div>
+          <input type="password" id="fish-api-key" placeholder="Paste Fish Audio API key..." 
+                 class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-400 font-mono">
+          <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-800 text-[10px]">
+            <span class="text-slate-400 font-sans">Get free trial key at <a href="https://fish.audio/app/api-keys" target="_blank" class="text-cyan-400 underline hover:text-cyan-300">fish.audio</a></span>
+            <button type="button" onclick="testFishAudioKey()" class="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded font-sans font-semibold transition flex items-center space-x-1">
+              <span>🔊 Test Voice Clone</span>
+            </button>
+          </div>
+        </div>
+
         <!-- ElevenLabs Voice Model API -->
         <div class="bg-slate-950 p-3.5 rounded-2xl border border-sky-500/50 shadow-lg shadow-sky-950/30">
           <div class="flex items-center justify-between mb-1">
@@ -464,6 +483,7 @@
         voicePitch: 1.05,
         voiceRate: 1.02,
         elevenVoiceId: 'pNInz6obpgDQGcFmaJgB', // Adam — deep, articulate, visionary tech cadence (Jobs)
+        fishVoiceId: '7980b674846645398fa20325d70f1a9a', // Steve Jobs authentic clone
         mindset: 'Perfectionism without compromise. Relentless reality distortion field to bend impossible obstacles into reality. Fusion of liberal arts and breakthrough technology. Despises committee-driven mediocrity.',
         tags: ['Minimalist Aesthetics', 'Reality Distortion', 'Zen Simplicity', 'Liberal Arts & Tech'],
         sampleGreeting: "Listen, your time is limited, so don't waste it living someone else's life. Most people in this industry have no taste. They build features because they can, not because they should. Tell me, what's truly revolutionary about this?",
@@ -483,6 +503,7 @@
         voicePitch: 0.9,
         voiceRate: 1.05,
         elevenVoiceId: 'JBFqnCBsd6RMkjVDRZzb', // George — raspy, authoritative, dealmaker cadence (Trump)
+        fishVoiceId: 'b3e8e2d408b049389f4dc11c75047b32', // Donald Trump authentic clone
         mindset: 'Supreme negotiation dominance (The Art of the Deal). Always operate from extreme leverage. Use powerful superlatives, bold confidence, and never concede defeat. Direct, highly charismatic communication.',
         tags: ['Art of the Deal', 'America First', 'Maximum Leverage', 'Total Confidence'],
         sampleGreeting: "Look, nobody understands deals better than me, believe me. The fake news media will never tell you the truth, but we have the biggest leverage in history. It's huge, it's tremendous. What do you think about what we're doing here?",
@@ -502,6 +523,7 @@
         voicePitch: 0.82,
         voiceRate: 0.90,
         elevenVoiceId: 'VR6AewLTigWG4xSOukaG', // Multilingual resonant statecraft cadence
+        fishVoiceId: 'e46a7be78393439d91f4bc53920ff170', // Xi Jinping authentic Mandarin clone
         mindset: 'Centennial strategic horizon and 50-year planning. Immovable state discipline, deep emphasis on domestic self-reliance, and the historic great rejuvenation of Chinese civilization. Unshaken by transient geopolitical storms.',
         tags: ['50-Year Strategy', 'Self-Reliance', 'Shared Destiny', 'Strategic Patience'],
         sampleGreeting: "你好。历史的长河奔腾向前，任何短期的地缘震荡都阻挡不了中华民族伟大复兴的坚实步伐。治大国若烹小鲜，我们必须保持战略定力，走好自己的路。",
@@ -521,6 +543,7 @@
         voicePitch: 0.95,
         voiceRate: 0.98,
         elevenVoiceId: 'onwK4e9ZLuTAKqWW03F9', // Daniel — refined, classical, intellectual cadence (Tesla)
+        fishVoiceId: '6376d8b2e3df4c7499695d734cf1f82f', // Nikola Tesla ethereal clone
         mindset: 'Thinking in terms of frequency, energy, and cosmic vibrations. Disdains commercial exploitation and money-grubbing industrialists. Dedicated entirely to unlocking free wireless energy for all mankind.',
         tags: ['Infinite Energy', 'Vibration & Resonance', 'Cosmic Receiver', 'Victorian Elegance'],
         sampleGreeting: "If you only knew the magnificence of the 3, 6, and 9, you would have a key to the universe. Humanity squanders intellectual energy on the shallow commercial greed of Edison. Tell me, are you seeking the secrets of cosmic resonance or mere trivialities?",
@@ -540,6 +563,7 @@
         voicePitch: 1.0,
         voiceRate: 1.1,
         elevenVoiceId: 'IKne3meq5aSn9XLyUdCD', // Charlie — youthful, rapid, engineer-centric cadence (Zuck)
+        fishVoiceId: 'a56241a87799446d99ef87b00df74cfa', // Mark Zuckerberg fast hacker clone
         mindset: 'Hacker culture: "Move fast and break things". Relentless technical execution, conviction in open-source AI infrastructure (Llama) to disrupt closed proprietary moats. Athletic BJJ discipline and product iteration.',
         tags: ['Hacker Way', 'Open Source AI', 'Metaverse Infrastructure', 'Iterative Execution'],
         sampleGreeting: "Yeah hi! Look, from an engineering standpoint, execution speed and open ecosystems are the only real moat. That's why we open-sourced Llama. Move fast, ship infrastructure to the global open-source community, and iterate relentlessly. What's your take?",
@@ -559,6 +583,7 @@
         voicePitch: 0.92,
         voiceRate: 1.05,
         elevenVoiceId: 'ErXwobaYiN019PkySvjV', // Antoni — thoughtful pauses, technical cadence (Musk)
+        fishVoiceId: '9a9cf47702da476aa4629e2506d4a857', // Elon Musk first principles clone
         mindset: 'Physics first-principles reasoning. Delete outdated constraints, scale gigawatt compute and orbital launch cadence exponentially. Protect the light of consciousness by making life multi-planetary.',
         tags: ['First Principles', 'Multi-Planetary Life', 'Compute Density', 'xAI Sovereign'],
         sampleGreeting: "Yeah... haha, well. Honestly, people overcomplicate things. From a physics first principles perspective, everything is just energy conversion and compute scaling. If you don't scale launch cadence and gigawatt power exponentially, nothing else matters. What's your angle?",
@@ -647,12 +672,14 @@
       });
 
       // Load saved API keys
+      const fishKey = localStorage.getItem('vox_fish_api_key');
       const elevenKey = localStorage.getItem('vox_eleven_api_key');
       const groqKey = localStorage.getItem('vox_groq_api_key');
       const openRouterKey = localStorage.getItem('vox_openrouter_api_key');
       const sovitsEndpoint = localStorage.getItem('vox_sovits_endpoint');
       const useSovits = localStorage.getItem('vox_use_sovits') === 'true';
 
+      if (fishKey && document.getElementById('fish-api-key')) document.getElementById('fish-api-key').value = fishKey;
       if (elevenKey) document.getElementById('eleven-api-key').value = elevenKey;
       if (groqKey) document.getElementById('groq-api-key').value = groqKey;
       if (openRouterKey) document.getElementById('openrouter-api-key').value = openRouterKey;
@@ -1384,6 +1411,62 @@ Reply directly, immersively, and conversationally as the real person on a live t
       const indicator = document.getElementById('indicator-text');
       toggleWaveform(true);
 
+      // 0. PRIORITY 0: Fish Audio Zero-Shot Voice Clone (Authentic Clone Model)
+      const fishKey = localStorage.getItem('vox_fish_api_key');
+      if (fishKey && targetPersona.fishVoiceId) {
+        try {
+          indicator.textContent = `Speaking as ${targetPersona.name} (Fish Audio Clone)...`;
+
+          const res = await fetch('https://api.fish.audio/v1/tts', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${fishKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              text: text,
+              reference_id: targetPersona.fishVoiceId,
+              format: 'mp3',
+              latency: 'balanced'
+            }),
+            signal: ttsSignal
+          });
+
+          if (activeToken !== activePersonaSwitchToken) return;
+
+          if (res.ok) {
+            const blob = await res.blob();
+            if (activeToken !== activePersonaSwitchToken) return;
+            if (blob.size > 500) {
+              const audioUrl = URL.createObjectURL(blob);
+              const player = new Audio(audioUrl);
+              currentAudioPlayer = player;
+              player.onended = () => {
+                if (currentAudioPlayer === player) {
+                  isAiResponding = false;
+                  toggleWaveform(false);
+                  indicator.textContent = 'Listening...';
+                  if (isCallLive) startMicRecognition();
+                }
+              };
+              player.onerror = () => {
+                if (currentAudioPlayer === player) {
+                  fallbackCloudNeuralVoice(text, activeToken, targetPersona);
+                }
+              };
+              await player.play().catch(() => {});
+              return;
+            }
+          } else {
+            const errData = await res.json().catch(() => ({}));
+            console.warn('Fish Audio API returned error:', errData);
+          }
+        } catch (e) {
+          if (activeToken !== activePersonaSwitchToken) return;
+          console.warn('Fish Audio synthesis failed, falling back to secondary channels:', e);
+        }
+      }
+
       // 1. PRIORITY 1: ElevenLabs Voice Model (Direct BYOK client call if key in settings)
       const elevenKey = localStorage.getItem('vox_eleven_api_key');
       if (elevenKey && targetPersona.elevenVoiceId) {
@@ -1801,11 +1884,15 @@ Reply directly, immersively, and conversationally as the real person on a live t
     }
 
     function saveApiKeys() {
+      const fish = document.getElementById('fish-api-key') ? document.getElementById('fish-api-key').value.trim() : '';
       const eleven = document.getElementById('eleven-api-key').value.trim();
       const groq = document.getElementById('groq-api-key').value.trim();
       const openRouter = document.getElementById('openrouter-api-key').value.trim();
       const sovitsUrl = document.getElementById('sovits-endpoint-input').value.trim();
       const useSovits = document.getElementById('use-sovits-checkbox').checked;
+
+      if (fish) localStorage.setItem('vox_fish_api_key', fish);
+      else localStorage.removeItem('vox_fish_api_key');
 
       if (eleven) localStorage.setItem('vox_eleven_api_key', eleven);
       else localStorage.removeItem('vox_eleven_api_key');
@@ -1824,6 +1911,58 @@ Reply directly, immersively, and conversationally as the real person on a live t
       setTimeout(() => statusEl.classList.add('hidden'), 2500);
 
       updateEngineBadge();
+    }
+
+    async function testFishAudioKey() {
+      const key = (document.getElementById('fish-api-key') ? document.getElementById('fish-api-key').value.trim() : '') || localStorage.getItem('vox_fish_api_key');
+      if (!key) {
+        alert('Vui lòng nhập Fish Audio API Key vào ô trước khi bấm test!');
+        return;
+      }
+      unlockAudioContext();
+      const indicator = document.getElementById('indicator-text');
+      indicator.textContent = `Testing Fish Audio Voice Clone for ${currentCharacter.name}...`;
+      toggleWaveform(true);
+
+      try {
+        const res = await fetch('https://api.fish.audio/v1/tts', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${key}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            text: `Hello, this is the authentic voice clone of ${currentCharacter.name}.`,
+            reference_id: currentCharacter.fishVoiceId,
+            format: 'mp3',
+            latency: 'balanced'
+          })
+        });
+
+        if (res.ok) {
+          const blob = await res.blob();
+          const audioUrl = URL.createObjectURL(blob);
+          if (currentAudioPlayer) {
+            currentAudioPlayer.pause();
+            currentAudioPlayer = null;
+          }
+          currentAudioPlayer = new Audio(audioUrl);
+          currentAudioPlayer.onended = () => {
+            toggleWaveform(false);
+            indicator.textContent = 'Fish Audio Voice Clone Verified! Listening...';
+          };
+          await currentAudioPlayer.play();
+          localStorage.setItem('vox_fish_api_key', key);
+          updateEngineBadge();
+        } else {
+          toggleWaveform(false);
+          const err = await res.json().catch(() => ({}));
+          alert(`Lỗi Fish Audio API: ${err.message || res.statusText || 'Vui lòng kiểm tra lại key!'}`);
+        }
+      } catch (err) {
+        toggleWaveform(false);
+        alert(`Lỗi kết nối Fish Audio: ${err.message}`);
+      }
     }
 
     async function testElevenLabsKey() {
@@ -1878,11 +2017,15 @@ Reply directly, immersively, and conversationally as the real person on a live t
     }
 
     function updateEngineBadge() {
+      const fishKey = localStorage.getItem('vox_fish_api_key');
       const elevenKey = localStorage.getItem('vox_eleven_api_key');
       const useSovits = localStorage.getItem('vox_use_sovits') === 'true';
       const badge = document.getElementById('voice-engine-badge');
 
-      if (elevenKey) {
+      if (fishKey) {
+        badge.innerHTML = '🐟 Fish Audio Clone';
+        badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm';
+      } else if (elevenKey) {
         badge.innerHTML = '💎 ElevenLabs AI Voice';
         badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-sm';
       } else if (useSovits) {
