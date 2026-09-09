@@ -3,7 +3,7 @@ import io
 import os
 import re
 from typing import List, Dict, Any, Optional
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Query, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel
@@ -58,7 +58,7 @@ PERSONA_REGISTRY: Dict[str, Dict[str, Any]] = {
         "display_name": "Steve Jobs",
         "role": "Visionary Co-founder, Apple",
         "native_lang": "en-US",
-        "fish_model_id": "7980b674846645398fa20325d70f1a9a",
+        "fish_model_id": "b27c6c896db64f96842e12dc6f6a07d2",
         "primary_tts": {
             "engine": "elevenlabs",
             "voice_id": "pNInz6obpgDQGcFmaJgB",
@@ -100,7 +100,7 @@ PERSONA_REGISTRY: Dict[str, Dict[str, Any]] = {
         "display_name": "Donald J. Trump",
         "role": "45th & 47th President of the United States",
         "native_lang": "en-US",
-        "fish_model_id": "b3e8e2d408b049389f4dc11c75047b32",
+        "fish_model_id": "5196af35f6ff4a0dbf541793fc9f2157",
         "primary_tts": {
             "engine": "elevenlabs",
             "voice_id": "JBFqnCBsd6RMkjVDRZzb",
@@ -143,7 +143,7 @@ PERSONA_REGISTRY: Dict[str, Dict[str, Any]] = {
         "display_name": "Xi Jinping",
         "role": "President of the People's Republic of China",
         "native_lang": "zh-CN",
-        "fish_model_id": "e46a7be78393439d91f4bc53920ff170",
+        "fish_model_id": "004d5b98eafa42788d3cc2ea8739e9aa",
         "primary_tts": {
             "engine": "elevenlabs",
             "voice_id": "VR6AewLTigWG4xSOukaG",
@@ -185,7 +185,7 @@ PERSONA_REGISTRY: Dict[str, Dict[str, Any]] = {
         "display_name": "Nikola Tesla",
         "role": "Pioneer of Alternating Current & Wireless Energy",
         "native_lang": "en-US",
-        "fish_model_id": "6376d8b2e3df4c7499695d734cf1f82f",
+        "fish_model_id": "033550cfccd94c3eaa7aff2aaafead92",
         "primary_tts": {
             "engine": "elevenlabs",
             "voice_id": "onwK4e9ZLuTAKqWW03F9",
@@ -227,7 +227,7 @@ PERSONA_REGISTRY: Dict[str, Dict[str, Any]] = {
         "display_name": "Mark Zuckerberg",
         "role": "Founder & CEO, Meta",
         "native_lang": "en-US",
-        "fish_model_id": "a56241a87799446d99ef87b00df74cfa",
+        "fish_model_id": "01da7fa05dea40e7915cbfeadac04dbf",
         "primary_tts": {
             "engine": "elevenlabs",
             "voice_id": "IKne3meq5aSn9XLyUdCD",
@@ -269,7 +269,7 @@ PERSONA_REGISTRY: Dict[str, Dict[str, Any]] = {
         "display_name": "Elon Musk",
         "role": "Founder & Chief Engineer, SpaceX & xAI",
         "native_lang": "en-US",
-        "fish_model_id": "9a9cf47702da476aa4629e2506d4a857",
+        "fish_model_id": "03397b4c4be74759b72533b663fbd001",
         "primary_tts": {
             "engine": "elevenlabs",
             "voice_id": "ErXwobaYiN019PkySvjV",
@@ -493,7 +493,9 @@ async def chat_endpoint(req: ChatRequest):
 async def generate_tts(
     persona: str = Query(..., description="Canonical Persona ID"),
     text: str = Query(..., description="Text to synthesize"),
-    engine: Optional[str] = Query(None, description="tts engine override: edge or elevenlabs")
+    engine: Optional[str] = Query(None, description="tts engine override: edge, fish, or elevenlabs"),
+    x_fish_api_key: Optional[str] = Header(None, alias="x-fish-api-key"),
+    x_eleven_api_key: Optional[str] = Header(None, alias="x-eleven-api-key")
 ):
     if not text.strip():
         raise HTTPException(status_code=400, detail="Text cannot be empty")
@@ -506,10 +508,12 @@ async def generate_tts(
         )
     
     persona_entry = PERSONA_REGISTRY[p_id]
+    active_fish_key = x_fish_api_key or FISH_AUDIO_API_KEY
+    active_eleven_key = x_eleven_api_key or ELEVEN_API_KEY
+    force_edge = (engine and engine.lower() == "edge")
     
     # 0. TIER 0: Fish Audio Zero-Shot Voice Clone (Authentic Clone Model)
-    force_edge = (engine and engine.lower() == "edge")
-    if FISH_AUDIO_API_KEY and not force_edge:
+    if active_fish_key and not force_edge:
         fish_model_id = persona_entry.get("fish_model_id")
         if fish_model_id:
             async with httpx.AsyncClient(timeout=25.0) as client:
@@ -517,7 +521,7 @@ async def generate_tts(
                     resp = await client.post(
                         "https://api.fish.audio/v1/tts",
                         headers={
-                            "Authorization": f"Bearer {FISH_AUDIO_API_KEY}",
+                            "Authorization": f"Bearer {active_fish_key}",
                             "Content-Type": "application/json"
                         },
                         json={
@@ -540,12 +544,21 @@ async def generate_tts(
                             }
                         )
                     else:
-                        print(f"Fish Audio TTS failed for persona '{p_id}' with status {resp.status_code}, falling back to secondary engines")
+                        print(f"Fish Audio TTS failed for persona '{p_id}' with status {resp.status_code}: {resp.text}")
+                        if engine and engine.lower() == "fish":
+                            raise HTTPException(
+                                status_code=resp.status_code if resp.status_code in [400, 401, 402, 403, 429] else 502,
+                                detail=f"Fish Audio ({resp.status_code}): {resp.text}"
+                            )
+                except HTTPException:
+                    raise
                 except Exception as fe:
                     print(f"Fish Audio exception for persona '{p_id}': {fe}")
+                    if engine and engine.lower() == "fish":
+                        raise HTTPException(status_code=502, detail=f"Fish Audio connection error: {fe}")
 
     # 1. TIER 1: ElevenLabs Voice Synthesis (Strictly Persona's Assigned Voice)
-    if ELEVEN_API_KEY and not force_edge:
+    if active_eleven_key and not force_edge:
         primary_tts = persona_entry.get("primary_tts")
         if primary_tts and primary_tts.get("voice_id"):
             voice_id = primary_tts["voice_id"]
@@ -557,7 +570,7 @@ async def generate_tts(
                     resp = await client.post(
                         f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
                         headers={
-                            "xi-api-key": ELEVEN_API_KEY,
+                            "xi-api-key": active_eleven_key,
                             "Content-Type": "application/json"
                         },
                         json={
@@ -579,9 +592,18 @@ async def generate_tts(
                             }
                         )
                     else:
-                        print(f"ElevenLabs TTS failed for persona '{p_id}' with status {resp.status_code}, falling back to persona's Edge-TTS voice")
+                        print(f"ElevenLabs TTS failed for persona '{p_id}' with status {resp.status_code}")
+                        if engine and engine.lower() == "elevenlabs":
+                            raise HTTPException(
+                                status_code=resp.status_code if resp.status_code in [400, 401, 402, 403, 429] else 502,
+                                detail=f"ElevenLabs ({resp.status_code}): {resp.text}"
+                            )
+                except HTTPException:
+                    raise
                 except Exception as e:
-                    print(f"ElevenLabs request exception for persona '{p_id}': {e}, falling back to persona's Edge-TTS voice")
+                    print(f"ElevenLabs request exception for persona '{p_id}': {e}")
+                    if engine and engine.lower() == "elevenlabs":
+                        raise HTTPException(status_code=502, detail=f"ElevenLabs connection error: {e}")
 
     # 2. TIER 2: Persona-Specific Edge-TTS Voice (Strict Persona Isolation)
     has_vi = bool(re.search(r'[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]', text, re.I))

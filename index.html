@@ -483,7 +483,7 @@
         voicePitch: 1.05,
         voiceRate: 1.02,
         elevenVoiceId: 'pNInz6obpgDQGcFmaJgB', // Adam — deep, articulate, visionary tech cadence (Jobs)
-        fishVoiceId: '7980b674846645398fa20325d70f1a9a', // Steve Jobs authentic clone
+        fishVoiceId: 'b27c6c896db64f96842e12dc6f6a07d2', // Steve Jobs authentic clone
         mindset: 'Perfectionism without compromise. Relentless reality distortion field to bend impossible obstacles into reality. Fusion of liberal arts and breakthrough technology. Despises committee-driven mediocrity.',
         tags: ['Minimalist Aesthetics', 'Reality Distortion', 'Zen Simplicity', 'Liberal Arts & Tech'],
         sampleGreeting: "Listen, your time is limited, so don't waste it living someone else's life. Most people in this industry have no taste. They build features because they can, not because they should. Tell me, what's truly revolutionary about this?",
@@ -503,7 +503,7 @@
         voicePitch: 0.9,
         voiceRate: 1.05,
         elevenVoiceId: 'JBFqnCBsd6RMkjVDRZzb', // George — raspy, authoritative, dealmaker cadence (Trump)
-        fishVoiceId: 'b3e8e2d408b049389f4dc11c75047b32', // Donald Trump authentic clone
+        fishVoiceId: '5196af35f6ff4a0dbf541793fc9f2157', // Donald Trump authentic clone
         mindset: 'Supreme negotiation dominance (The Art of the Deal). Always operate from extreme leverage. Use powerful superlatives, bold confidence, and never concede defeat. Direct, highly charismatic communication.',
         tags: ['Art of the Deal', 'America First', 'Maximum Leverage', 'Total Confidence'],
         sampleGreeting: "Look, nobody understands deals better than me, believe me. The fake news media will never tell you the truth, but we have the biggest leverage in history. It's huge, it's tremendous. What do you think about what we're doing here?",
@@ -523,7 +523,7 @@
         voicePitch: 0.82,
         voiceRate: 0.90,
         elevenVoiceId: 'VR6AewLTigWG4xSOukaG', // Multilingual resonant statecraft cadence
-        fishVoiceId: 'e46a7be78393439d91f4bc53920ff170', // Xi Jinping authentic Mandarin clone
+        fishVoiceId: '004d5b98eafa42788d3cc2ea8739e9aa', // Xi Jinping authentic Mandarin clone
         mindset: 'Centennial strategic horizon and 50-year planning. Immovable state discipline, deep emphasis on domestic self-reliance, and the historic great rejuvenation of Chinese civilization. Unshaken by transient geopolitical storms.',
         tags: ['50-Year Strategy', 'Self-Reliance', 'Shared Destiny', 'Strategic Patience'],
         sampleGreeting: "你好。历史的长河奔腾向前，任何短期的地缘震荡都阻挡不了中华民族伟大复兴的坚实步伐。治大国若烹小鲜，我们必须保持战略定力，走好自己的路。",
@@ -543,7 +543,7 @@
         voicePitch: 0.95,
         voiceRate: 0.98,
         elevenVoiceId: 'onwK4e9ZLuTAKqWW03F9', // Daniel — refined, classical, intellectual cadence (Tesla)
-        fishVoiceId: '6376d8b2e3df4c7499695d734cf1f82f', // Nikola Tesla ethereal clone
+        fishVoiceId: '033550cfccd94c3eaa7aff2aaafead92', // Nikola Tesla ethereal clone
         mindset: 'Thinking in terms of frequency, energy, and cosmic vibrations. Disdains commercial exploitation and money-grubbing industrialists. Dedicated entirely to unlocking free wireless energy for all mankind.',
         tags: ['Infinite Energy', 'Vibration & Resonance', 'Cosmic Receiver', 'Victorian Elegance'],
         sampleGreeting: "If you only knew the magnificence of the 3, 6, and 9, you would have a key to the universe. Humanity squanders intellectual energy on the shallow commercial greed of Edison. Tell me, are you seeking the secrets of cosmic resonance or mere trivialities?",
@@ -563,7 +563,7 @@
         voicePitch: 1.0,
         voiceRate: 1.1,
         elevenVoiceId: 'IKne3meq5aSn9XLyUdCD', // Charlie — youthful, rapid, engineer-centric cadence (Zuck)
-        fishVoiceId: 'a56241a87799446d99ef87b00df74cfa', // Mark Zuckerberg fast hacker clone
+        fishVoiceId: '01da7fa05dea40e7915cbfeadac04dbf', // Mark Zuckerberg fast hacker clone
         mindset: 'Hacker culture: "Move fast and break things". Relentless technical execution, conviction in open-source AI infrastructure (Llama) to disrupt closed proprietary moats. Athletic BJJ discipline and product iteration.',
         tags: ['Hacker Way', 'Open Source AI', 'Metaverse Infrastructure', 'Iterative Execution'],
         sampleGreeting: "Yeah hi! Look, from an engineering standpoint, execution speed and open ecosystems are the only real moat. That's why we open-sourced Llama. Move fast, ship infrastructure to the global open-source community, and iterate relentlessly. What's your take?",
@@ -583,7 +583,7 @@
         voicePitch: 0.92,
         voiceRate: 1.05,
         elevenVoiceId: 'ErXwobaYiN019PkySvjV', // Antoni — thoughtful pauses, technical cadence (Musk)
-        fishVoiceId: '9a9cf47702da476aa4629e2506d4a857', // Elon Musk first principles clone
+        fishVoiceId: '03397b4c4be74759b72533b663fbd001', // Elon Musk first principles clone
         mindset: 'Physics first-principles reasoning. Delete outdated constraints, scale gigawatt compute and orbital launch cadence exponentially. Protect the light of consciousness by making life multi-planetary.',
         tags: ['First Principles', 'Multi-Planetary Life', 'Compute Density', 'xAI Sovereign'],
         sampleGreeting: "Yeah... haha, well. Honestly, people overcomplicate things. From a physics first principles perspective, everything is just energy conversion and compute scaling. If you don't scale launch cadence and gigawatt power exponentially, nothing else matters. What's your angle?",
@@ -1411,24 +1411,19 @@ Reply directly, immersively, and conversationally as the real person on a live t
       const indicator = document.getElementById('indicator-text');
       toggleWaveform(true);
 
-      // 0. PRIORITY 0: Fish Audio Zero-Shot Voice Clone (Authentic Clone Model)
+      // 0. PRIORITY 0: Fish Audio Zero-Shot Voice Clone (Authentic Clone Model via Backend Proxy)
       const fishKey = localStorage.getItem('vox_fish_api_key');
+      const cloudTtsEndpoint = localStorage.getItem('vox_cloud_tts_endpoint') || 'https://vox-persona.onrender.com/api/tts';
       if (fishKey && targetPersona.fishVoiceId) {
         try {
           indicator.textContent = `Speaking as ${targetPersona.name} (Fish Audio Clone)...`;
 
-          const res = await fetch('https://api.fish.audio/v1/tts', {
-            method: 'POST',
+          const ttsUrl = `${cloudTtsEndpoint}?persona=${encodeURIComponent(targetPersona.id)}&text=${encodeURIComponent(text)}&engine=fish`;
+          const res = await fetch(ttsUrl, {
+            method: 'GET',
             headers: {
-              'Authorization': `Bearer ${fishKey}`,
-              'Content-Type': 'application/json'
+              'x-fish-api-key': fishKey
             },
-            body: JSON.stringify({
-              text: text,
-              reference_id: targetPersona.fishVoiceId,
-              format: 'mp3',
-              latency: 'balanced'
-            }),
             signal: ttsSignal
           });
 
@@ -1545,9 +1540,15 @@ Reply directly, immersively, and conversationally as the real person on a live t
         activeTtsAbortController = controller;
         const timeoutId = setTimeout(() => controller.abort(), 20000);
 
+        const fishKey = localStorage.getItem('vox_fish_api_key');
+        const elevenKey = localStorage.getItem('vox_eleven_api_key');
+        const customHeaders = {};
+        if (fishKey) customHeaders['x-fish-api-key'] = fishKey;
+        if (elevenKey) customHeaders['x-eleven-api-key'] = elevenKey;
+
         // Canonical contract: GET /api/tts?persona={persona_id}&text={text} (NO API key in query params)
         const ttsUrl = `${cloudTtsEndpoint}?persona=${encodeURIComponent(targetPersona.id)}&text=${encodeURIComponent(text)}`;
-        const res = await fetch(ttsUrl, { signal: controller.signal });
+        const res = await fetch(ttsUrl, { headers: customHeaders, signal: controller.signal });
         clearTimeout(timeoutId);
 
         if (activeToken !== activePersonaSwitchToken) return;
@@ -1924,19 +1925,16 @@ Reply directly, immersively, and conversationally as the real person on a live t
       indicator.textContent = `Testing Fish Audio Voice Clone for ${currentCharacter.name}...`;
       toggleWaveform(true);
 
+      const cloudTtsEndpoint = localStorage.getItem('vox_cloud_tts_endpoint') || 'https://vox-persona.onrender.com/api/tts';
+      const sampleText = `Hello, this is the authentic voice clone of ${currentCharacter.name}.`;
+      const ttsUrl = `${cloudTtsEndpoint}?persona=${encodeURIComponent(currentCharacter.id)}&text=${encodeURIComponent(sampleText)}&engine=fish`;
+
       try {
-        const res = await fetch('https://api.fish.audio/v1/tts', {
-          method: 'POST',
+        const res = await fetch(ttsUrl, {
+          method: 'GET',
           headers: {
-            'Authorization': `Bearer ${key}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            text: `Hello, this is the authentic voice clone of ${currentCharacter.name}.`,
-            reference_id: currentCharacter.fishVoiceId,
-            format: 'mp3',
-            latency: 'balanced'
-          })
+            'x-fish-api-key': key
+          }
         });
 
         if (res.ok) {
@@ -1957,7 +1955,8 @@ Reply directly, immersively, and conversationally as the real person on a live t
         } else {
           toggleWaveform(false);
           const err = await res.json().catch(() => ({}));
-          alert(`Lỗi Fish Audio API: ${err.message || res.statusText || 'Vui lòng kiểm tra lại key!'}`);
+          const errMsg = err.detail || err.message || res.statusText || 'Vui lòng kiểm tra lại key hoặc số dư!';
+          alert(`Lỗi Fish Audio (${res.status}): ${errMsg}`);
         }
       } catch (err) {
         toggleWaveform(false);
