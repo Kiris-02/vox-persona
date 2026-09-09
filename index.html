@@ -1885,8 +1885,9 @@ Reply directly, immersively, and conversationally as the real person on a live t
     }
 
     function saveApiKeys() {
-      const fish = document.getElementById('fish-api-key') ? document.getElementById('fish-api-key').value.trim() : '';
-      const eleven = document.getElementById('eleven-api-key').value.trim();
+      const fishRaw = document.getElementById('fish-api-key') ? document.getElementById('fish-api-key').value : '';
+      const fish = fishRaw.trim().replace(/^Bearer\s+/i, '').replace(/^["']|["']$/g, '').trim();
+      const eleven = document.getElementById('eleven-api-key').value.trim().replace(/^Bearer\s+/i, '').replace(/^["']|["']$/g, '').trim();
       const groq = document.getElementById('groq-api-key').value.trim();
       const openRouter = document.getElementById('openrouter-api-key').value.trim();
       const sovitsUrl = document.getElementById('sovits-endpoint-input').value.trim();
@@ -1915,7 +1916,8 @@ Reply directly, immersively, and conversationally as the real person on a live t
     }
 
     async function testFishAudioKey() {
-      const key = (document.getElementById('fish-api-key') ? document.getElementById('fish-api-key').value.trim() : '') || localStorage.getItem('vox_fish_api_key');
+      let rawKey = (document.getElementById('fish-api-key') ? document.getElementById('fish-api-key').value : '') || localStorage.getItem('vox_fish_api_key') || '';
+      let key = rawKey.trim().replace(/^Bearer\s+/i, '').replace(/^["']|["']$/g, '').trim();
       if (!key) {
         alert('Vui lòng nhập Fish Audio API Key vào ô trước khi bấm test!');
         return;
@@ -1956,7 +1958,11 @@ Reply directly, immersively, and conversationally as the real person on a live t
           toggleWaveform(false);
           const err = await res.json().catch(() => ({}));
           const errMsg = err.detail || err.message || res.statusText || 'Vui lòng kiểm tra lại key hoặc số dư!';
-          alert(`Lỗi Fish Audio (${res.status}): ${errMsg}`);
+          if (res.status === 401) {
+            alert('Lỗi Fish Audio (401 - Invalid Token):\nChuỗi API Key bạn dán vào không hợp lệ hoặc đã bị revoke!\n\n👉 Cách lấy đúng Key:\n1. Vào fish.audio/app/api-keys\n2. Bấm "Create New Key" rồi bấm Create\n3. Bấm nút "Copy" ngay tại cửa sổ popup vừa tạo (chỉ hiện 1 lần duy nhất)\n4. Dán lại vào đây rồi bấm Test.');
+          } else {
+            alert(`Lỗi Fish Audio (${res.status}): ${errMsg}`);
+          }
         }
       } catch (err) {
         toggleWaveform(false);

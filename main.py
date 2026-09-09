@@ -509,7 +509,15 @@ async def generate_tts(
     
     persona_entry = PERSONA_REGISTRY[p_id]
     active_fish_key = x_fish_api_key or FISH_AUDIO_API_KEY
+    if active_fish_key:
+        active_fish_key = active_fish_key.strip().strip('"\'')
+        if active_fish_key.lower().startswith("bearer "):
+            active_fish_key = active_fish_key[7:].strip()
+
     active_eleven_key = x_eleven_api_key or ELEVEN_API_KEY
+    if active_eleven_key:
+        active_eleven_key = active_eleven_key.strip().strip('"\'')
+
     force_edge = (engine and engine.lower() == "edge")
     
     # 0. TIER 0: Fish Audio Zero-Shot Voice Clone (Authentic Clone Model)
