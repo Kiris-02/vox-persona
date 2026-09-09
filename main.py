@@ -530,7 +530,8 @@ async def generate_tts(
                         "https://api.fish.audio/v1/tts",
                         headers={
                             "Authorization": f"Bearer {active_fish_key}",
-                            "Content-Type": "application/json"
+                            "Content-Type": "application/json",
+                            "model": "s2.1-pro-free"
                         },
                         json={
                             "text": text,
