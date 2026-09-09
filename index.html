@@ -366,8 +366,8 @@
   </footer>
 
   <!-- SETTINGS / DEVELOPER BYOK MODE MODAL -->
-  <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-brand-900 border border-slate-800 max-w-xl w-full rounded-3xl p-6 shadow-2xl relative">
+  <div id="settings-modal" onclick="if(event.target === this) toggleSettingsModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4 cursor-pointer">
+    <div class="bg-brand-900 border border-slate-800 max-w-xl w-full max-h-[90vh] overflow-y-auto rounded-3xl p-6 shadow-2xl relative cursor-default">
       <button onclick="toggleSettingsModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
@@ -1941,8 +1941,19 @@ Reply directly, immersively, and conversationally as the real person on a live t
 
     // SETTINGS MODAL & API CONFIG
     function toggleSettingsModal() {
-      document.getElementById('settings-modal').classList.toggle('hidden');
+      const modal = document.getElementById('settings-modal');
+      if (modal) modal.classList.toggle('hidden');
     }
+
+    // Dismiss settings modal on Escape key press
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('settings-modal');
+        if (modal && !modal.classList.contains('hidden')) {
+          toggleSettingsModal();
+        }
+      }
+    });
 
     function saveApiKeys() {
       const fishRaw = document.getElementById('fish-api-key') ? document.getElementById('fish-api-key').value : '';
