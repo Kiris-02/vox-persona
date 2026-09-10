@@ -10,11 +10,13 @@ class TestSovitsBridge(unittest.TestCase):
         self.assertEqual(nb["nbformat"], 4)
         self.assertGreaterEqual(len(nb["cells"]), 8)
 
-        # Check Cell 7 has the pycloudflared installation and try_cloudflare
+        # Check Cell 7 has pycloudflared installation, process polling, and local synthesis self-test
         launcher_src = "".join(nb["cells"][7]["source"])
-        self.assertIn("pip install -q pycloudflared", launcher_src)
-        self.assertIn("try_cloudflare", launcher_src)
+        self.assertIn("pycloudflared", launcher_src)
+        self.assertIn("api_proc.poll()", launcher_src)
+        self.assertIn("gpt_sovits_api.log", launcher_src)
         self.assertIn("http://127.0.0.1:8000/synthesize", launcher_src)
+        self.assertIn("try_cloudflare", launcher_src)
 
     def test_audio_references_present(self):
         """Verify all 6 canonical reference audio files exist locally and are non-empty."""
