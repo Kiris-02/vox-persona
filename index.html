@@ -2104,7 +2104,9 @@ Reply directly, immersively, and conversationally as the real person on a live t
       toggleWaveform(true);
 
       const cleanBase = endpoint.replace(/\/+$/, '');
-      const sampleText = `Hello, this is the authentic voice clone of ${currentCharacter.name} powered by GPT-SoVITS.`;
+      const sampleText = currentCharacter.id === 'xijinping'
+        ? "你好，这是由 GPT-SoVITS 驱动的习近平真实声音克隆。"
+        : `Hello, this is the authentic voice clone of ${currentCharacter.name} powered by GPT-SoVITS.`;
       const sovitsUrl = cleanBase.includes('/tts') || cleanBase.includes('/synthesize')
         ? `${cleanBase}?persona=${encodeURIComponent(currentCharacter.id)}&text=${encodeURIComponent(sampleText)}`
         : `${cleanBase}/synthesize?persona=${encodeURIComponent(currentCharacter.id)}&text=${encodeURIComponent(sampleText)}`;

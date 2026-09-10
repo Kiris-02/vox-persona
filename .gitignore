@@ -9,6 +9,7 @@ __pycache__/
 *.pyc
 test_*.py
 !test_voice_routing.py
+!test_sovits_bridge.py
 list_edge.py
 generate_missing_samples.py
 .valid_gemini_key
