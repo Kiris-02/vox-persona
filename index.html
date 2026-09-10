@@ -182,15 +182,27 @@
         <!-- VIDEO CALL AVATAR VIEWPORT -->
         <div class="relative flex flex-col items-center justify-center py-2">
           
-          <!-- Avatar Frame -->
+          <!-- Avatar Frame: Cinematic Card Hologram View -->
           <div class="relative group">
-            <div id="glow-ring" class="absolute -inset-4 bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-500 rounded-full blur-2xl opacity-20 transition duration-700"></div>
+            <div id="glow-ring" class="absolute -inset-3 bg-gradient-to-r from-sky-500/30 via-indigo-500/20 to-purple-500/30 rounded-3xl blur-xl opacity-40 transition duration-700"></div>
             
-            <img id="stage-avatar-large" src="assets/jobs.jpg" alt="Real Avatar" 
-                 class="relative w-36 h-36 sm:w-44 sm:h-44 rounded-full object-cover border-4 border-slate-700 shadow-2xl transition duration-300">
+            <!-- 2.5D Audio-Reactive Facial Compositor Canvas (Cinematic 3:4 Card) -->
+            <div class="relative rounded-2xl overflow-hidden border-2 border-slate-700/80 bg-slate-950 shadow-2xl">
+              <canvas id="stage-avatar-canvas" width="330" height="440"
+                      class="w-44 h-56 sm:w-52 sm:h-[275px] object-cover transition duration-300 block"></canvas>
+              
+              <!-- Subtle Holographic Status Badge Overlay -->
+              <div class="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-transparent to-slate-950/40"></div>
+              <div class="absolute top-2.5 left-2.5 flex items-center space-x-1.5 bg-slate-900/85 backdrop-blur-md px-2 py-0.5 rounded-md border border-slate-700/60 text-[9px] font-mono text-slate-300">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="canvas-status-badge">HD LIVE</span>
+              </div>
+            </div>
+            
+            <img id="stage-avatar-large" src="assets/jobs.jpg" alt="Real Avatar" class="hidden">
             
             <!-- Speaking animation badge -->
-            <div id="speaking-indicator" class="hidden absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-slate-900/95 border border-sky-400 text-sky-300 text-[10px] font-bold px-3 py-0.5 rounded-full shadow-xl flex items-center space-x-1.5 whitespace-nowrap">
+            <div id="speaking-indicator" class="hidden absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-slate-900/95 border border-sky-400 text-sky-300 text-[10px] font-bold px-3 py-0.5 rounded-full shadow-xl flex items-center space-x-1.5 whitespace-nowrap z-10">
               <span class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span>
               <span id="indicator-text">Speaking...</span>
             </div>
@@ -672,10 +684,189 @@
     let activeTtsAbortController = null;
     let activeChatAbortController = null;
     let isAiResponding = false;
+    // ==========================================
+    // 2.5D AUDIO-REACTIVE FACIAL COMPOSITOR ENGINE (CINEMATIC DIGNIFIED CARD)
+    // ==========================================
+    const PERSONA_FACIAL_ANCHORS = {
+      jobs: { mouth_x: 175, mouth_y: 218, mouth_rx: 28, mouth_ry: 8, maxDrop: 5.5 },
+      trump: { mouth_x: 174, mouth_y: 275, mouth_rx: 29, mouth_ry: 8, maxDrop: 5.5 },
+      musk: { mouth_x: 155, mouth_y: 207, mouth_rx: 26, mouth_ry: 8, maxDrop: 5.5 },
+      zuck: { mouth_x: 105, mouth_y: 223, mouth_rx: 24, mouth_ry: 8, maxDrop: 5.0 },
+      tesla: { mouth_x: 138, mouth_y: 204, mouth_rx: 22, mouth_ry: 7, maxDrop: 5.0 },
+      xijinping: { mouth_x: 138, mouth_y: 182, mouth_rx: 26, mouth_ry: 7, maxDrop: 5.0 }
+    };
+
+    const personaImgCache = {};
+    let facialAnalyserNode = null;
+    let facialFreqData = null;
+    let isAvatarSpeaking = false;
+    let currentMouthDrop = 0;
+    let targetMouthDrop = 0;
+    let compositorAnimHandle = null;
+
+    function initFacialCompositor() {
+      // 1. Preload high-resolution persona portraits
+      characters.forEach(c => {
+        const img = new Image();
+        img.src = c.avatar;
+        personaImgCache[c.id] = img;
+      });
+
+      // 2. Prepare audio analyser
+      setupFacialAudioAnalyser();
+
+      // 3. Launch 60 FPS Compositor Render Loop
+      if (!compositorAnimHandle) {
+        compositorAnimHandle = requestAnimationFrame(renderFacialCompositorFrame);
+      }
+    }
+
+    function setupFacialAudioAnalyser() {
+      if (window.AudioContext || window.webkitAudioContext) {
+        if (!window._voxAudioCtx) {
+          window._voxAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (!facialAnalyserNode && window._voxAudioCtx) {
+          try {
+            facialAnalyserNode = window._voxAudioCtx.createAnalyser();
+            facialAnalyserNode.fftSize = 128;
+            facialAnalyserNode.smoothingTimeConstant = 0.6;
+            facialFreqData = new Uint8Array(facialAnalyserNode.frequencyBinCount);
+          } catch(e) {
+            console.warn('[FacialCompositor] Analyser setup deferred:', e);
+          }
+        }
+      }
+    }
+
+    function connectAudioToFacialEngine(audioElement) {
+      if (!audioElement) return;
+      unlockAudioContext();
+      setupFacialAudioAnalyser();
+
+      if (!audioElement._facialAttached && window._voxAudioCtx && facialAnalyserNode) {
+        try {
+          const source = window._voxAudioCtx.createMediaElementSource(audioElement);
+          source.connect(facialAnalyserNode);
+          facialAnalyserNode.connect(window._voxAudioCtx.destination);
+          audioElement._facialAttached = true;
+        } catch(e) {
+          // May throw if already attached on reused audio element
+          audioElement._facialAttached = true;
+        }
+      }
+
+      audioElement.addEventListener('play', () => { isAvatarSpeaking = true; });
+      audioElement.addEventListener('pause', () => { isAvatarSpeaking = false; });
+      audioElement.addEventListener('ended', () => { isAvatarSpeaking = false; });
+    }
+
+    function switchCanvasPersona(id) {
+      currentMouthDrop = 0;
+      targetMouthDrop = 0;
+    }
+
+    function renderFacialCompositorFrame(time) {
+      compositorAnimHandle = requestAnimationFrame(renderFacialCompositorFrame);
+
+      const canvas = document.getElementById('stage-avatar-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const personaId = (currentCharacter && currentCharacter.id) ? currentCharacter.id : 'jobs';
+      const img = personaImgCache[personaId];
+      if (!img || !img.complete || img.naturalWidth === 0) return;
+
+      const anchor = PERSONA_FACIAL_ANCHORS[personaId] || PERSONA_FACIAL_ANCHORS.jobs;
+
+      // Audio-reactive calculation
+      if (isAvatarSpeaking) {
+        let hasFftData = false;
+        if (facialAnalyserNode && facialFreqData) {
+          facialAnalyserNode.getByteFrequencyData(facialFreqData);
+          let sum = 0;
+          const count = 14;
+          for (let i = 1; i <= count; i++) {
+            sum += facialFreqData[i];
+          }
+          const avg = sum / count;
+          if (avg > 5) {
+            hasFftData = true;
+            targetMouthDrop = Math.min(anchor.maxDrop, (avg / 135) * anchor.maxDrop);
+          }
+        }
+        if (!hasFftData) {
+          // Fallback natural speaking cadence for synthesize or native speech
+          const cadence = Math.max(0, Math.sin(time * 0.012) * Math.cos(time * 0.007));
+          targetMouthDrop = cadence * (anchor.maxDrop * 0.75);
+        }
+      } else {
+        targetMouthDrop = 0;
+      }
+
+      // Smooth mouth transition
+      currentMouthDrop = currentMouthDrop * 0.7 + targetMouthDrop * 0.3;
+
+      // Dignified breathing and subtle posture cadence
+      const breathY = Math.sin(time * 0.0016) * 0.75;
+      const subtleTilt = Math.sin(time * 0.0008) * 0.0018;
+
+      ctx.clearRect(0, 0, 330, 440);
+
+      ctx.save();
+      // Center of 330x440 canvas
+      ctx.translate(165, 220);
+      ctx.rotate(subtleTilt);
+
+      // 1. Draw base high-resolution portrait
+      ctx.drawImage(img, -165, -220 + breathY, 330, 440);
+
+      // 2. Audio-reactive Lip Sync Layer (feathered lower-lip displacement)
+      if (currentMouthDrop > 0.35) {
+        // A. Oral cavity shadow
+        ctx.beginPath();
+        ctx.ellipse(
+          anchor.mouth_x - 165, 
+          anchor.mouth_y - 220 + breathY, 
+          anchor.mouth_rx * 0.75, 
+          currentMouthDrop * 1.15, 
+          0, 0, Math.PI * 2
+        );
+        ctx.fillStyle = 'rgba(18, 5, 8, 0.96)';
+        ctx.fill();
+
+        // B. Lower lip & chin shift with seamless elliptical feathering
+        const lipW = Math.round(anchor.mouth_rx * 2.2);
+        const lipH = 36;
+        const lipX = anchor.mouth_x - Math.round(lipW / 2);
+        const lipY = anchor.mouth_y;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.ellipse(
+          anchor.mouth_x - 165, 
+          anchor.mouth_y - 220 + breathY + currentMouthDrop + 8, 
+          lipW * 0.48, 
+          lipH * 0.55, 
+          0, 0, Math.PI * 2
+        );
+        ctx.clip();
+        ctx.drawImage(
+          img, 
+          lipX, lipY, lipW, lipH, 
+          lipX - 165, lipY - 220 + breathY + currentMouthDrop, lipW, lipH
+        );
+        ctx.restore();
+      }
+
+      ctx.restore();
+    }
 
     // INITIALIZATION
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
+      initFacialCompositor();
       renderCharacterRoster();
       renderNewsFeed();
       renderTicker();
@@ -787,6 +978,7 @@
       document.getElementById('stage-role').textContent = currentCharacter.role;
       document.getElementById('stage-tag').textContent = currentCharacter.tag;
       document.getElementById('stage-lang-tag').textContent = currentCharacter.nativeLangBadge;
+      switchCanvasPersona(currentCharacter.id);
 
       // Update Mindset DNA
       document.getElementById('mindset-desc').textContent = currentCharacter.mindset;
@@ -928,6 +1120,7 @@
           synthesizeSpeech(currentCharacter.sampleGreeting, activeToken);
         }
       };
+      connectAudioToFacialEngine(player);
       player.play().catch(() => {
         if (currentAudioPlayer === player) {
           isAiResponding = false;
@@ -1461,6 +1654,7 @@ Reply directly, immersively, and conversationally as the real person on a live t
                   fallbackCloudNeuralVoice(text, activeToken, targetPersona);
                 }
               };
+              connectAudioToFacialEngine(player);
               await player.play().catch(() => {});
               return;
             }
@@ -1509,6 +1703,7 @@ Reply directly, immersively, and conversationally as the real person on a live t
                   fallbackCloudNeuralVoice(text, activeToken, targetPersona);
                 }
               };
+              connectAudioToFacialEngine(player);
               await player.play().catch(() => {});
               return;
             }
@@ -1569,6 +1764,7 @@ Reply directly, immersively, and conversationally as the real person on a live t
                   fallbackCloudNeuralVoice(text, activeToken, targetPersona);
                 }
               };
+              connectAudioToFacialEngine(player);
               await player.play().catch(() => {});
               return;
             }
@@ -1633,6 +1829,7 @@ Reply directly, immersively, and conversationally as the real person on a live t
                 fallbackBrowserSpeech(text, activeToken, targetPersona);
               }
             };
+            connectAudioToFacialEngine(player);
             await player.play().catch(() => {});
             return;
           }
@@ -1686,7 +1883,11 @@ Reply directly, immersively, and conversationally as the real person on a live t
         }
       }
 
+      utter.onstart = () => {
+        isAvatarSpeaking = true;
+      };
       utter.onend = () => {
+        isAvatarSpeaking = false;
         if (activeToken === activePersonaSwitchToken) {
           isAiResponding = false;
           toggleWaveform(false);
@@ -1695,6 +1896,7 @@ Reply directly, immersively, and conversationally as the real person on a live t
         }
       };
       utter.onerror = () => {
+        isAvatarSpeaking = false;
         if (activeToken === activePersonaSwitchToken) {
           isAiResponding = false;
           toggleWaveform(false);
@@ -2022,6 +2224,7 @@ Reply directly, immersively, and conversationally as the real person on a live t
             toggleWaveform(false);
             indicator.textContent = 'Fish Audio Voice Clone Verified! Listening...';
           };
+          connectAudioToFacialEngine(currentAudioPlayer);
           await currentAudioPlayer.play();
           localStorage.setItem('vox_fish_api_key', key);
           updateEngineBadge();
@@ -2078,6 +2281,7 @@ Reply directly, immersively, and conversationally as the real person on a live t
             toggleWaveform(false);
             indicator.textContent = 'AI Persona Voice Verified! Listening...';
           };
+          connectAudioToFacialEngine(currentAudioPlayer);
           await currentAudioPlayer.play();
           localStorage.setItem('vox_eleven_api_key', key);
           updateEngineBadge();
@@ -2125,6 +2329,7 @@ Reply directly, immersively, and conversationally as the real person on a live t
             toggleWaveform(false);
             indicator.textContent = 'GPT-SoVITS Voice Verified! Listening...';
           };
+          connectAudioToFacialEngine(currentAudioPlayer);
           await currentAudioPlayer.play();
           localStorage.setItem('vox_sovits_endpoint', endpoint);
           localStorage.setItem('vox_use_sovits', 'true');

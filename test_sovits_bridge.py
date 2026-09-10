@@ -42,5 +42,19 @@ class TestSovitsBridge(unittest.TestCase):
         self.assertIn("testSovitsKey", content)
         self.assertIn("你好，这是由 GPT-SoVITS 驱动的习近平真实声音克隆。", content)
 
+    def test_facial_compositor_engine(self):
+        """Verify 2.5D Audio-Reactive Facial Compositor markup and scripts in index.html."""
+        with open("index.html", "r", encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn('id="stage-avatar-canvas"', content)
+        self.assertIn('width="330" height="440"', content)
+        self.assertIn("PERSONA_FACIAL_ANCHORS", content)
+        for persona in ["jobs", "trump", "musk", "zuck", "tesla", "xijinping"]:
+            self.assertIn(f"{persona}:", content)
+        self.assertIn("initFacialCompositor()", content)
+        self.assertIn("connectAudioToFacialEngine", content)
+        self.assertIn("switchCanvasPersona", content)
+        self.assertIn("renderFacialCompositorFrame", content)
+
 if __name__ == "__main__":
     unittest.main()
